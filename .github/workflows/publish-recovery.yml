@@ -1,6 +1,9 @@
 name: Publish recovered LAIN_OS history
 
 on:
+  push:
+    branches:
+      - recovery/publisher
   workflow_dispatch:
 
 permissions:
