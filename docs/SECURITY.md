@@ -67,8 +67,14 @@ access restrictions and competing apps may affect readback.
 
 The real configured Groq planner completed a manual Android/Termux autonomous
 session with two independently verified file writes and returned complete after
-observing history. That is not automated Android CI or hardware validation of
-these five new capabilities. Their exact hardware acceptance remains pending.
+observing history. That is separate planner-loop evidence, not automated Android CI.
+
+The five Android Capability Expansion v1 capabilities were manually validated on
+Android 16 with F-Droid Termux plus matching Termux:API at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`. Battery and clipboard verification
+PASSED; toast, vibration, and share remained LIMITED by design; unconfirmed share
+was blocked before execution; and audit redaction was verified. This is manual
+device evidence, not automated Android hardware CI.
 
 ## Primary threats
 
@@ -176,6 +182,10 @@ Do not store:
 
 `reddit.create_post` is Class 2 and always requires confirmation under the default policy. Planner intent cannot grant that confirmation. OAuth client credentials and refresh tokens are read from `LAIN_REDDIT_*` environment variables, are never accepted in an action envelope, and are never included in results or audit records. Post bodies are redacted from audit arguments.
 
-Live Reddit posting has not been performed as part of the planner milestone. Android notification, URI opening, and audit recording have been manually hardware-validated in F-Droid Termux with Termux:API; no automated Android CI is claimed.
+Live Reddit posting has not been performed as part of the planner milestone.
+Android notification and URI opening were manually hardware-validated in an earlier
+F-Droid Termux + Termux:API pass. The exact-head Android Capability Expansion v1
+acceptance record covers the five new capabilities and audit behavior described
+above. No automated Android hardware CI is claimed.
 
 An attempted request ID is terminal even after timeout or an ambiguous remote failure: the runtime writes an audit idempotency barrier before calling the remote submit endpoint and will not submit that ID again merely to determine whether the first request succeeded. Rate-limit responses are returned without credential rotation or aggressive retries. This narrow adapter does not create a general HTTP or raw Reddit capability.

@@ -80,3 +80,21 @@ GitHub connector became unavailable after successful exact-base retrieval;
 discovery reports GitHub uninstalled. No PR, CI status or mergeability evidence is
 claimed until installation/connection is restored. The existing branch and
 review fixes are retained together; no follow-up PR or merge is authorized.
+
+
+## Completion record
+
+Subsequent execution superseded the earlier publication-status note above without
+rewriting that historical record. PR #1 was published and later merged into
+`main` as merge commit `4f718038db6065328895b261c92ae7504ca25aad`.
+
+Manual Android/Termux acceptance completed at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`: battery and clipboard verification
+PASSED; toast, vibration, and share reported LIMITED as designed; unconfirmed share
+was blocked by policy; the user observed the toast, vibration, and share chooser;
+and audit content redaction was confirmed. GitHub Actions Verify run #7 passed on
+the accepted feature head, and Verify run #8 passed on the merge commit with 232
+tests.
+
+The completed acceptance is manual physical-device evidence, not automated Android
+hardware CI. Later runtime-affecting Android changes require a fresh hardware gate.

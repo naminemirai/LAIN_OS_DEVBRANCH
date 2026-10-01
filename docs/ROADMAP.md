@@ -51,7 +51,9 @@ Add practical workflow actions:
 
 ## v0.2 — Android Capability Expansion v1
 
-Implemented with portable tests; exact-capability hardware acceptance pending:
+Implemented with portable tests and manual Android/Termux hardware acceptance
+completed at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`:
 - read-only structured `android.battery_status`;
 - bounded `android.vibrate` and short `android.toast`;
 - write-only `android.clipboard_set`, with private immediate comparison;
@@ -59,6 +61,8 @@ Implemented with portable tests; exact-capability hardware acceptance pending:
 - reusable private Termux command boundary with timeout/output limits and filtered
   environment; no generic command or device-control capability;
 - honest PASSED/FAILED/LIMITED verification and recursive payload redaction.
+- physical acceptance observed battery and clipboard PASSED, toast/vibration/share
+  LIMITED as designed, the share confirmation barrier, and audit content redaction.
 
 Next Android sub-milestone: individually reviewed narrow Shizuku-backed
 capabilities where native intents and Termux:API cannot serve the operation.
