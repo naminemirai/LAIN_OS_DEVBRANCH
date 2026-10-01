@@ -71,7 +71,7 @@ def bounded_run(argv, *, shell, capture_output, text, check, input, timeout, env
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise subprocess.TimeoutExpired(argv, timeout)
-            events = selector.select(0 if parent_exited else remaining)
+            events = selector.select(0 if parent_exited else min(remaining, 0.05))
             if parent_exited and not events:
                 break
             for key, _ in events:
