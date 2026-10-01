@@ -3,6 +3,7 @@ import json
 import subprocess
 import sys
 import os
+import time
 from dataclasses import replace
 from unittest.mock import patch
 import unittest
@@ -219,6 +220,17 @@ class AndroidBoundedProcessTests(unittest.TestCase):
     def test_closed_pipes_do_not_disable_timeout(self):
         with self.assertRaises(subprocess.TimeoutExpired):
             self.run_process('import os,time; os.close(1); os.close(2); time.sleep(5)', timeout=0.05)
+
+    def test_exited_parent_is_not_held_open_by_descendant_pipes(self):
+        script = (
+            'import subprocess,sys; '
+            'subprocess.Popen([sys.executable,"-c","import time; time.sleep(5)"]); '
+            'sys.stdout.write("ok"); sys.stdout.flush()'
+        )
+        started = time.monotonic()
+        result = self.run_process(script, timeout=1)
+        self.assertLess(time.monotonic() - started, 1)
+        self.assertEqual((result.stdout, result.returncode), ('ok', 0))
 
 
 class AndroidRuntimeIntegrationTests(unittest.TestCase):
