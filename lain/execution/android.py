@@ -128,9 +128,9 @@ def _execute_expansion(name, arguments, config, which, runner):
     readback = commands.run("termux-clipboard-get")
     if readback.outcome.status is not ActionStatus.SUCCESS:
         return ExecutionOutcome.success(readback="unavailable")
-    # Termux's clipboard getter emits a line terminator. Remove only that
-    # transport delimiter; never strip user whitespace or return the read value.
-    matches = readback.stdout == args["content"] + "\n"
+    # Termux ClipboardAPI uses out.print(text), with no line delimiter.
+    # Compare exactly, including user whitespace; never return the read value.
+    matches = readback.stdout == args["content"]
     return ExecutionOutcome.success(readback="matched" if matches else "mismatch")
 
 

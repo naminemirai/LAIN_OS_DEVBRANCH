@@ -17,6 +17,7 @@ def _capability_payload(capabilities: tuple[CapabilityDefinition, ...]) -> list[
                 for name, spec in cap.arguments.items()
             },
             "risk_class": int(cap.risk_class),
+            "argument_limits": {name: spec.limits() for name, spec in cap.arguments.items() if spec.limits()},
         }
         for cap in capabilities
     ]

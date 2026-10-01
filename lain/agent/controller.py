@@ -147,9 +147,10 @@ class AgentController:
 
         started = self.monotonic_clock()
         try:
+            context = build_agent_context(session)
             iteration = self.planning.decide(
-                session.goal,
-                build_agent_context(session),
+                context["goal"],
+                context,
                 session.iteration_count + 1,
             )
         except LainError as exc:

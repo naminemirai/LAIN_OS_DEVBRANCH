@@ -122,14 +122,17 @@ a destination. Dismiss the chooser during testing without sending anything.
 There is no general Termux, shell, intent or clipboard-read capability. Fixed argv
 and stdin keep payloads separate from options. A filtered launch environment,
 configured timeout, and actively enforced 65536/4096-byte stdout/stderr limits
-bound command execution. Missing commands return PLATFORM_UNSUPPORTED.
+bound command execution. Missing commands return PLATFORM_UNSUPPORTED. The registry publishes duration/
+byte limits in both CLI and planner catalogs; trusted validation remains authoritative.
 
 Clipboard content uses existing recursive `content` redaction in audit, session
 output and planner history. Private readback never leaves the adapter, including
-on mismatch/error. Clipboard/share arguments are also redacted in `plan`/`do`
-display output; do not reuse that display as an executable request. Pending
-actions retain their supplied content in the existing private mode-0600 session
-checkpoint for exact-action resume; those files remain under the device owner's
+on mismatch/error. Known payload echoes in intent/goal/reason views are masked after the typed
+payload is known. The initial user goal remains available to its planner.
+Clipboard/share arguments are also redacted in `plan`/`do`
+display output; do not reuse that display as an executable request. Session
+checkpoints retain supplied action content, including completed actions, in the
+existing private mode-0600 files for exact-action resume; those files remain under the device owner's
 control. Keep credentials out of goals/payloads; free-form goal/reason text is not
 a secret vault.
 

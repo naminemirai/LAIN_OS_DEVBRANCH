@@ -13,7 +13,7 @@ from lain.agent import (
     AgentSessionStatus,
     AgentSessionStore,
 )
-from lain.audit.logger import AuditLogger, redact
+from lain.audit.logger import AuditLogger, redact, redact_android_narratives
 from lain.capabilities.registry import DEFAULT_REGISTRY
 from lain.config import RuntimeConfig, load_config
 from lain.errors import ErrorCode, LainError
@@ -79,6 +79,7 @@ def _capability_payload():
                 "network_required": cap.network_required,
                 "environments": list(cap.environments),
                 "verification": cap.verification,
+                "argument_limits": {name: spec.limits() for name, spec in cap.arguments.items() if spec.limits()},
                 "arguments": {
                     name: {
                         "types": [typ.__name__ for typ in spec.types],
@@ -109,7 +110,8 @@ def _build_agent_stack(config: RuntimeConfig) -> tuple[AgentController, AgentSes
 
 
 def _safe_session_payload(session) -> dict[str, Any]:
-    return redact(session.to_dict())
+    raw = session.to_dict()
+    return redact_android_narratives(redact(raw), raw)
 
 
 def _safe_plan_payload(envelope) -> dict[str, Any]:
@@ -117,13 +119,13 @@ def _safe_plan_payload(envelope) -> dict[str, Any]:
     for action in payload["actions"]:
         if action["type"] in {"android.clipboard_set", "android.share_text"}:
             action["arguments"] = redact(action["arguments"])
-    return payload
+    return redact_android_narratives(payload, envelope.to_dict())
 
 
 def _session_summary(session) -> dict[str, Any]:
     return {
         "session_id": session.session_id,
-        "goal": session.goal,
+        "goal": _safe_session_payload(session)["goal"],
         "status": session.status.value,
         "iteration_count": session.iteration_count,
         "updated_at": session.updated_at,
@@ -254,7 +256,9 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
             result = engine.execute(envelope)
             payload = result.to_dict()
-            payload["actions"] = _safe_plan_payload(envelope)["actions"]
+            safe_plan = _safe_plan_payload(envelope)
+            payload["actions"] = safe_plan["actions"]
+            payload["intent"] = safe_plan["intent"]
             _emit(payload, json_mode=json_mode)
             return 0 if all(item.status is ActionStatus.SUCCESS for item in result.results) else 3
 
@@ -287,7 +291,7 @@ def main(argv: list[str] | None = None) -> int:
                 envelope,
                 confirmed_action_ids=frozenset(args.confirm),
             )
-            payload = result.to_dict()
+            payload = redact_android_narratives(result.to_dict(), envelope.to_dict())
             _emit(payload, json_mode=json_mode)
             return 0 if all(item.status is ActionStatus.SUCCESS for item in result.results) else 3
 

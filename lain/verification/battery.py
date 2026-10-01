@@ -14,16 +14,20 @@ _ENUMS = {
 def validate_battery(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("battery result must be an object")
-    percentage = value.get("percentage")
-    if type(percentage) is not int or not 0 <= percentage <= 100:
-        raise ValueError("battery percentage must be an integer in 0..100")
-    result = {"percentage": percentage}
+    result: dict[str, Any] = {}
+    if "percentage" in value:
+        percentage = value["percentage"]
+        if type(percentage) is not int or not 0 <= percentage <= 100:
+            raise ValueError("battery percentage must be an integer in 0..100")
+        result["percentage"] = percentage
     for name, allowed in _ENUMS.items():
         if name in value:
             item = value[name]
-            if not isinstance(item, str) or item not in allowed:
+            if not isinstance(item, str) or not item or len(item) > 64 or "\x00" in item:
                 raise ValueError("invalid battery enum")
-            result[name] = item
+            # Platforms can report numeric fallback strings for missing/future
+            # enum constants. Return stable UNKNOWN rather than arbitrary text.
+            result[name] = item if item in allowed else "UNKNOWN"
     for name in ("temperature", "current"):
         if name in value:
             item = value[name]
@@ -32,4 +36,6 @@ def validate_battery(value: Any) -> dict[str, Any]:
             if name == "temperature" and not -100 <= item <= 200:
                 raise ValueError("invalid battery temperature")
             result[name] = item
+    if not result:
+        raise ValueError("battery result has no supported fields")
     return result

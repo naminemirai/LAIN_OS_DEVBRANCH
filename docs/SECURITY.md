@@ -30,11 +30,14 @@ Crash recovery is deliberately conservative. If the append-only audit says the c
 
 Session/planner-facing output uses existing recursive redaction rules for
 credential-like keys and private payload keys such as `content` and `body`.
-Durable session files must not contain credentials. Pending clipboard writes,
-like pending file writes, retain their exact supplied payload in the private
+Durable session files must not contain credentials. Clipboard/file action records,
+including completed actions, retain their exact supplied payload in the private
 mode-0600 checkpoint for restart/confirmation; checkpoint storage is user-owned
-and is not an audit log or a planner-facing view. Free-form goals/reasons are not
-automatically secret-classified; never put credentials in them.
+and is not an audit log or a planner-facing view. Known private payload echoes in
+free-form intent/goal/reason views are masked
+when a typed clipboard/share action is known. Initial user goals are intentionally
+available to the first planner decision; unrelated credentials are not inferred
+from narrative text. Never put credentials in goals.
 
 ### Android expansion boundary
 

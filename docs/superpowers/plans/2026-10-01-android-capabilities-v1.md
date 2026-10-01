@@ -43,3 +43,40 @@ descendant cleanup; planner self-confirmation; preservation of existing behavior
 Baseline: `python scripts/verify.py` → 198 tests passing; compile/diff/security
 checks passing. Connector-retrieved files produce the exact upstream Git tree
 `90d42323964f051b0dcc2e69e2a21b3679c4fab3`.
+
+Implementation and regression tests were developed in RED → GREEN steps for
+registry bounds, all adapters, command output/timeout limits, runtime/autonomous
+dispatch, clipboard public display, and the Android availability helper.
+
+Fresh independent review found two Important issues: incorrect clipboard LF
+comparison and private payload echoes in free-text views. Both have observed
+RED → GREEN regression tests. Follow-up checks also cover masking multiple
+payloads without changing structural metadata, optional battery percentage and
+unknown platform enums, and publication of argument limits to planners/CLI while
+preserving the existing Groq argument contract.
+
+Rulings:
+- Preserve exact private mode-0600 session checkpoint payloads, including completed
+  actions; redact public/planner views. Changing durable replay state would exceed
+  this milestone. Cost: a device owner/local privileged process can read retained
+  payloads; checkpoints must stay private.
+- Initial user goal remains available to the first planner call so it can propose
+  explicit content; subsequent known payload echoes are masked. Cost: users must
+  not supply credentials as goals/payloads.
+- Existing Termux toast upstream uses `echo` and may consume option-only strings
+  such as `-n`. Keep command-acceptance LIMITED and document the fidelity limit.
+  Cost: such a toast may appear empty; ordinary marker hardware test remains needed.
+- POSIX process-group cleanup covers ordinary descendants, not intentionally
+  daemonized processes escaping the group. Capability-selected installed commands
+  are trusted; no planner-controlled executable exists.
+
+Review source contracts checked at Termux API
+`fc26ce17e3badf85d4df191af364fcf7798047f1` and API package
+`9e7f1531e1aa4a9c1e261a2dbde4de93653c366e`: ClipboardAPI prints exact text with no
+delimiter and v2 stdin preserves whitespace; share stdin path always creates a
+chooser. This source inspection is not physical Android validation.
+
+GitHub connector became unavailable after successful exact-base retrieval;
+discovery reports GitHub uninstalled. No PR, CI status or mergeability evidence is
+claimed until installation/connection is restored. The existing branch and
+review fixes are retained together; no follow-up PR or merge is authorized.

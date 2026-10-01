@@ -22,6 +22,11 @@ from lain.planning import AgentPlannerDecision, AgentPlannerStatus, ProposedActi
 from lain.protocol.models import ActionEnvelope
 from lain.agent.context import build_agent_context
 from lain.cli import _safe_session_payload
+from lain.cli import _session_summary
+from lain.audit.logger import redact_android_narratives
+from lain.planning.protocol import planner_request
+from lain.cli import _capability_payload
+from lain.planner_adapters.groq import parse_planner_input
 
 
 class FakeCommands:
@@ -68,6 +73,19 @@ class AndroidExpansionAdapterTests(unittest.TestCase):
         result = self.execute('android.battery_status', {}, FakeCommands([(0, '{"percentage":0}', '')]))
         self.assertEqual(result.details['battery'], {'percentage': 0})
 
+    def test_battery_missing_percentage_still_returns_available_fields(self):
+        result = self.execute('android.battery_status', {},
+                              FakeCommands([(0, '{"status":"DISCHARGING","temperature":25}', '')]))
+        self.assertEqual(result.status, ActionStatus.SUCCESS)
+        self.assertEqual(result.details['battery'], {'status': 'DISCHARGING', 'temperature': 25})
+        self.assertEqual(self.verify('android.battery_status', result).status, VerificationStatus.PASSED)
+
+    def test_battery_platform_unknown_enums_are_normalized_without_echo(self):
+        result = self.execute('android.battery_status', {},
+                              FakeCommands([(0, '{"percentage":50,"health":"-1","plugged":"PLUGGED_-1"}', '')]))
+        self.assertEqual(result.status, ActionStatus.SUCCESS)
+        self.assertEqual(result.details['battery'], {'percentage': 50, 'health': 'UNKNOWN', 'plugged': 'UNKNOWN'})
+
     def test_battery_malformed_shapes_and_field_types_fail_closed(self):
         for raw in ('nope', '[]', 'null', '{}', '{"percentage":true}', '{"percentage":101}',
                     '{"percentage":50,"temperature":NaN}', '{"percentage":50,"status":[]}',
@@ -95,7 +113,7 @@ class AndroidExpansionAdapterTests(unittest.TestCase):
 
     def test_clipboard_readback_is_private_and_not_a_capability(self):
         content = '-h; $(whoami)\nmarker'
-        fake = FakeCommands([(0, '', ''), (0, content + '\n', '')])
+        fake = FakeCommands([(0, '', ''), (0, content, '')])
         result = self.execute('android.clipboard_set', {'content': content}, fake)
         self.assertEqual([call[0] for call in fake.calls],
                          [['/termux/bin/termux-clipboard-set'], ['/termux/bin/termux-clipboard-get']])
@@ -108,6 +126,16 @@ class AndroidExpansionAdapterTests(unittest.TestCase):
         result = self.execute('android.clipboard_set', {'content': 'test-marker'}, fake)
         self.assertNotIn('unrelated-private-value', json.dumps(result.details))
         self.assertEqual(self.verify('android.clipboard_set', result).status, VerificationStatus.FAILED)
+
+    def test_clipboard_exact_bytes_preserve_newlines_and_reject_added_newline(self):
+        for content in ('marker', 'marker\n', 'marker\n\n', ' 🌀\r\n'):
+            with self.subTest(content=content):
+                result = self.execute('android.clipboard_set', {'content': content},
+                    FakeCommands([(0, '', ''), (0, content, '')]))
+                self.assertEqual(self.verify('android.clipboard_set', result).status, VerificationStatus.PASSED)
+                result = self.execute('android.clipboard_set', {'content': content},
+                    FakeCommands([(0, '', ''), (0, content + '\n', '')]))
+                self.assertEqual(self.verify('android.clipboard_set', result).status, VerificationStatus.FAILED)
 
     def test_clipboard_readback_unavailable_is_limited_and_failed_write_never_reads(self):
         fake = FakeCommands()
@@ -218,7 +246,7 @@ class AndroidRuntimeIntegrationTests(unittest.TestCase):
             ('android.battery_status', {}, [(0, '{"percentage":50}', '')], VerificationStatus.PASSED),
             ('android.vibrate', {'duration_ms': 100}, [], VerificationStatus.LIMITED),
             ('android.toast', {'content': 'marker'}, [], VerificationStatus.LIMITED),
-            ('android.clipboard_set', {'content': 'marker'}, [(0, '', ''), (0, 'marker\n', '')], VerificationStatus.PASSED),
+            ('android.clipboard_set', {'content': 'marker'}, [(0, '', ''), (0, 'marker', '')], VerificationStatus.PASSED),
             ('android.share_text', {'content': 'marker'}, [], VerificationStatus.LIMITED),
         )
         for name, args, responses, expected in fixtures:
@@ -263,13 +291,13 @@ class AndroidRuntimeIntegrationTests(unittest.TestCase):
             def decide(inner, goal, context, capabilities):
                 contexts.append(context)
                 if len(contexts) == 1:
-                    return AgentPlannerDecision(AgentPlannerStatus.CONTINUE, 'write marker',
+                    return AgentPlannerDecision(AgentPlannerStatus.CONTINUE, 'write ' + content,
                         (ProposedAction('android.clipboard_set', {'content': content}),))
                 return AgentPlannerDecision(AgentPlannerStatus.COMPLETE, 'finished', ())
         store = AgentSessionStore(self.config.audit_path.parent / 'sessions')
         ctl = AgentController(AgentPlanningService(Planner()), self.runtime, store, AgentBudget(4, 8, 8, 30))
-        session = ctl.create('put explicit test marker in clipboard')
-        fake = FakeCommands([(0, '', ''), (0, content + '\n', '')])
+        session = ctl.create('put ' + content + ' in clipboard')
+        fake = FakeCommands([(0, '', ''), (0, content, '')])
         with self.fake_boundary(fake):
             final = ctl.run_until_stop(session.session_id)
         self.assertEqual(final.status, AgentSessionStatus.COMPLETE)
@@ -279,7 +307,8 @@ class AndroidRuntimeIntegrationTests(unittest.TestCase):
         self.assertEqual(record.result.verification.status, VerificationStatus.PASSED)
         self.assertEqual(len(fake.calls), 2)
         self.assertEqual(contexts[1]['history'][0]['actions'][0]['arguments'], {'content': '[REDACTED]'})
-        self.assertNotIn(content, json.dumps(contexts) + json.dumps(_safe_session_payload(final)))
+        self.assertNotIn(content, json.dumps(contexts[1:]) + json.dumps(_safe_session_payload(final)))
+        self.assertNotIn(content, json.dumps(_session_summary(final)))
         self.assertNotIn(content, self.config.audit_path.read_text())
 
     def test_autonomous_invalid_arguments_rejected_before_command(self):
@@ -292,6 +321,20 @@ class AndroidRuntimeIntegrationTests(unittest.TestCase):
             AgentPlanningService(Planner()).decide('test', {}, 1)
         self.assertEqual(fake.calls, [])
 
+    def test_narrative_masking_collects_all_payloads_without_mutating_metadata(self):
+        source = {'actions': [
+            {'type': 'android.clipboard_set', 'arguments': {'content': 'first'}},
+            {'type': 'android.share_text', 'arguments': {'content': 'R'}},
+        ]}
+        value = {'goal': 'first R', 'intent': 'first R', 'planner_reason': 'first R',
+                 'terminal_reason': 'first R', 'type': 'android.share_text', 'status': 'READY',
+                 'session_id': 'R', 'reason': 'first R'}
+        masked = redact_android_narratives(value, source)
+        self.assertEqual(masked['goal'], '[REDACTED] [REDACTED]')
+        self.assertEqual(masked['type'], 'android.share_text')
+        self.assertEqual(masked['status'], 'READY')
+        self.assertEqual(masked['session_id'], 'R')
+
 
 CAPABILITIES = {
     'android.battery_status': ({}, 0),
@@ -303,6 +346,16 @@ CAPABILITIES = {
 
 
 class AndroidExpansionRegistryTests(unittest.TestCase):
+    def test_catalog_exposes_limits_without_changing_groq_argument_contract(self):
+        catalog = _capability_payload()['capabilities']
+        caps = {item['name']: item for item in catalog}
+        self.assertEqual(caps['android.vibrate']['argument_limits'], {'duration_ms': {'minimum': 1, 'maximum': 5000}})
+        self.assertEqual(caps['android.toast']['argument_limits'], {'content': {'max_bytes': 1024}})
+        request = planner_request('test', DEFAULT_REGISTRY.definitions(), 8)
+        parsed = parse_planner_input(json.dumps(request))
+        caps = {item['name']: item for item in parsed['capabilities']}
+        self.assertEqual(caps['android.clipboard_set']['argument_limits'], {'content': {'max_bytes': 16384}})
+        self.assertEqual(caps['android.share_text']['argument_limits'], {'content': {'max_bytes': 16384}})
     def test_metadata_and_default_policy(self):
         with tempfile.TemporaryDirectory() as tmp:
             config = RuntimeConfig.for_workspace(Path(tmp))

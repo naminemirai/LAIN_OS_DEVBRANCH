@@ -66,7 +66,8 @@ class PlannerCliTests(unittest.TestCase):
         for command in ('plan', 'do'):
             with self.subTest(command=command), tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp)
-                code, out, _ = self.run_cli(['--config', str(config(root, script)), command, 'set marker', '--json'])
+                code, out, _ = self.run_cli(['--config', str(config(root, script)), command,
+                                           'copy private-clipboard-marker to clipboard', '--json'])
                 self.assertNotIn('private-clipboard-marker', out)
                 self.assertEqual(json.loads(out)['actions'][0]['arguments']['content'], '[REDACTED]')
 

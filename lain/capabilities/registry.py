@@ -26,6 +26,11 @@ class ArgumentSpec:
     maximum: int | None = None
     max_bytes: int | None = None
 
+    def limits(self) -> dict[str, int]:
+        return {name: value for name, value in (
+            ("minimum", self.minimum), ("maximum", self.maximum), ("max_bytes", self.max_bytes),
+        ) if value is not None}
+
 
 @dataclass(frozen=True, slots=True)
 class CapabilityDefinition:

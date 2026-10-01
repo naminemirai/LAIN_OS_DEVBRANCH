@@ -90,7 +90,9 @@ calibration. Unsupported/failure is a stop to inspect prerequisites/output forma
 python -m lain --workspace "$LAIN_HW_WORKSPACE" execute "$LAIN_HW_WORKSPACE/toast.json" --json
 ```
 
-Observe the short local message. Expected: success + LIMITED. Record whether it
+Observe the short local message. Upstream `termux-toast` uses Bash `echo`, so
+option-only text such as `-n` can display empty; command acceptance cannot establish
+text fidelity. This test uses an ordinary explicit marker. Expected: success + LIMITED. Record whether it
 appeared; do not relabel command acceptance as independent UI verification.
 
 ## 6. Short vibration
