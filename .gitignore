@@ -31,6 +31,7 @@ tmp/
 
 # Worktrees
 .worktrees/
+.superpowers/
 
 # OS/editor
 .DS_Store
