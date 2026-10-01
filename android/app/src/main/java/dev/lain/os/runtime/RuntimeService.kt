@@ -12,12 +12,14 @@ import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.ScheduledThreadPoolExecutor
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicBoolean
 
 /** Only the owner application's UID can reach this non-exported Binder. */
 class RuntimeService : Service() {
     private val worker = ScheduledThreadPoolExecutor(1)
-    private val pumping = AtomicBoolean(false)
+    private val pump = RuntimePump(worker) {
+        if (!bound) controller?.callAttr("stop_active")
+        controller?.callAttr("advance")?.toBoolean() ?: false
+    }
     @Volatile private var controller: PyObject? = null
     @Volatile private var startupFailed = false
     @Volatile private var bound = false
@@ -98,23 +100,7 @@ class RuntimeService : Service() {
         if (value.toByteArray(Charsets.UTF_8).size <= RuntimeProtocol.MAX_BYTES) value
         else RuntimeProtocol.failure("APP_RESPONSE_TOO_LARGE")
 
-    private fun kick() {
-        if (worker.isShutdown || !pumping.compareAndSet(false, true)) return
-        worker.execute { advanceOnce() }
-    }
-
-    private fun advanceOnce() {
-        try {
-            if (!bound) controller?.callAttr("stop_active")
-            val keepRunning = controller?.callAttr("advance")?.toBoolean() ?: false
-            if (keepRunning && !worker.isShutdown) {
-                worker.schedule({ advanceOnce() }, 25, TimeUnit.MILLISECONDS)
-            } else pumping.set(false)
-        } catch (_: Exception) {
-            pumping.set(false)
-            // Preserve durable state for explicit inspection/recovery. No retry loop.
-        }
-    }
+    private fun kick() = pump.kick()
 
     override fun onBind(intent: Intent?): IBinder {
         bound = true

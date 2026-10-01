@@ -4,8 +4,8 @@ This checklist validates the new standalone APK. Prior Termux acceptance and
 emulator results do not establish physical toast, vibration, clipboard, or
 chooser behavior for these native adapters.
 
-Install the current debug APK, package `dev.lain.os`, version `0.1.3-interface`
-(code 4). Record the APK SHA-256, Android version, device model, and date.
+Install the current debug APK, package `dev.lain.os`, version `0.1.4-interface`
+(code 5). Record the APK SHA-256, Android version, device model, and date.
 The APK uses an offline demo planner and needs no provider credentials.
 
 1. Open LAIN_OS. Wait for “Local runtime ready”; Run must remain disabled until
@@ -26,7 +26,9 @@ The APK uses an offline demo planner and needs no provider credentials.
    chooser, then dismiss it without selecting a destination or sending anything.
    Expect LIMITED, not independent proof of delivery.
 7. Start another share task, leave it unapproved, and tap Stop. Expect CANCELLED
-   with no chooser. Rotate the app and confirm no duplicate task is submitted.
+   with no chooser. Also repeat several times, tapping Stop as the task reaches
+   its confirmation pause; cancellation must settle without a second Stop or
+   reconnect. Rotate the app and confirm no duplicate task is submitted.
 8. Start a share task and leave it paused. Terminate only this app's processes
    through Android's app controls (or `adb shell am force-stop dev.lain.os`).
    Reopen LAIN_OS. No chooser or automatic execution should occur. Inspect the
