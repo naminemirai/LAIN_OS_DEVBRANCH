@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var ui: ActivityMainBinding
     private val model: WorkbenchViewModel by viewModels()
     private var lastHistory = ""
+    private var lastResults: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,17 +75,21 @@ class MainActivity : AppCompatActivity() {
         ui.approvalText.text = approval?.let {
             "${it.optString("type")}\n${it.optJSONObject("arguments")?.toString(2)}\n\n${getString(R.string.approval_explanation)}"
         } ?: ""
-        ui.results.removeAllViews()
         val actions = session?.optJSONArray("actions")
-        if (actions == null || actions.length() == 0) {
-            ui.results.addView(resultText(getString(R.string.no_results)))
-        } else for (i in 0 until actions.length()) {
-            val action = actions.getJSONObject(i)
-            val detail = action.optJSONObject("details")
-            val text = "${action.optString("type")}\n" +
-                "Execution: ${action.optString("status")}  ·  Verification: ${action.optString("verification")}" +
-                if (detail != null && detail.length() > 0) "\n${detail.toString(2)}" else ""
-            ui.results.addView(resultText(text))
+        val resultsKey = session?.optString("session_id") + actions?.toString()
+        if (resultsKey != lastResults) {
+            lastResults = resultsKey
+            ui.results.removeAllViews()
+            if (actions == null || actions.length() == 0) {
+                ui.results.addView(resultText(getString(R.string.no_results)))
+            } else for (i in 0 until actions.length()) {
+                val action = actions.getJSONObject(i)
+                val detail = action.optJSONObject("details")
+                val text = "${action.optString("type")}\n" +
+                    "Execution: ${action.optString("status")}  ·  Verification: ${action.optString("verification")}" +
+                    if (detail != null && detail.length() > 0) "\n${detail.toString(2)}" else ""
+                ui.results.addView(resultText(text))
+            }
         }
         val historyKey = state.history.toString() + active
         if (historyKey != lastHistory) {

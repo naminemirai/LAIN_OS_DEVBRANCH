@@ -34,7 +34,17 @@ class WorkbenchViewModel(application: Application, private val saved: SavedState
     }
 
     private fun current() = mutable.value ?: WorkbenchState()
-    private fun change(update: (WorkbenchState) -> WorkbenchState) { mutable.value = update(current()) }
+    private fun change(update: (WorkbenchState) -> WorkbenchState) {
+        val before = current()
+        val after = update(before)
+        // Polling identical JSON must not rebuild the owner's screen or clear
+        // text selection. Real connection, approval, and result changes publish.
+        if (before.connected == after.connected && before.ready == after.ready &&
+            before.startupFailed == after.startupFailed && before.pending == after.pending &&
+            before.message == after.message && before.session?.toString() == after.session?.toString() &&
+            before.history.toString() == after.history.toString()) return
+        mutable.value = after
+    }
 
     fun attach() {
         visible = true

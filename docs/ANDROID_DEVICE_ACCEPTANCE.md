@@ -4,8 +4,8 @@ This checklist validates the new standalone APK. Prior Termux acceptance and
 emulator results do not establish physical toast, vibration, clipboard, or
 chooser behavior for these native adapters.
 
-Install the current debug APK, package `dev.lain.os`, version `0.1.2-interface`
-(code 3). Record the APK SHA-256, Android version, device model, and date.
+Install the current debug APK, package `dev.lain.os`, version `0.1.3-interface`
+(code 4). Record the APK SHA-256, Android version, device model, and date.
 The APK uses an offline demo planner and needs no provider credentials.
 
 1. Open LAIN_OS. Wait for “Local runtime ready”; Run must remain disabled until

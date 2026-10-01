@@ -11,8 +11,8 @@ android {
         applicationId = "dev.lain.os"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.1.2-interface"
+        versionCode = 4
+        versionName = "0.1.3-interface"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
     }

@@ -42,6 +42,13 @@ class RuntimeFlowTest {
                 assertTrue(text.contains("Verification: passed", ignoreCase = true))
                 assertTrue(text.contains("percentage"))
             }
+            var displayed: android.view.View? = null
+            scenario.onActivity { displayed = it.findViewById<android.widget.LinearLayout>(R.id.results).getChildAt(0) }
+            SystemClock.sleep(1600) // Cross two unchanged runtime polls.
+            scenario.onActivity {
+                assertSame("Unchanged results must preserve selectable text views", displayed,
+                    it.findViewById<android.widget.LinearLayout>(R.id.results).getChildAt(0))
+            }
         }
     }
 
