@@ -5,6 +5,7 @@ import android.content.ServiceConnection
 import android.os.Binder
 import android.os.Parcel
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.filters.SdkSuppress
 import org.junit.Assert.*
 import org.junit.Test
 import org.json.JSONObject
@@ -44,7 +45,9 @@ class RuntimeConnectionTest {
         }
     }
 
-    @Test fun bindingDeathAllowsExplicitReconnect() {
+    @Test
+    @SdkSuppress(minSdkVersion = 26) // ServiceConnection.onBindingDied was added in API 26.
+    fun bindingDeathAllowsExplicitReconnect() {
         val instrumentation = InstrumentationRegistry.getInstrumentation()
         instrumentation.runOnMainSync {
             val binding = FakeBinding()

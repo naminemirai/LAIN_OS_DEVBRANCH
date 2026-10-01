@@ -91,7 +91,10 @@ attribute was moved out of the API 24 base resources. Android 12+ cloud backup
 and device transfer now explicitly exclude application data.
 
 The Android workflow builds both APKs, runs lint, and executes instrumentation
-on an API 35 emulator. Exact CI heads and emulator results are recorded in
+on API 24 and API 35 emulators. The API 24 emulator passed all nine applicable instrumentation tests after
+removing an inline theme font-family override that crashed button inflation on
+Android 7. The API 26 binding-death callback test runs on newer platforms.
+Exact CI heads and emulator results are recorded in
 [PR #3](https://github.com/naminemirai/LAIN_OS_DEVBRANCH/pull/3). Physical acceptance
 remains open; use [the native APK checklist](ANDROID_DEVICE_ACCEPTANCE.md).
 Earlier paused-pass evidence below describes the initial build only.
@@ -115,7 +118,7 @@ and merging was corrected in `android/app/build.gradle.kts`.
 
 The output is `android/app/build/outputs/apk/debug/app-debug.apk`; the delivered
 copy is `/workspace/artifacts/LAIN_OS-interface-debug.apk`. Its package is
-`dev.lain.os`, version `0.1.1-interface` (version code 2), with arm64-v8a and x86_64 support and a
+`dev.lain.os`, version `0.1.2-interface` (version code 3), with arm64-v8a and x86_64 support and a
 minimum Android API level of 24. It is debug-signed; no release signing was done.
 The earlier updated assembly reported `BUILD SUCCESSFUL in 34s`, exit 0, with all
 48 tasks executed. Connection regression tests were subsequently compiled along
