@@ -77,6 +77,13 @@ The first implementation should favor boring, observable operations such as file
 
 ## Runtime quick start
 
+The standalone Android interface source is in `android/`. It embeds this runtime
+and provides a text workbench with fixed offline demos, confirmations, results,
+history, and Stop controls. Portable verification, Android lint, and API 24
+emulator tests pass; physical-device acceptance remains pending. See
+[Android interface](docs/ANDROID_APP.md) for build instructions and
+the current evidence status.
+
 LAIN_OS requires Python 3.11 or newer and has no runtime third-party dependencies.
 
 ```sh

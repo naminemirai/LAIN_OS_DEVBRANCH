@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/workbench_root"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@color/background" android:fillViewport="true">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="24dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/eyebrow" android:textColor="@color/accent" android:textSize="11sp"
+            android:letterSpacing="0.18" android:layout_marginTop="12dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/app_name" android:textColor="@color/text_primary"
+            android:textSize="36sp" android:textStyle="bold" android:layout_marginTop="8dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/subtitle" android:textColor="@color/text_secondary"
+            android:textSize="15sp" android:layout_marginTop="6dp" />
+        <TextView android:id="@+id/connection" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/accent" android:textSize="12sp" android:layout_marginTop="20dp" />
+        <Button android:id="@+id/reconnect_button" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="@string/reconnect" android:textAllCaps="false" android:visibility="gone" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/card" android:orientation="vertical" android:padding="20dp"
+            android:layout_marginTop="20dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/command_heading" android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/demo_notice" android:textColor="@color/text_secondary" android:textSize="12sp"
+                android:layout_marginTop="8dp" />
+            <EditText android:id="@+id/command_input" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:minHeight="64dp" android:hint="@string/command_hint" android:inputType="textCapSentences|textMultiLine"
+                android:maxLength="4096" android:importantForAutofill="no" android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" android:layout_marginTop="12dp" android:gravity="top|start" />
+            <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content">
+                <LinearLayout android:id="@+id/demo_commands" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:orientation="horizontal" />
+            </HorizontalScrollView>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+                <Button android:id="@+id/run_button" android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp"
+                    android:text="@string/run" android:textAllCaps="false" android:backgroundTint="@color/accent" android:textColor="@color/background" />
+                <Button android:id="@+id/stop_button" android:layout_width="0dp" android:layout_weight="1" android:layout_height="52dp"
+                    android:layout_marginStart="12dp" android:text="@string/stop" android:textAllCaps="false" />
+            </LinearLayout>
+            <TextView android:id="@+id/message" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" android:textSize="12sp" android:layout_marginTop="10dp"
+                android:accessibilityLiveRegion="polite" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/card" android:orientation="vertical" android:padding="20dp"
+            android:layout_marginTop="16dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/task_heading" android:textColor="@color/text_secondary" android:textSize="11sp" android:letterSpacing="0.12" />
+            <TextView android:id="@+id/task_title" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/text_primary" android:textSize="18sp" android:textStyle="bold" android:layout_marginTop="8dp" />
+            <TextView android:id="@+id/task_status" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/accent" android:textSize="12sp" android:layout_marginTop="6dp" />
+            <ProgressBar android:id="@+id/progress" style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent" android:layout_height="8dp" android:indeterminate="true"
+                android:indeterminateTint="@color/accent" android:layout_marginTop="12dp" android:visibility="gone" />
+            <Button android:id="@+id/resume_button" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/resume" android:textAllCaps="false" android:visibility="gone" />
+            <LinearLayout android:id="@+id/results" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginTop="12dp" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/limited_notice" android:textColor="@color/text_secondary" android:textSize="11sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/approval_card" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/card" android:orientation="vertical" android:padding="20dp"
+            android:layout_marginTop="16dp" android:visibility="gone">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/approval_heading" android:textColor="@color/accent" android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:id="@+id/approval_text" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/text_primary" android:textSize="13sp" android:layout_marginTop="12dp" />
+            <Button android:id="@+id/approve_button" android:layout_width="match_parent" android:layout_height="52dp"
+                android:text="@string/approve" android:textAllCaps="false" android:layout_marginTop="12dp" />
+        </LinearLayout>
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/history_heading" android:textColor="@color/text_primary"
+            android:textSize="18sp" android:textStyle="bold" android:layout_marginTop="28dp" />
+        <LinearLayout android:id="@+id/history" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:layout_marginTop="8dp" />
+        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="@string/footer" android:textColor="@color/text_secondary" android:textSize="11sp"
+            android:layout_marginTop="20dp" android:layout_marginBottom="24dp" />
+    </LinearLayout>
+</ScrollView>

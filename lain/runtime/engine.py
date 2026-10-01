@@ -40,11 +40,13 @@ class RuntimeEngine:
         registry: CapabilityRegistry = DEFAULT_REGISTRY,
         audit: AuditLogger | None = None,
         reddit_client: RedditClient | None = None,
+        native_android=None,
     ):
         self.config = config
         self.registry = registry
         self.audit = audit or AuditLogger(config.audit_path)
         self.reddit_client = reddit_client
+        self.native_android = native_android
 
     def preflight(self, envelope: ActionEnvelope) -> tuple[tuple[Action, CapabilityDefinition], ...]:
         if len(envelope.actions) > self.config.max_actions:
@@ -211,6 +213,11 @@ class RuntimeEngine:
         )
 
     def _execute_action(self, action: Action) -> ExecutionOutcome:
+        if action.type.startswith("android.") and self.native_android is not None:
+            if self.config.android_adapter == "disabled":
+                return ExecutionOutcome.unsupported(ErrorCode.PLATFORM_UNSUPPORTED.value,
+                                                    "Android adapter is disabled")
+            return self.native_android.execute(action)
         if action.type == "file.write_text":
             return execute_file_write_text(action.arguments, self.config)
         if action.type == "file.copy":
@@ -244,6 +251,8 @@ class RuntimeEngine:
         )
 
     def _verify_action(self, action: Action, outcome: ExecutionOutcome) -> VerificationResult:
+        if action.type.startswith("android.") and self.native_android is not None:
+            return self.native_android.verify(action, outcome)
         if action.type == "file.write_text":
             return verify_file_write_text(outcome)
         if action.type == "file.copy":

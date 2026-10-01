@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LAIN_OS</string>
+    <string name="eyebrow">LOCAL AUTONOMOUS INTELLIGENT NETWORKING</string>
+    <string name="subtitle">Your device. Your actions. Your control.</string>
+    <string name="connected">● Local runtime ready</string>
+    <string name="starting">○ Starting embedded runtime</string>
+    <string name="disconnected">○ Runtime disconnected</string>
+    <string name="reconnect">Reconnect runtime</string>
+    <string name="command_heading">What would you like to do?</string>
+    <string name="demo_notice">Offline demo · Choose a command below. A language-model planner is not configured in this version.</string>
+    <string name="command_hint">Choose an offline command…</string>
+    <string name="run">Run locally</string>
+    <string name="stop">Stop task</string>
+    <string name="resume">Resume interrupted task</string>
+    <string name="task_heading">CURRENT TASK</string>
+    <string name="no_task">Ready when you are</string>
+    <string name="stopping">STOP REQUESTED · WAITING FOR SETTLED OUTCOME</string>
+    <string name="no_results">Action results will appear here.</string>
+    <string name="limited_notice">LIMITED means Android accepted the operation. It does not independently prove the UI or physical effect.</string>
+    <string name="approval_heading">Your approval is required</string>
+    <string name="approval_explanation">Approve only this stored action. Private content is hidden here. Sharing opens a chooser; you choose a destination.</string>
+    <string name="approve">Approve this action</string>
+    <string name="history_heading">Recent sessions</string>
+    <string name="no_history">No sessions yet. Start with a local demo.</string>
+    <string name="footer">Private storage · On-demand execution · Debug interface
+Returning to the background requests Stop. Interrupted work requires explicit recovery.</string>
+</resources>

@@ -14,6 +14,7 @@ venv/
 
 # Kotlin/Gradle/Android
 .gradle/
+.kotlin/
 build/
 **/build/
 local.properties
@@ -31,6 +32,7 @@ tmp/
 
 # Worktrees
 .worktrees/
+.superpowers/
 
 # OS/editor
 .DS_Store

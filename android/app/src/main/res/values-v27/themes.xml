@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Lain" parent="Base.Theme.Lain">
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

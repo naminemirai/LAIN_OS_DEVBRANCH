@@ -1,0 +1,124 @@
+"""App control contracts; execution deferred at the owner's request."""
+import json
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+from lain.app.control import AppController
+
+
+class AppControlTests(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        self.app = AppController(Path(self.directory.name))
+
+    def send(self, command, **arguments):
+        return json.loads(self.app.dispatch(json.dumps({
+            "version": 1, "command": command, "arguments": arguments,
+        })))
+
+    def settle(self):
+        for _ in range(20):
+            if not self.app.advance():
+                return
+        self.fail("demo did not settle within bounded steps")
+
+    def test_unknown_control_command_rejected(self):
+        self.assertFalse(self.send("shell", command_line="id")["ok"])
+
+    def test_oversized_or_duplicate_json_rejected(self):
+        self.assertFalse(json.loads(self.app.dispatch(" " * 65537))["ok"])
+        self.assertFalse(json.loads(self.app.dispatch(
+            '{"version":1,"version":1,"command":"sessions","arguments":{}}'
+        ))["ok"])
+
+    def test_demo_creates_real_scoped_file(self):
+        reply = self.send("start", goal="Create demo file")
+        self.assertTrue(reply["ok"])
+        self.settle()
+        self.assertEqual((Path(self.directory.name) / "workspace" / "demo.txt").read_text(),
+                         "Hello from LAIN_OS.\n")
+        state = self.send("inspect", session_id=reply["session"]["session_id"])
+        self.assertEqual(state["session"]["status"], "complete")
+        self.assertEqual(state["session"]["actions"][0]["verification"], "passed")
+
+    def test_stop_prevents_next_action(self):
+        reply = self.send("start", goal="Create demo file")
+        sid = reply["session"]["session_id"]
+        self.app.advance()  # Planning only; no effect yet.
+        self.assertTrue(self.send("stop", session_id=sid)["ok"])
+        self.settle()
+        self.assertFalse((Path(self.directory.name) / "workspace" / "demo.txt").exists())
+        self.assertEqual(self.send("inspect", session_id=sid)["session"]["status"], "cancelled")
+
+    def paused_share(self):
+        reply = self.send("start", goal="Share demo text")
+        self.settle()
+        return self.send("inspect", session_id=reply["session"]["session_id"])["session"]
+
+    def test_approval_bound_to_exact_stored_action(self):
+        session = self.paused_share()
+        self.assertEqual(session["status"], "paused_confirmation")
+        self.assertFalse(self.send("approve", session_id=session["session_id"], token="invented")["ok"])
+        self.assertTrue(self.send("approve", session_id=session["session_id"],
+                                  token=session["approval"]["token"])["ok"])
+
+    def test_approval_replay_rejected(self):
+        session = self.paused_share()
+        arguments = {"session_id": session["session_id"], "token": session["approval"]["token"]}
+        self.assertTrue(self.send("approve", **arguments)["ok"])
+        self.assertFalse(self.send("approve", **arguments)["ok"])
+
+    def test_restart_requires_fresh_approval(self):
+        session = self.paused_share()
+        self.app = AppController(Path(self.directory.name))
+        self.assertFalse(self.send("approve", session_id=session["session_id"],
+                                   token=session["approval"]["token"])["ok"])
+        self.assertFalse(self.app.advance())
+
+    def test_sensitive_history_redacted(self):
+        session = self.paused_share()
+        serialized = json.dumps(session)
+        self.assertNotIn("Hello from LAIN_OS.", serialized)
+        self.assertIn("[REDACTED]", serialized)
+
+    def test_restart_does_not_replay(self):
+        self.send("start", goal="Create demo file")
+        self.app.advance()
+        self.app = AppController(Path(self.directory.name))
+        self.assertFalse(self.app.advance())
+        self.assertFalse((Path(self.directory.name) / "workspace" / "demo.txt").exists())
+
+    def test_boolean_version_and_unknown_arguments_rejected(self):
+        self.assertFalse(json.loads(self.app.dispatch(
+            '{"version":true,"command":"sessions","arguments":{}}'
+        ))["ok"])
+        self.assertFalse(self.send("sessions", extra=True)["ok"])
+
+    def test_stop_acknowledges_while_native_step_is_in_flight(self):
+        entered, release = threading.Event(), threading.Event()
+
+        class BlockingNative:
+            def execute(self, name, arguments):
+                entered.set()
+                if not release.wait(5):
+                    raise RuntimeError("fixture not released")
+                return '{"status":"success","details":{"battery":{"percentage":50}}}'
+
+        self.app = AppController(Path(self.directory.name), BlockingNative())
+        sid = self.send("start", goal="Show battery")["session"]["session_id"]
+        self.app.advance()
+        worker = threading.Thread(target=self.app.advance)
+        worker.start()
+        try:
+            self.assertTrue(entered.wait(2))
+            self.assertTrue(self.send("stop", session_id=sid)["stop_requested"])
+        finally:
+            release.set()
+            worker.join(5)
+        self.assertFalse(worker.is_alive())
+        session = self.send("inspect", session_id=sid)["session"]
+        self.assertEqual(session["status"], "cancelled")
+        self.assertEqual(session["actions"][0]["verification"], "passed")
