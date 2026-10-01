@@ -1,0 +1,16 @@
+allowed_roots = ["~/LAIN-workspace"]
+audit_path = "~/.lain/audit.jsonl"
+max_actions = 32
+max_text_write_bytes = 1048576
+overwrite_default = false
+confirmation_risk_threshold = 2
+deny_risk_threshold = 3
+android_adapter = "auto"
+android_timeout_seconds = 10.0
+# Planner argv is executed directly (never through a shell) and receives JSON on stdin.
+planner_command = []
+# Groq example (store the real key outside the repository):
+# planner_command = ["lain-groq-planner", "--key-file", "/home/user/.config/lain/groq.key"]
+planner_timeout_seconds = 30.0
+planner_max_output_bytes = 65536
+planner_max_actions = 8

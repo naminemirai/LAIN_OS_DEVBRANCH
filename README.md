@@ -1,1 +1,214 @@
-# LAIN_OS_DEVBRANCH
+# LAIN_OS
+
+**Local Autonomous Intelligent Networking**
+
+`LAIN_OS` is the canonical project and repository name. The Python import namespace remains `lain` for compatibility and ergonomics.
+
+LAIN_OS is a local-first agentic systems project for turning an Android device into a human-controlled execution environment for AI-assisted work.
+
+The core idea is simple:
+
+```
+intent -> plan -> permissioned action -> verification -> memory
+```
+
+LAIN_OS is not a monolithic assistant and not a cloud-first automation service. It is an integration layer between reasoning models, local files, deterministic automation, Android capabilities, developer tools, and user-owned data.
+
+## Design goals
+
+- Local-first execution and storage
+- Human authority over consequential actions
+- Portable, inspectable state
+- Replaceable tools and adapters
+- Deterministic automation beneath probabilistic reasoning
+- Explicit permissions and auditability
+- Graceful offline behavior
+- Minimal dependence on proprietary services
+
+## Initial environment
+
+The current experimental stack assumes some combination of:
+
+- Android
+- Termux
+- Shizuku
+- Tasker or another deterministic automation engine
+- Obsidian or plain Markdown for durable knowledge
+- Git for source control
+- External or local language models as planners
+
+These are implementation choices, not permanent dependencies.
+
+## System model
+
+LAIN_OS separates four concerns:
+
+1. **Reasoning** — interpret intent and choose an operation.
+2. **Control** — authorize, schedule, and route actions.
+3. **Execution** — perform deterministic device or filesystem operations.
+4. **Memory** — persist results, state, provenance, and audit history.
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## First milestone
+
+Demonstrate a complete local loop on Android:
+
+```
+natural-language request
+        |
+        v
+structured action request
+        |
+        v
+policy/permission check
+        |
+        v
+local deterministic executor
+        |
+        v
+verified result
+        |
+        v
+append-only audit record
+```
+
+The first implementation should favor boring, observable operations such as file routing, notifications, project archiving, and launching intents before attempting unrestricted UI automation.
+
+## Runtime quick start
+
+LAIN_OS requires Python 3.11 or newer and has no runtime third-party dependencies.
+
+```sh
+python -m pip install -e .
+python -m lain capabilities --json
+python -m lain --config ~/.lain/config.toml plan "open https://example.com" --json
+python -m lain --config ~/.lain/config.toml do "open https://example.com" --json
+python -m lain --workspace /tmp/lain-demo validate request.json --json
+python -m lain --workspace /tmp/lain-demo execute request.json --confirm a1 --json
+```
+
+Requests use the typed [ACTION_PROTOCOL](specs/ACTION_PROTOCOL.md). Filesystem operations are restricted to configured roots, consequential actions require an explicit action ID passed to `--confirm`, and results distinguish execution from verification. Android actions report `unsupported` outside a supported Termux environment rather than simulating success.
+
+## Developer workflow
+
+Install the package in editable mode and run the canonical portable verification suite:
+
+```sh
+python -m pip install -e .
+python scripts/verify.py
+```
+
+The verifier compiles the package, runs the unit tests, checks the Git diff for whitespace errors, and scans runtime source for unsafe execution primitives and the repository for stale project naming. GitHub Actions runs this same script automatically for every pull request and every push to `main`.
+
+### Android/Termux smoke testing
+
+On Android/Termux (or ordinary Linux), run:
+
+```sh
+python scripts/verify_android.py
+```
+
+The helper reports platform information, checks that `lain` is importable, lists the availability of commands used by the Android adapters, and invokes the canonical portable verification suite. It is deliberately non-destructive: it does not open a URI, post a notification, modify user files, or perform any other device action.
+
+`plan` and `do` use a configured, provider-independent external-process planner. Configure `planner_command` as a TOML argv array; LAIN_OS sends a registry-derived capability catalog and the intent as JSON on stdin. Planner output is an untrusted proposal, not an executable envelope: the trusted planning service supplies protocol version, request ID, exact original intent, and deterministic action IDs, then the existing runtime validates capabilities and arguments. `plan` performs preflight only. `do` uses the same path and leaves policy—including confirmation requirements—authoritative. With no planner configured these commands fail with `PLANNER_UNAVAILABLE`; direct `validate` and `execute` remain fully offline and supported.
+
+#### Groq planner adapter
+
+The optional `lain-groq-planner` command uses Groq without adding an SDK dependency. Store the API key outside the repository, restrict access, and configure the subprocess argv:
+
+```sh
+mkdir -p ~/.config/lain
+printf '%s\n' '<your Groq API key>' > ~/.config/lain/groq.key
+chmod 600 ~/.config/lain/groq.key
+```
+
+```toml
+planner_command = [
+  "lain-groq-planner",
+  "--key-file",
+  "/data/data/com.termux/files/home/.config/lain/groq.key",
+]
+```
+
+The same adapter supports both planner contracts. For a one-shot action, inspect the proposal first and then execute through the trusted runtime:
+
+```sh
+lain --config ~/.config/lain/config.toml plan "open https://example.com" --json
+lain --config ~/.config/lain/config.toml do "open https://example.com" --json
+```
+
+For a durable autonomous session, `lain run` sends the AGENT_PROTOCOL request to Groq. Groq may propose bounded batches and `continue | complete | blocked`; trusted LAIN_OS code still owns request/action IDs, policy, confirmation, execution, verification, checkpoints, and budgets:
+
+```sh
+lain --config ~/.config/lain/config.toml run "create hello.txt containing hello, then create done.txt containing finished" --json
+```
+
+### Autonomous loops
+
+The bounded durable agent runtime sits above the existing planner and trusted executor. A session repeatedly plans a bounded action batch, executes one authorized action at a time, verifies it, checkpoints the result, and replans from durable state.
+
+```sh
+lain --config ~/.lain/config.toml run "create hello.txt, then create done.txt" --json
+lain --config ~/.lain/config.toml sessions --json
+lain --config ~/.lain/config.toml session <session-id> --json
+lain --config ~/.lain/config.toml resume <session-id> --json
+lain --config ~/.lain/config.toml cancel <session-id> --json
+```
+
+If an action requires confirmation, the session pauses rather than allowing the planner to approve itself:
+
+```sh
+lain --config ~/.lain/config.toml resume <session-id> --confirm i1a1 --json
+```
+
+Default trusted budgets are 12 planner iterations, 32 attempted actions total, 900 seconds of active planner/executor runtime, and at most `planner_max_actions` actions in one planner batch. Consumed budgets survive restart and resume.
+
+Session state is stored beside the configured audit directory under `sessions/<session-id>/state.json`. With the default configuration this is `~/.lain/sessions/<session-id>/state.json`; with `--workspace /tmp/lain-demo` it is `/tmp/lain-demo/.lain/sessions/<session-id>/state.json`.
+
+Each action is checkpointed before another action executes. Resume never blindly replays a completed action, and audit evidence that is ahead of the session checkpoint causes a fail-closed reconciliation state. This milestone is foreground/on-demand only: it does not add a background daemon or unrestricted AccessibilityService control.
+
+See [specs/AGENT_PROTOCOL.md](specs/AGENT_PROTOCOL.md) for the planner lifecycle wire contract.
+
+### Reddit post creation
+
+`reddit.create_post` is the only Reddit API operation exposed. Copy `.env.example` to an ignored local `.env` if useful, but export its values into the process environment; LAIN_OS does not automatically load dotenv files. Configure a Reddit OAuth application and refresh token without supplying an account password to LAIN_OS:
+
+```sh
+export LAIN_REDDIT_CLIENT_ID=...
+export LAIN_REDDIT_CLIENT_SECRET=...
+export LAIN_REDDIT_REFRESH_TOKEN=...
+export LAIN_REDDIT_USER_AGENT='linux:LAIN_OS:0.1 (by /u/example)'
+python -m lain execute reddit-request.json --confirm a1 --json
+```
+
+Generate a fresh request ID with `python -c 'import uuid; print(uuid.uuid4())'`. Example request:
+
+```json
+{
+  "version": "0",
+  "request_id": "<fresh UUID>",
+  "intent": "Publish a Reddit post",
+  "actions": [{
+    "id": "a1",
+    "type": "reddit.create_post",
+    "arguments": {
+      "subreddit": "example",
+      "title": "LAIN_OS test",
+      "body": "Example content."
+    }
+  }]
+}
+```
+
+The runtime exchanges the refresh token only at execution time, publishes through Reddit's OAuth API, and performs a separate post lookup. It never exposes a general authenticated HTTP capability. Unit tests inject a fake transport; live posting is intentionally not automatic.
+
+## Status
+
+The v0 local runtime, untrusted planner boundary, bounded durable autonomous-loop runtime, and initial narrow Reddit external-write slice are implemented and covered by portable tests. The `android.notify` and `android.open_uri` execution paths, including audit recording, have been manually validated on real F-Droid Termux + Termux:API hardware. This is manual hardware evidence, not automated Android CI. Autonomous Loops v1 still requires its final live configured-planner interruption/resume acceptance run on the Android device before being described as fully hardware-validated. Live Reddit posting has not been validated.
+
+## Repository policy
+
+Do not commit secrets, authentication tokens, private messages, precise personal location history, recovery codes, or other sensitive user data.
+
+LAIN_OS should make the device more capable without making its owner less in control.

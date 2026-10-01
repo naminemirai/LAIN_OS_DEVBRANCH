@@ -1,0 +1,41 @@
+# Local secrets and configuration
+.env
+.env.*
+!.env.example
+secrets/
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Kotlin/Gradle/Android
+.gradle/
+build/
+**/build/
+local.properties
+*.iml
+.idea/
+
+# Node
+node_modules/
+
+# Runtime state
+logs/
+state/
+cache/
+tmp/
+
+# Worktrees
+.worktrees/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Packaging
+*.egg-info/

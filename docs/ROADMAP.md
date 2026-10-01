@@ -1,0 +1,163 @@
+# Roadmap
+
+## v0 — Local loop
+
+Goal: prove the architecture with a small, inspectable control path.
+
+Deliverables:
+- action-envelope schema;
+- capability registry;
+- permission policy;
+- local executor;
+- result verification;
+- append-only audit log;
+- three safe capabilities:
+  - create/move/copy a file;
+  - post an Android notification;
+  - launch a standards-based Android intent.
+
+Exit condition:
+
+A natural-language request can become a typed action, execute locally, verify success, and produce an audit record without unrestricted screen automation.
+
+Status: runtime and planner boundary implemented and covered by portable tests. `android.notify`, `android.open_uri`, and their audit records have been manually validated on a real F-Droid Termux + Termux:API device; this is not automated Android CI. A real configured planner still must complete the natural-language loop on that device.
+
+## v0.0.1 — First external write
+
+- expose only `reddit.create_post` as a Class 2 capability;
+- require explicit confirmation;
+- use locally supplied OAuth refresh-token credentials;
+- prevent duplicate execution by `request_id` and never automatically retry ambiguous writes;
+- verify returned post metadata with an independent lookup;
+- keep credentials and submitted bodies out of audit records.
+
+Live Reddit testing is opt-in and is not part of the unit suite.
+
+## v0.1 — Workbench bridge
+
+Add practical workflow actions:
+- route shared text into an inbox;
+- route PDFs/documents by type;
+- create project folders from templates;
+- archive a project;
+- write Markdown capture files;
+- invoke Git status/build/test commands through constrained wrappers.
+
+## v0.2 — Android capability expansion
+
+Evaluate:
+- Termux:API;
+- Shizuku;
+- Tasker/Automate bridges;
+- share-sheet receiver;
+- notification listener;
+- file observer;
+- widget/control surface.
+
+Each new capability must define permission and verification behavior before implementation.
+
+## v0.3 — Local agent runtime
+
+Implemented bounded foreground autonomy:
+- provider-independent subprocess planner boundary;
+- explicit planner lifecycle decisions: `continue | complete | blocked`;
+- model-independent bounded action batches;
+- durable resumable sessions with atomic per-action checkpoints;
+- finite iteration/action/runtime budgets;
+- interruption-safe resume without replay of completed actions;
+- conservative audit-ahead-of-checkpoint reconciliation;
+- explicit cancellation;
+- human confirmation pause/resume gates;
+- exclusive per-session execution leases.
+
+The v0.3 implementation is deliberately on-demand/foreground. Persistent background services, scheduled wakeups, event triggers, and unrestricted AccessibilityService automation remain later milestones.
+
+## v0.4 — Multi-node LAIN_OS
+
+Add authenticated local networking:
+- node identity;
+- discovery;
+- capability advertisement;
+- encrypted transport;
+- remote action approval;
+- per-node audit logs.
+
+
+## v1.0 — Secure Android APK ("do the thing" surface)
+
+Package LAIN_OS as a production-oriented Android application that exposes the trusted runtime through a minimal, human-controlled command surface.
+
+Primary user story:
+
+```
+"do the thing"
+    ↓
+intent capture
+    ↓
+planner
+    ↓
+typed action
+    ↓
+policy / confirmation
+    ↓
+trusted capability
+    ↓
+verification
+    ↓
+audit + result
+```
+
+The APK must preserve the existing trust model rather than collapsing planner, authorization, and execution into one privileged process.
+
+Security requirements:
+- Kotlin + AndroidX; Google Play Services must not be required;
+- release builds signed with a user-controlled signing key;
+- reproducible/CI-verifiable release build where practical;
+- minimize exported activities, services, receivers, and providers;
+- explicit component permissions and intent validation;
+- scoped storage by default; avoid broad/all-files access unless a capability demonstrably requires it;
+- Android Keystore-backed protection for locally stored secrets and tokens;
+- no credentials, recovery material, or private payloads in logs;
+- authenticated, narrowly scoped IPC between the Android UI/control plane and the LAIN_OS runtime;
+- capability allow/deny controls visible to the user;
+- device-credential or biometric confirmation option for high-risk external/destructive actions;
+- emergency stop / disable-execution control;
+- clear foreground/background execution state;
+- signed update integrity and rollback-aware release process;
+- dependency and manifest review as part of release verification;
+- tests for exported-component abuse, malformed intents, replay/duplicate requests, path escapes, secret leakage, and authorization bypasses.
+
+Initial app surfaces should remain intentionally small:
+- command/intention entry;
+- share-sheet target;
+- confirmation sheet for consequential actions;
+- recent action + verification/audit view;
+- capability/settings screen;
+- optional Quick Settings tile, widget, or notification action for fast invocation.
+
+Do not implement unrestricted AccessibilityService automation as the foundation. Prefer typed Android APIs, intents, local adapters, and deterministic capabilities. Accessibility-based control remains an explicitly reviewed fallback.
+
+Exit condition:
+
+A signed APK can accept a user command, convert it into the existing ACTION_PROTOCOL flow, obtain required confirmation, execute an allowed local or authenticated capability, verify the result, and present the audit trail without granting the planner unrestricted device authority.
+
+## Later
+
+Possible research tracks:
+- persistent background agent service and event-driven wakeups;
+- local speech interface;
+- on-device models;
+- visual UI fallback;
+- sensor fusion;
+- repository-native coding agents;
+- shared memory indexing;
+- offline semantic search.
+
+## Explicitly deferred
+
+- cloud account dependency;
+- unrestricted AccessibilityService autonomy;
+- autonomous purchasing or money movement;
+- secret storage design;
+- internet-exposed remote control;
+- self-modifying policy.
