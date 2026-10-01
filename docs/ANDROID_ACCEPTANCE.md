@@ -1,10 +1,41 @@
 # Android Capability Expansion v1 — manual hardware gate
 
-Run on real F-Droid Termux plus matching Termux:API. Newly added capabilities
-have portable fake-command coverage only; this document does not claim hardware
-validation. Execute one step, inspect its result, then continue. Never merge until
-the owner explicitly approves. Do not install from a moving branch without checking
-the exact reviewed SHA. No credential contents are printed or changed here.
+Run on real F-Droid Termux plus matching Termux:API. This document records the
+completed v1 acceptance and remains the procedure for future revalidation. Execute
+one step, inspect its result, then continue. Do not install from a moving branch
+without checking the exact reviewed SHA. No credential contents are printed or
+changed here.
+
+## Acceptance record
+
+Manual acceptance completed on Android 16 at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`, later merged unchanged into
+`main` by merge commit `4f718038db6065328895b261c92ae7504ca25aad`.
+
+Observed results:
+
+- `android.battery_status`: success, verification PASSED.
+- `android.toast`: success, verification LIMITED; toast physically observed.
+- `android.vibrate`: success, verification LIMITED; vibration physically observed.
+- `android.clipboard_set`: success, verification PASSED.
+- `android.share_text`: unconfirmed execution blocked with
+  `CONFIRMATION_REQUIRED`; after explicit confirmation, success + LIMITED and the
+  Android share chooser appeared. No destination was selected and nothing was sent.
+- Audit records redacted clipboard/share `content` as `[REDACTED]` and preserved
+  the expected risk and policy decisions.
+
+GitHub Actions Verify run #7 passed on the accepted feature head. The merge commit
+then passed Verify run #8 with 232 tests. This is manual hardware evidence plus
+portable CI, not automated Android hardware CI.
+
+The physical timeout found during acceptance was traced to the filtered subprocess
+environment omitting Android runtime variables required by Termux:API on Android
+16. The accepted head preserves those required runtime variables while continuing
+to exclude provider/executor credentials.
+
+Any later runtime-affecting change to the Android command transport, adapters,
+policy, verification semantics, command arguments, environment propagation,
+clipboard handling, or share behavior requires a fresh hardware acceptance run.
 
 ## 1. Confirm exact PR head
 
@@ -160,5 +191,6 @@ Inspect trusted action history, verification and final checkpoint. Existing
 policy/confirmation/budgets remain authoritative. This is optional networked
 planner acceptance, not a prerequisite for offline deterministic capabilities.
 
-Keep the isolated evidence until the owner decides on merge. No automatic
+For future runtime-affecting changes, repeat this procedure against the new exact
+reviewed head and preserve the resulting evidence through review. No automatic
 cleanup or modification of unrelated user data is performed.

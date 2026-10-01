@@ -120,10 +120,12 @@ Share requires exact-action confirmation under existing policy and never chooses
 a destination. Dismiss the chooser during testing without sending anything.
 
 There is no general Termux, shell, intent or clipboard-read capability. Fixed argv
-and stdin keep payloads separate from options. A filtered launch environment,
-configured timeout, and actively enforced 65536/4096-byte stdout/stderr limits
-bound command execution. Missing commands return PLATFORM_UNSUPPORTED. The registry publishes duration/
-byte limits in both CLI and planner catalogs; trusted validation remains authoritative.
+and stdin keep payloads separate from options. The filtered launch environment
+preserves the Android runtime variables required by Termux:API while excluding
+provider/executor credentials. Configured timeout and actively enforced
+65536/4096-byte stdout/stderr limits bound command execution. Missing commands
+return PLATFORM_UNSUPPORTED. The registry publishes duration/byte limits in both
+CLI and planner catalogs; trusted validation remains authoritative.
 
 Clipboard content uses existing recursive `content` redaction in audit, session
 output and planner history. Private readback never leaves the adapter, including
@@ -136,9 +138,15 @@ existing private mode-0600 files for exact-action resume; those files remain und
 control. Keep credentials out of goals/payloads; free-form goal/reason text is not
 a secret vault.
 
-The new capabilities have not been tested on physical hardware. Follow
-[hardware acceptance](docs/ANDROID_ACCEPTANCE.md) at the reviewed exact PR head.
-Portable tests use injected command boundaries and require no phone or internet.
+Manual physical acceptance was completed on Android 16 using F-Droid Termux plus
+matching Termux:API at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`. Battery and clipboard verification
+PASSED; toast, vibration, and share reported LIMITED as designed; the user observed
+the toast, vibration, and share chooser; unconfirmed share was blocked by policy;
+and audit redaction was confirmed. This is manual device evidence, not automated
+Android CI. Later runtime-affecting changes require revalidation. See
+[hardware acceptance](docs/ANDROID_ACCEPTANCE.md). Portable tests use injected
+command boundaries and require no phone or internet.
 
 ### Environment smoke check
 
@@ -246,14 +254,15 @@ The runtime exchanges the refresh token only at execution time, publishes throug
 
 The v0 runtime, planner boundary, durable autonomous loops, narrow Reddit slice,
 and Android Capability Expansion v1 are implemented and covered by portable tests.
-Notification, URI opening, and audit recording were manually validated on real
-F-Droid Termux + matching Termux:API hardware. A real configured Groq planner also
-completed a live Android/Termux autonomous session: `hello.txt` contained `hello`,
-`done.txt` contained `finished`, both actions independently verified PASSED, and
-the planner observed verified history before returning complete. This manual
-hardware evidence is not automated Android CI and does not claim live
-interruption/resume validation. The five new Android capabilities and live Reddit
-posting still require their own hardware/live acceptance.
+Notification and URI opening were manually validated in an earlier F-Droid
+Termux + Termux:API device pass. The exact-head acceptance for Android Capability
+Expansion v1 separately validated the five new capabilities and audit behavior at
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`: battery and clipboard PASSED;
+toast, vibration, and share remained LIMITED by design; and the share confirmation
+barrier held. A real configured Groq planner also completed a live Android/Termux
+autonomous session with two independently verified file writes before returning
+complete. Manual device evidence is not automated Android CI and does not claim
+live interruption/resume validation. Live Reddit posting remains unvalidated.
 
 ## Repository policy
 

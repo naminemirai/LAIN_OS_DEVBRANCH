@@ -166,7 +166,11 @@ Notification/URI/toast/vibration/share establish command acceptance only and
 report LIMITED. Clipboard PASSED establishes a point-in-time private readback
 match, not persistence or visibility; unavailable evidence is LIMITED and mismatch
 is FAILED. Battery PASSED establishes a valid structured API reading, not sensor
-calibration. No hardware validation of the five new capabilities is claimed.
+calibration. Manual Android/Termux hardware acceptance at exact feature head
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff` exercised the five new capabilities:
+battery and clipboard PASSED, toast/vibration/share remained LIMITED by design,
+and the share confirmation barrier and audit redaction were observed. This is not
+automated Android hardware CI.
 
 External writes follow the same boundary. `reddit.create_post` receives only a subreddit, title, and body after policy confirmation. Its adapter obtains OAuth credentials from the local process environment, submits one self-post, and returns non-secret metadata. Separate identity and post lookups compare post ID, subreddit, title, and authenticated author. Remote responses remain untrusted, and unavailable evidence is not promoted to verified success.
 
