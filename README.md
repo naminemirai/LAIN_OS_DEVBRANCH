@@ -101,7 +101,43 @@ python scripts/verify.py
 
 The verifier compiles the package, runs the unit tests, checks the Git diff for whitespace errors, and scans runtime source for unsafe execution primitives and the repository for stale project naming. GitHub Actions runs this same script automatically for every pull request and every push to `main`.
 
-### Android/Termux smoke testing
+### Android Capability Expansion v1
+
+Requires F-Droid Termux, matching Termux:API app and its command package.
+
+| Capability | Arguments / bounds | Risk | Verification |
+|---|---|---:|---|
+| `android.battery_status` | `{}` | 0 | PASSED for validated structured reading |
+| `android.vibrate` | `duration_ms`: integer, 1–5000 | 1 | LIMITED; no physical observation |
+| `android.toast` | `content`: nonempty UTF-8, ≤1024 bytes | 1 | LIMITED; short toast command accepted |
+| `android.clipboard_set` | `content`: nonempty UTF-8, ≤16384 bytes | 1 | PASSED on private immediate match; FAILED on mismatch; LIMITED if readback unavailable |
+| `android.share_text` | `content`: nonempty UTF-8, ≤16384 bytes | 2 | LIMITED; chooser command accepted, never proof of sharing |
+
+Unknown fields, NUL, invalid Unicode and boolean durations are rejected. Battery
+results expose only percentage, status, plugged, health, temperature (°C), and
+current (µA). Optional fields may be absent; raw extra fields never reach planners.
+Share requires exact-action confirmation under existing policy and never chooses
+a destination. Dismiss the chooser during testing without sending anything.
+
+There is no general Termux, shell, intent or clipboard-read capability. Fixed argv
+and stdin keep payloads separate from options. A filtered launch environment,
+configured timeout, and actively enforced 65536/4096-byte stdout/stderr limits
+bound command execution. Missing commands return PLATFORM_UNSUPPORTED.
+
+Clipboard content uses existing recursive `content` redaction in audit, session
+output and planner history. Private readback never leaves the adapter, including
+on mismatch/error. Clipboard/share arguments are also redacted in `plan`/`do`
+display output; do not reuse that display as an executable request. Pending
+actions retain their supplied content in the existing private mode-0600 session
+checkpoint for exact-action resume; those files remain under the device owner's
+control. Keep credentials out of goals/payloads; free-form goal/reason text is not
+a secret vault.
+
+The new capabilities have not been tested on physical hardware. Follow
+[hardware acceptance](docs/ANDROID_ACCEPTANCE.md) at the reviewed exact PR head.
+Portable tests use injected command boundaries and require no phone or internet.
+
+### Environment smoke check
 
 On Android/Termux (or ordinary Linux), run:
 
@@ -205,7 +241,16 @@ The runtime exchanges the refresh token only at execution time, publishes throug
 
 ## Status
 
-The v0 local runtime, untrusted planner boundary, bounded durable autonomous-loop runtime, and initial narrow Reddit external-write slice are implemented and covered by portable tests. The `android.notify` and `android.open_uri` execution paths, including audit recording, have been manually validated on real F-Droid Termux + Termux:API hardware. This is manual hardware evidence, not automated Android CI. Autonomous Loops v1 still requires its final live configured-planner interruption/resume acceptance run on the Android device before being described as fully hardware-validated. Live Reddit posting has not been validated.
+The v0 runtime, planner boundary, durable autonomous loops, narrow Reddit slice,
+and Android Capability Expansion v1 are implemented and covered by portable tests.
+Notification, URI opening, and audit recording were manually validated on real
+F-Droid Termux + matching Termux:API hardware. A real configured Groq planner also
+completed a live Android/Termux autonomous session: `hello.txt` contained `hello`,
+`done.txt` contained `finished`, both actions independently verified PASSED, and
+the planner observed verified history before returning complete. This manual
+hardware evidence is not automated Android CI and does not claim live
+interruption/resume validation. The five new Android capabilities and live Reddit
+posting still require their own hardware/live acceptance.
 
 ## Repository policy
 

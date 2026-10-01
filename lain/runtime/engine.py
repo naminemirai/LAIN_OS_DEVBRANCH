@@ -9,7 +9,11 @@ from lain.audit.logger import AuditLogger, redact
 from lain.capabilities.registry import CapabilityDefinition, CapabilityRegistry, DEFAULT_REGISTRY, RiskClass
 from lain.config import RuntimeConfig
 from lain.errors import ErrorCode, LainError
-from lain.execution.android import execute_android_notify, execute_android_open_uri, validate_android_uri
+from lain.execution.android import (
+    execute_android_notify, execute_android_open_uri, validate_android_uri,
+    execute_android_battery_status, execute_android_vibrate, execute_android_toast,
+    execute_android_clipboard_set, execute_android_share_text,
+)
 from lain.execution.filesystem import execute_file_copy, execute_file_move, execute_file_write_text
 from lain.execution.models import ExecutionOutcome
 from lain.policy.engine import PolicyDecision, evaluate_policy
@@ -23,7 +27,7 @@ from lain.protocol.models import (
     VerificationStatus,
 )
 from lain.security.paths import resolve_allowed_path
-from lain.verification.android import verify_android_command
+from lain.verification.android import verify_android_command, verify_android_expansion
 from lain.verification.filesystem import verify_file_copy, verify_file_move, verify_file_write_text
 from lain.integrations.reddit import RedditClient
 
@@ -217,6 +221,16 @@ class RuntimeEngine:
             return execute_android_notify(action.arguments, self.config)
         if action.type == "android.open_uri":
             return execute_android_open_uri(action.arguments, self.config)
+        if action.type == "android.battery_status":
+            return execute_android_battery_status(action.arguments, self.config)
+        if action.type == "android.vibrate":
+            return execute_android_vibrate(action.arguments, self.config)
+        if action.type == "android.toast":
+            return execute_android_toast(action.arguments, self.config)
+        if action.type == "android.clipboard_set":
+            return execute_android_clipboard_set(action.arguments, self.config)
+        if action.type == "android.share_text":
+            return execute_android_share_text(action.arguments, self.config)
         if action.type == "reddit.create_post":
             try:
                 client = self.reddit_client or RedditClient.from_environment()
@@ -238,6 +252,9 @@ class RuntimeEngine:
             return verify_file_move(outcome)
         if action.type in {"android.notify", "android.open_uri"}:
             return verify_android_command(outcome)
+        if action.type in {"android.battery_status", "android.vibrate", "android.toast",
+                           "android.clipboard_set", "android.share_text"}:
+            return verify_android_expansion(action.type, outcome)
         if action.type == "reddit.create_post":
             if outcome.status is not ActionStatus.SUCCESS:
                 return VerificationResult(VerificationStatus.UNAVAILABLE, {"reason": "execution failed"})

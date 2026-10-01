@@ -20,7 +20,13 @@ Exit condition:
 
 A natural-language request can become a typed action, execute locally, verify success, and produce an audit record without unrestricted screen automation.
 
-Status: runtime and planner boundary implemented and covered by portable tests. `android.notify`, `android.open_uri`, and their audit records have been manually validated on a real F-Droid Termux + Termux:API device; this is not automated Android CI. A real configured planner still must complete the natural-language loop on that device.
+Status: runtime and planner boundary implemented and covered by portable tests.
+Notification/URI/audit were manually validated on real F-Droid Termux + matching
+Termux:API. A real configured Groq planner completed a live Android/Termux autonomous
+session: two file actions (`hello.txt` = `hello`, `done.txt` = `finished`) executed
+and independently verified PASSED, then Groq observed verified history and returned
+complete. Manual hardware evidence is not automated Android CI; live interruption/
+resume is a separate acceptance case.
 
 ## v0.0.1 — First external write
 
@@ -43,18 +49,22 @@ Add practical workflow actions:
 - write Markdown capture files;
 - invoke Git status/build/test commands through constrained wrappers.
 
-## v0.2 — Android capability expansion
+## v0.2 — Android Capability Expansion v1
 
-Evaluate:
-- Termux:API;
-- Shizuku;
-- Tasker/Automate bridges;
-- share-sheet receiver;
-- notification listener;
-- file observer;
-- widget/control surface.
+Implemented with portable tests; exact-capability hardware acceptance pending:
+- read-only structured `android.battery_status`;
+- bounded `android.vibrate` and short `android.toast`;
+- write-only `android.clipboard_set`, with private immediate comparison;
+- confirmed `android.share_text`, opening only a user-visible chooser;
+- reusable private Termux command boundary with timeout/output limits and filtered
+  environment; no generic command or device-control capability;
+- honest PASSED/FAILED/LIMITED verification and recursive payload redaction.
 
-Each new capability must define permission and verification behavior before implementation.
+Next Android sub-milestone: individually reviewed narrow Shizuku-backed
+capabilities where native intents and Termux:API cannot serve the operation.
+Tasker bridges, receivers, notification listeners, file observers and widgets
+remain later scope. AccessibilityService and visual/coordinate automation remain
+explicit fallbacks, not the foundation. See [hardware acceptance](ANDROID_ACCEPTANCE.md).
 
 ## v0.3 — Local agent runtime
 

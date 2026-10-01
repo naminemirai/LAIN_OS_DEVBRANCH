@@ -10,10 +10,11 @@ from lain.protocol.models import Action
 
 
 class RegistryPolicyTests(unittest.TestCase):
-    def test_registry_contains_exact_v0_capabilities(self):
+    def test_registry_contains_exact_supported_capabilities(self):
         self.assertEqual(
             set(DEFAULT_REGISTRY.names()),
-            {"file.write_text", "file.copy", "file.move", "android.notify", "android.open_uri", "reddit.create_post"},
+            {"file.write_text", "file.copy", "file.move", "android.notify", "android.open_uri", "reddit.create_post",
+             "android.battery_status", "android.vibrate", "android.toast", "android.clipboard_set", "android.share_text"},
         )
         for name in DEFAULT_REGISTRY.names():
             cap = DEFAULT_REGISTRY.get(name)

@@ -108,6 +108,23 @@ Possible backends:
 
 The router exposes capabilities, not unrestricted device control.
 
+Android Capability Expansion v1 preserves this flow. `RuntimeEngine` explicitly
+dispatches five named capabilities to narrow adapters. The private
+`TermuxApiCommandRunner` handles availability, fixed argv/stdin, launch-variable
+environment filtering, timeout, actively bounded output and structured errors.
+It is not registered as a capability. Existing notification/URI adapters reuse it
+and preserve their launcher preference.
+
+Share uses only fixed `send`/`text/plain` options with stdin; no receiver, file or
+chooser bypass. Battery JSON is untrusted evidence and is validated/filtered.
+Clipboard comparison is private immediate readback of the just-written value;
+raw stdout/stderr and unrelated clipboard content never reach runtime results.
+
+Future narrow backends fit this same capability/runtime/verification boundary.
+No speculative Shizuku scaffolding or AccessibilityService is added. Preferred
+order: native API → Android intent/IPC → Termux:API → narrow Shizuku → explicitly
+reviewed AccessibilityService → coordinates/vision last.
+
 ### 5. Policy layer
 
 Every capability declares:
@@ -138,12 +155,18 @@ The system verifies that the requested operation actually occurred.
 
 Examples:
 - destination file exists and checksum matches;
-- Android intent resolved;
-- notification was posted;
+- valid structured battery reading obtained;
+- privately compare just-written clipboard content against immediate readback;
 - Git commit exists;
 - expected application state is observable.
 
 A planner assertion is never treated as proof of execution.
+
+Notification/URI/toast/vibration/share establish command acceptance only and
+report LIMITED. Clipboard PASSED establishes a point-in-time private readback
+match, not persistence or visibility; unavailable evidence is LIMITED and mismatch
+is FAILED. Battery PASSED establishes a valid structured API reading, not sensor
+calibration. No hardware validation of the five new capabilities is claimed.
 
 External writes follow the same boundary. `reddit.create_post` receives only a subreddit, title, and body after policy confirmation. Its adapter obtains OAuth credentials from the local process environment, submits one self-post, and returns non-secret metadata. Separate identity and post lookups compare post ID, subreddit, title, and authenticated author. Remote responses remain untrusted, and unavailable evidence is not promoted to verified success.
 
@@ -166,7 +189,7 @@ An audit entry should minimally contain:
   "action": "...",
   "parameters_redacted": {},
   "result": "success|failure|denied",
-  "verification": "passed|failed|not_applicable"
+  "verification": "passed|failed|not_applicable|limited|unavailable"
 }
 ```
 

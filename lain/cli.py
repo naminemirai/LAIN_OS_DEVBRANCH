@@ -112,6 +112,14 @@ def _safe_session_payload(session) -> dict[str, Any]:
     return redact(session.to_dict())
 
 
+def _safe_plan_payload(envelope) -> dict[str, Any]:
+    payload = envelope.to_dict()
+    for action in payload["actions"]:
+        if action["type"] in {"android.clipboard_set", "android.share_text"}:
+            action["arguments"] = redact(action["arguments"])
+    return payload
+
+
 def _session_summary(session) -> dict[str, Any]:
     return {
         "session_id": session.session_id,
@@ -242,11 +250,11 @@ def main(argv: list[str] | None = None) -> int:
             ).plan(args.intent)
             engine.preflight(envelope)
             if args.command == "plan":
-                _emit(envelope.to_dict(), json_mode=json_mode)
+                _emit(_safe_plan_payload(envelope), json_mode=json_mode)
                 return 0
             result = engine.execute(envelope)
             payload = result.to_dict()
-            payload["actions"] = envelope.to_dict()["actions"]
+            payload["actions"] = _safe_plan_payload(envelope)["actions"]
             _emit(payload, json_mode=json_mode)
             return 0 if all(item.status is ActionStatus.SUCCESS for item in result.results) else 3
 
