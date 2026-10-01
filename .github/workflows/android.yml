@@ -45,7 +45,16 @@ jobs:
           arch: x86_64
           profile: pixel_2
           disable-animations: true
-          script: ./android/gradlew --project-dir android :app:connectedDebugAndroidTest --no-daemon
+          script: |
+            ./android/gradlew --project-dir android :app:connectedDebugAndroidTest --no-daemon
+            mkdir -p android/app/build/reports/device
+            adb shell am startservice -n dev.lain.os/.runtime.RuntimeService > android/app/build/reports/device/foreign-service.txt 2>&1 || true
+            grep -Eq 'Permission Denial|not exported' android/app/build/reports/device/foreign-service.txt
+            adb shell am start -n dev.lain.os/.MainActivity
+            sleep 2
+            adb shell uiautomator dump /sdcard/lain-window.xml
+            adb pull /sdcard/lain-window.xml android/app/build/reports/device/window.xml
+            adb exec-out screencap -p > android/app/build/reports/device/screen.png
       - name: Upload APK and test reports
         if: always()
         uses: actions/upload-artifact@v4

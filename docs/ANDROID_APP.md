@@ -91,14 +91,17 @@ attribute was moved out of the API 24 base resources. Android 12+ cloud backup
 and device transfer now explicitly exclude application data.
 
 The Android workflow builds both APKs, runs lint, and executes instrumentation
-on an API 35 emulator. CI and installed-device results remain pending until their
-runs finish. Earlier paused-pass evidence below describes the initial build only.
+on an API 35 emulator. Exact CI heads and emulator results are recorded in
+[PR #3](https://github.com/naminemirai/LAIN_OS_DEVBRANCH/pull/3). Physical acceptance
+remains open; use [the native APK checklist](ANDROID_DEVICE_ACCEPTANCE.md).
+Earlier paused-pass evidence below describes the initial build only.
 
 Source baseline: `main@7abec73ea4bd096b4b6c69cf66745bf6115412e1`. The initial
 connector-restored snapshot was moved into a real Git worktree when Git transport
 became available: branch `feature/android-interface-v1` in
 `/workspace/LAIN_OS_ANDROID_CHECKOUT/.worktrees/android-interface`. Published
-history is preserved; this coding pass has not committed or pushed its changes.
+history is preserved. The interface and Android CI have been published on that
+feature branch in draft PR #3; no merge was performed.
 
 During the initial coding pass, the owner paused verification runs. Python and
 Android tests were authored without running them. Verification has now resumed
