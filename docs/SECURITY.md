@@ -28,7 +28,47 @@ Every executed action is checkpointed before another action may run. Completed v
 
 Crash recovery is deliberately conservative. If the append-only audit says the current action was execution-attempted but the session checkpoint still lacks its result, LAIN_OS does not infer success and does not retry. The session blocks with reconciliation required. This protects external writes and any other action whose outcome could be ambiguous across a crash boundary.
 
-Session/planner-facing output uses the existing recursive redaction rules for credential-like keys and private payload keys such as `content` and `body`. Durable session files must not contain credentials.
+Session/planner-facing output uses existing recursive redaction rules for
+credential-like keys and private payload keys such as `content` and `body`.
+Durable session files must not contain credentials. Clipboard/file action records,
+including completed actions, retain their exact supplied payload in the private
+mode-0600 checkpoint for restart/confirmation; checkpoint storage is user-owned
+and is not an audit log or a planner-facing view. Known private payload echoes in
+free-form intent/goal/reason views are masked
+when a typed clipboard/share action is known. Initial user goals are intentionally
+available to the first planner decision; unrelated credentials are not inferred
+from narrative text. Never put credentials in goals.
+
+### Android expansion boundary
+
+Battery is read-only Class 0. Toast, bounded vibration and clipboard write are
+Class 1 local effects (none restores prior device state). Share chooser is Class 2:
+content crosses to an external action surface, so explicit confirmation is required
+even though LAIN_OS never selects a destination or transmits the share itself.
+Existing policy thresholds still apply to direct and autonomous execution.
+
+Adapters choose fixed command names/options. Text goes via stdin; no arbitrary
+flags, intents/extras, shell, Shizuku commands, HTTP or device-control interface is
+exposed. The command runner allowlists launch/locale/Termux environment variables
+and excludes provider/executor credentials. Output pipes are actively capped at
+65536/4096 bytes; timeout/output failure kills the command's POSIX process group.
+Raw stdout/stderr never become audit/session diagnostics.
+
+Clipboard readback runs only immediately after a successful write, solely for
+private comparison. No planner-visible clipboard getter is registered, no prior
+clipboard is fetched, and even a raced/unrelated readback is discarded. Errors or
+missing readback produce LIMITED; mismatch produces VERIFICATION_FAILED. Text is
+redacted in audit/history/session and clipboard/share plan/do display output.
+
+Command acceptance is LIMITED for unobservable UI/haptic effects. Battery PASSED
+means structured evidence validated; clipboard PASSED means immediate comparison
+matched. Neither proves persistent UI state or user observation. Android clipboard
+access restrictions and competing apps may affect readback.
+
+The real configured Groq planner completed a manual Android/Termux autonomous
+session with two independently verified file writes and returned complete after
+observing history. That is not automated Android CI or hardware validation of
+these five new capabilities. Their exact hardware acceptance remains pending.
 
 ## Primary threats
 

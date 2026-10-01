@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from lain.agent.models import AgentSession
-from lain.audit.logger import redact
+from lain.audit.logger import redact, redact_android_narratives
 
 
 def build_agent_context(session: AgentSession) -> dict[str, Any]:
@@ -40,7 +40,7 @@ def build_agent_context(session: AgentSession) -> dict[str, Any]:
             }
         )
 
-    return {
+    return redact_android_narratives({
         "goal": session.goal,
         "iteration_count": session.iteration_count,
         "remaining_budget": {
@@ -52,4 +52,4 @@ def build_agent_context(session: AgentSession) -> dict[str, Any]:
             ),
         },
         "history": history,
-    }
+    }, session.to_dict())

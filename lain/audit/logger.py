@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,44 @@ def redact(value: Any) -> Any:
     if isinstance(value, tuple):
         return [redact(item) for item in value]
     return value
+
+
+def redact_android_narratives(value: Any, source: Any) -> Any:
+    """Mask echoes of known private Android payloads in free-text views.
+
+    Keep structural IDs/types/statuses untouched. The initial user-supplied goal
+    is intentionally available to its planner; once a typed private payload is
+    known, historical/context/display echoes no longer need that plaintext.
+    """
+    contents: set[str] = set()
+
+    def collect(item):
+        if isinstance(item, dict):
+            if item.get("type") in {"android.clipboard_set", "android.share_text"}:
+                args = item.get("arguments")
+                if isinstance(args, dict) and isinstance(args.get("content"), str) and args["content"]:
+                    contents.add(args["content"])
+            for child in item.values():
+                collect(child)
+        elif isinstance(item, (list, tuple)):
+            for child in item:
+                collect(child)
+
+    collect(source)
+    narratives = {"goal", "intent", "reason", "planner_reason", "terminal_reason"}
+    private = sorted(contents, key=len, reverse=True)
+    pattern = re.compile("|".join(re.escape(content) for content in private)) if private else None
+
+    def mask(item, field=None):
+        if isinstance(item, dict):
+            return {key: mask(child, key) for key, child in item.items()}
+        if isinstance(item, (list, tuple)):
+            return [mask(child, field) for child in item]
+        if isinstance(item, str) and field in narratives and pattern is not None:
+            item = pattern.sub(lambda _: "[REDACTED]", item)
+        return item
+
+    return mask(value)
 
 
 class AuditLogger:

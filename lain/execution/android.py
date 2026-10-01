@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 from typing import Any, Callable
@@ -9,6 +10,9 @@ from lain.capabilities.registry import DEFAULT_REGISTRY
 from lain.config import RuntimeConfig
 from lain.errors import ErrorCode, LainError
 from lain.execution.models import ExecutionOutcome
+from lain.execution.termux import TermuxApiCommandRunner, bounded_run
+from lain.protocol.models import ActionStatus
+from lain.verification.battery import validate_battery
 
 Runner = Callable[..., subprocess.CompletedProcess[str]]
 Which = Callable[[str], str | None]
@@ -30,37 +34,7 @@ def validate_android_uri(uri: str) -> str:
 
 
 def _run_command(argv: list[str], config: RuntimeConfig, runner: Runner) -> ExecutionOutcome:
-    try:
-        completed = runner(
-            argv,
-            shell=False,
-            capture_output=True,
-            text=True,
-            timeout=config.android_timeout_seconds,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        return ExecutionOutcome.failure(
-            ErrorCode.TIMEOUT.value,
-            "Android adapter command timed out",
-            executable=argv[0],
-        )
-    except OSError as exc:
-        return ExecutionOutcome.failure(
-            ErrorCode.EXECUTION_FAILED.value,
-            "Android adapter command could not be started",
-            executable=argv[0],
-            exception=type(exc).__name__,
-        )
-    if completed.returncode != 0:
-        return ExecutionOutcome.failure(
-            ErrorCode.EXECUTION_FAILED.value,
-            "Android adapter command failed",
-            executable=argv[0],
-            returncode=completed.returncode,
-            stderr=(completed.stderr or "")[:1000],
-        )
-    return ExecutionOutcome.success(executable=argv[0], returncode=completed.returncode)
+    return TermuxApiCommandRunner(config, which=shutil.which, runner=runner).execute_argv(argv).outcome
 
 
 def execute_android_notify(
@@ -68,7 +42,7 @@ def execute_android_notify(
     config: RuntimeConfig,
     *,
     which: Which = shutil.which,
-    runner: Runner = subprocess.run,
+    runner: Runner = bounded_run,
 ) -> ExecutionOutcome:
     try:
         args = DEFAULT_REGISTRY.get("android.notify").validate_arguments(arguments)
@@ -94,7 +68,7 @@ def execute_android_open_uri(
     config: RuntimeConfig,
     *,
     which: Which = shutil.which,
-    runner: Runner = subprocess.run,
+    runner: Runner = bounded_run,
 ) -> ExecutionOutcome:
     try:
         args = DEFAULT_REGISTRY.get("android.open_uri").validate_arguments(arguments)
@@ -124,3 +98,66 @@ def execute_android_open_uri(
         ErrorCode.PLATFORM_UNSUPPORTED.value,
         "no supported Android URI launcher is available",
     )
+
+
+def _execute_expansion(name, arguments, config, which, runner):
+    try:
+        args = DEFAULT_REGISTRY.get(name).validate_arguments(arguments)
+    except LainError as exc:
+        return ExecutionOutcome.failure(exc.code.value, exc.message)
+    commands = TermuxApiCommandRunner(config, which=which, runner=runner)
+    if name == "android.battery_status":
+        response = commands.run("termux-battery-status")
+        if response.outcome.status is not ActionStatus.SUCCESS:
+            return response.outcome
+        try:
+            battery = validate_battery(json.loads(response.stdout, object_pairs_hook=_unique_object))
+        except (ValueError, TypeError, OverflowError, RecursionError):
+            return ExecutionOutcome.failure(ErrorCode.EXECUTION_FAILED.value, "invalid structured battery result")
+        return ExecutionOutcome.success(battery=battery)
+    if name == "android.vibrate":
+        return commands.run("termux-vibrate", ("-d", str(args["duration_ms"]))).outcome
+    if name == "android.toast":
+        return commands.run("termux-toast", ("-s",), input=args["content"]).outcome
+    if name == "android.share_text":
+        # No -d, receiver, file or model-controlled extras. Termux shows chooser.
+        return commands.run("termux-share", ("-a", "send", "-c", "text/plain"), input=args["content"]).outcome
+    response = commands.run("termux-clipboard-set", input=args["content"])
+    if response.outcome.status is not ActionStatus.SUCCESS:
+        return response.outcome
+    readback = commands.run("termux-clipboard-get")
+    if readback.outcome.status is not ActionStatus.SUCCESS:
+        return ExecutionOutcome.success(readback="unavailable")
+    # Termux ClipboardAPI uses out.print(text), with no line delimiter.
+    # Compare exactly, including user whitespace; never return the read value.
+    matches = readback.stdout == args["content"]
+    return ExecutionOutcome.success(readback="matched" if matches else "mismatch")
+
+
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate battery field")
+        result[key] = value
+    return result
+
+
+def execute_android_battery_status(arguments, config, *, which=shutil.which, runner=bounded_run):
+    return _execute_expansion("android.battery_status", arguments, config, which, runner)
+
+
+def execute_android_vibrate(arguments, config, *, which=shutil.which, runner=bounded_run):
+    return _execute_expansion("android.vibrate", arguments, config, which, runner)
+
+
+def execute_android_toast(arguments, config, *, which=shutil.which, runner=bounded_run):
+    return _execute_expansion("android.toast", arguments, config, which, runner)
+
+
+def execute_android_clipboard_set(arguments, config, *, which=shutil.which, runner=bounded_run):
+    return _execute_expansion("android.clipboard_set", arguments, config, which, runner)
+
+
+def execute_android_share_text(arguments, config, *, which=shutil.which, runner=bounded_run):
+    return _execute_expansion("android.share_text", arguments, config, which, runner)

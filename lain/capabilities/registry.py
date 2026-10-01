@@ -22,6 +22,14 @@ class ArgumentSpec:
     types: tuple[type, ...]
     required: bool = True
     default: Any = _MISSING
+    minimum: int | None = None
+    maximum: int | None = None
+    max_bytes: int | None = None
+
+    def limits(self) -> dict[str, int]:
+        return {name: value for name, value in (
+            ("minimum", self.minimum), ("maximum", self.maximum), ("max_bytes", self.max_bytes),
+        ) if value is not None}
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,12 +64,23 @@ class CapabilityDefinition:
                     validated[name] = spec.default
                 continue
             value = arguments[name]
-            if not isinstance(value, spec.types):
+            if not isinstance(value, spec.types) or (isinstance(value, bool) and bool not in spec.types):
                 raise LainError(
                     ErrorCode.ARGUMENT_INVALID,
                     f"argument '{name}' has invalid type",
                     details={"argument": name},
                 )
+            if spec.minimum is not None and value < spec.minimum:
+                raise LainError(ErrorCode.ARGUMENT_INVALID, f"argument '{name}' is below its minimum")
+            if spec.maximum is not None and value > spec.maximum:
+                raise LainError(ErrorCode.ARGUMENT_INVALID, f"argument '{name}' exceeds its maximum")
+            if spec.max_bytes is not None:
+                try:
+                    size = len(value.encode("utf-8"))
+                except UnicodeError as exc:
+                    raise LainError(ErrorCode.ARGUMENT_INVALID, f"argument '{name}' must be valid UTF-8") from exc
+                if not size or size > spec.max_bytes or "\x00" in value:
+                    raise LainError(ErrorCode.ARGUMENT_INVALID, f"argument '{name}' is empty, contains NUL, or exceeds its byte limit")
             validated[name] = value
         if missing:
             raise LainError(
@@ -169,6 +188,63 @@ DEFAULT_REGISTRY = CapabilityRegistry(
             network_required=False,
             environments=("termux", "android"),
             verification="intent_acceptance",
+        ),
+        CapabilityDefinition(
+            name="android.battery_status",
+            arguments={},
+            risk_class=RiskClass.READ_ONLY,
+            required_permissions=("android.battery",),
+            reversible=False,
+            confirmation_required=False,
+            network_required=False,
+            environments=("termux", "android"),
+            verification="structured_battery_result",
+        ),
+        CapabilityDefinition(
+            name="android.vibrate",
+            arguments={"duration_ms": ArgumentSpec((int,), minimum=1, maximum=5000)},
+            risk_class=RiskClass.REVERSIBLE_LOCAL_WRITE,
+            required_permissions=("android.vibration",),
+            reversible=False,
+            confirmation_required=False,
+            network_required=False,
+            environments=("termux", "android"),
+            verification="command_acceptance",
+        ),
+        CapabilityDefinition(
+            name="android.toast",
+            arguments={"content": ArgumentSpec(_STR, max_bytes=1024)},
+            risk_class=RiskClass.REVERSIBLE_LOCAL_WRITE,
+            required_permissions=("android.toast",),
+            reversible=False,
+            confirmation_required=False,
+            network_required=False,
+            environments=("termux", "android"),
+            verification="command_acceptance",
+        ),
+        CapabilityDefinition(
+            name="android.clipboard_set",
+            arguments={"content": ArgumentSpec(_STR, max_bytes=16384)},
+            risk_class=RiskClass.REVERSIBLE_LOCAL_WRITE,
+            required_permissions=("android.clipboard.write",),
+            reversible=False,
+            confirmation_required=False,
+            network_required=False,
+            environments=("termux", "android"),
+            verification="private_immediate_readback",
+        ),
+        CapabilityDefinition(
+            name="android.share_text",
+            arguments={"content": ArgumentSpec(_STR, max_bytes=16384)},
+            # Chooser exposes content to an external action surface; policy still
+            # requires confirmation even though this adapter never selects a receiver.
+            risk_class=RiskClass.EXTERNAL_WRITE,
+            required_permissions=("android.share_chooser",),
+            reversible=False,
+            confirmation_required=True,
+            network_required=False,
+            environments=("termux", "android"),
+            verification="chooser_command_acceptance",
         ),
         CapabilityDefinition(
             name="reddit.create_post",

@@ -91,6 +91,15 @@ class DeveloperLoopTests(unittest.TestCase):
         self.assertEqual(looked_up, list(verify_android.TERMUX_COMMANDS))
         verifier.assert_called_once_with()
 
+    def test_android_helper_inspects_expansion_commands_without_actions(self):
+        looked_up = []
+        with patch.object(verify_android.verify, 'main', return_value=0):
+            with redirect_stdout(StringIO()):
+                result = verify_android.main(which=lambda name: looked_up.append(name) or None)
+        self.assertEqual(result, 0)
+        self.assertTrue({'termux-battery-status', 'termux-vibrate', 'termux-toast',
+                         'termux-clipboard-set', 'termux-clipboard-get', 'termux-share'} <= set(looked_up))
+
 
 if __name__ == "__main__":
     unittest.main()

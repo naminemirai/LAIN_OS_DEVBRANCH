@@ -61,6 +61,16 @@ class PlannerCliTests(unittest.TestCase):
             self.assertEqual(code, 2)
             self.assertEqual(json.loads(out)["error"]["code"], "PLANNER_UNAVAILABLE")
 
+    def test_clipboard_payload_is_redacted_in_plan_and_do_output(self):
+        script = "import json; print(json.dumps({'actions':[{'type':'android.clipboard_set','arguments':{'content':'private-clipboard-marker'}}]}))"
+        for command in ('plan', 'do'):
+            with self.subTest(command=command), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                code, out, _ = self.run_cli(['--config', str(config(root, script)), command,
+                                           'copy private-clipboard-marker to clipboard', '--json'])
+                self.assertNotIn('private-clipboard-marker', out)
+                self.assertEqual(json.loads(out)['actions'][0]['arguments']['content'], '[REDACTED]')
+
 
 if __name__ == "__main__":
     unittest.main()

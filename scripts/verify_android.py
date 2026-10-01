@@ -17,7 +17,10 @@ else:
     from scripts import verify
 
 Which = Callable[[str], str | None]
-TERMUX_COMMANDS = ("termux-notification", "termux-open-url", "am")
+TERMUX_COMMANDS = (
+    "termux-notification", "termux-open-url", "am", "termux-battery-status",
+    "termux-vibrate", "termux-toast", "termux-clipboard-set", "termux-clipboard-get", "termux-share",
+)
 
 
 def main(*, which: Which = shutil.which) -> int:
