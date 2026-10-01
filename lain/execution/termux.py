@@ -55,11 +55,26 @@ def bounded_run(argv, *, shell, capture_output, text, check, input, timeout, env
             process.stdin.close()
         selector.register(process.stdout, selectors.EVENT_READ, "stdout")
         selector.register(process.stderr, selectors.EVENT_READ, "stderr")
+        group_cleaned = False
         while selector.get_map():
+            parent_exited = process.poll() is not None
+            if parent_exited and not group_cleaned:
+                # Termux API helpers may leave short-lived broadcast descendants
+                # holding inherited stdout/stderr descriptors open after the
+                # direct helper has completed.  The session is private to this
+                # command, so terminate only those leftover descendants.
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                group_cleaned = True
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise subprocess.TimeoutExpired(argv, timeout)
-            for key, _ in selector.select(remaining):
+            events = selector.select(0 if parent_exited else remaining)
+            if parent_exited and not events:
+                break
+            for key, _ in events:
                 stream, name = key.fileobj, key.data
                 if name == "stdin":
                     try:
@@ -78,10 +93,11 @@ def bounded_run(argv, *, shell, capture_output, text, check, input, timeout, env
                     output[name].extend(chunk)
                     if len(output[name]) > limits[name]:
                         raise LainError(ErrorCode.EXECUTION_FAILED, "Android command output exceeds byte limit")
-        remaining = deadline - time.monotonic()
-        if remaining <= 0:
-            raise subprocess.TimeoutExpired(argv, timeout)
-        process.wait(timeout=remaining)
+        if process.poll() is None:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(argv, timeout)
+            process.wait(timeout=remaining)
         return subprocess.CompletedProcess(
             argv, process.returncode, stdout=output["stdout"].decode("utf-8"),
             stderr=output["stderr"].decode("utf-8"),
