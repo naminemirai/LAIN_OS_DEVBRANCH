@@ -196,6 +196,27 @@ class AndroidExpansionAdapterTests(unittest.TestCase):
         self.assertNotIn('GROQ_API_KEY', kwargs['env'])
         self.assertNotIn('LAIN_REDDIT_REFRESH_TOKEN', kwargs['env'])
 
+    def test_command_environment_preserves_required_android_runtime_variables(self):
+        from lain.execution.termux import command_environment
+        required = {
+            'DEX2OATBOOTCLASSPATH': '/system/framework/a.jar',
+            'ANDROID_I18N_ROOT': '/apex/com.android.i18n',
+            'ANDROID__BUILD_VERSION_SDK': '36',
+            'BOOTCLASSPATH': '/system/framework/b.jar',
+            'ANDROID_TZDATA_ROOT': '/apex/com.android.tzdata',
+            'ANDROID_ART_ROOT': '/apex/com.android.art',
+        }
+        with patch.dict(os.environ, {
+            **required,
+            'GROQ_API_KEY': 'credential',
+            'LAIN_REDDIT_REFRESH_TOKEN': 'credential',
+        }, clear=True):
+            env = command_environment()
+        for name, value in required.items():
+            self.assertEqual(env.get(name), value)
+        self.assertNotIn('GROQ_API_KEY', env)
+        self.assertNotIn('LAIN_REDDIT_REFRESH_TOKEN', env)
+
 
 class AndroidBoundedProcessTests(unittest.TestCase):
     def run_process(self, script, **kwargs):
