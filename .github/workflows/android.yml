@@ -3,7 +3,7 @@ name: Android
 on:
   pull_request:
   push:
-    branches: [main, feature/android-interface-v1]
+    branches: [main]
 
 permissions:
   contents: read
@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: '3.11'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+          log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@v4
       - name: Build APK, instrumentation, and lint
         run: ./android/gradlew --project-dir android :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --no-daemon
