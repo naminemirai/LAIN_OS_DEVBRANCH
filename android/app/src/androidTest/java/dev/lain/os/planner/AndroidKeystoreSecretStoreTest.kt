@@ -10,6 +10,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class AndroidKeystoreSecretStoreTest {
@@ -57,6 +60,66 @@ class AndroidKeystoreSecretStoreTest {
             assertEquals(secret, store.resolve(ref))
         } finally {
             store.remove(ref)
+        }
+    }
+
+    @Test fun swappedCredentialRecordsFailClosed() {
+        val store = AndroidKeystoreSecretStore(context)
+        val firstRef = store.create("first-" + UUID.randomUUID())
+        val secondRef = store.create("second-" + UUID.randomUUID())
+        val root = File(context.filesDir, "planner-secrets")
+        val firstFile = File(root, "$firstRef.secret")
+        val secondFile = File(root, "$secondRef.secret")
+        val firstRecord = firstFile.readBytes()
+        val secondRecord = secondFile.readBytes()
+        try {
+            firstFile.writeBytes(secondRecord)
+            secondFile.writeBytes(firstRecord)
+
+            for (ref in listOf(firstRef, secondRef)) {
+                try {
+                    store.resolve(ref)
+                    fail("credential record swap was accepted for $ref")
+                } catch (exc: SecretStoreException) {
+                    assertEquals(AndroidKeystoreSecretStore.ERROR_CREDENTIAL_INVALID, exc.code)
+                }
+            }
+        } finally {
+            store.remove(firstRef)
+            store.remove(secondRef)
+        }
+    }
+
+    @Test fun concurrentStoreInitializationDoesNotFail() {
+        val root = File(context.filesDir, "planner-secrets")
+        assertTrue(root.deleteRecursively() || !root.exists())
+
+        val workers = 8
+        val ready = CountDownLatch(workers)
+        val start = CountDownLatch(1)
+        val done = CountDownLatch(workers)
+        val failures = mutableListOf<Throwable>()
+        val executor = Executors.newFixedThreadPool(workers)
+        try {
+            repeat(workers) {
+                executor.execute {
+                    ready.countDown()
+                    try {
+                        assertTrue(start.await(5, TimeUnit.SECONDS))
+                        AndroidKeystoreSecretStore(context)
+                    } catch (exc: Throwable) {
+                        synchronized(failures) { failures += exc }
+                    } finally {
+                        done.countDown()
+                    }
+                }
+            }
+            assertTrue(ready.await(5, TimeUnit.SECONDS))
+            start.countDown()
+            assertTrue(done.await(10, TimeUnit.SECONDS))
+            assertTrue("concurrent initialization failures: $failures", failures.isEmpty())
+        } finally {
+            executor.shutdownNow()
         }
     }
 
