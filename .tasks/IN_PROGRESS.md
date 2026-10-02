@@ -28,5 +28,8 @@ Do not merge without explicit owner approval and fresh final-head evidence.
 - Android workflow #22: SUCCESS on API 24 and API 35, including build/APK, JVM unit tests, lint, and emulator instrumentation.
 - BLOCKED: physical Android Stop-at-confirmation-transition acceptance from `docs/ANDROID_DEVICE_ACCEPTANCE.md` must still be observed on-device before merge readiness.
 - `gh-review-loop` has not been invoked because the task is not merge-ready until that physical gate passes.
+- Physical acceptance APK prepared from workflow #22/API 35: SHA-256 `976d531dd96f676397ac32355f9209e6775804c76711937f7f38784942b20d4e`, 38,033,613 bytes; artifact reports 1/1 JVM regression and 10/10 API-35 instrumentation tests passing.
+- PR review inventory: 0 review threads and 0 submitted reviews; Codex review attempts are quota-blocked, so there is currently no actionable automated review feedback to process.
+
 
 ---
