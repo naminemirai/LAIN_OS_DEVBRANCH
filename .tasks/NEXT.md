@@ -1,20 +1,5 @@
 # Next
 
-## TASK-001: Reconcile PR #4 with current main and restore mergeability
-**Priority:** P0
-**Updated:** 2026-10-02 12:19
-
-Fresh GitHub PR review on head `6217be8ec2b3d4bd20993c46239bf0425543617c` passed with no actionable code finding, and Android workflow #22 plus Verify workflow #33 are successful. GitHub currently reports the PR non-mergeable because the branch has diverged from current `main@f96bd6e6429faaf8a7d8af5a753b66b46e4511b9` (2 commits ahead, 11 behind).
-
-Acceptance:
-- reconcile the PR branch with current main without dropping the intended seven-file Android Stop wake-up fix;
-- restore GitHub mergeability;
-- preserve unrelated mainline work;
-- request/perform a fresh PR review on the reconciled head;
-- if that fresh review passes, the owner-authorized review-only merge policy permits merge even if physical acceptance/tests are not rerun; any deferred/unrun checks must remain explicitly labeled rather than claimed passed.
-
----
-
 ## TASK-002: Implement Android Keystore-backed planner SecretStore
 **Priority:** P1
 **Updated:** 2026-10-02 12:19
@@ -34,3 +19,4 @@ Acceptance:
 - a fresh GitHub PR review passes before merge.
 
 ---
+
