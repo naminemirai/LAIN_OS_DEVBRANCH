@@ -184,6 +184,10 @@ internal class PlannerTransportCall(
                 return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_RESPONSE_MALFORMED)
             }
             if (cancelled.get()) cancelled() else PlannerTransportResult.Success(body)
+        } catch (_: ResponseTooLarge) {
+            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
+                NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE
+            )
         } catch (exc: SecretStoreException) {
             if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(exc.code)
         } catch (_: UnknownHostException) {
