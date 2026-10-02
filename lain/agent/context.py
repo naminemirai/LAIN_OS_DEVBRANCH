@@ -43,6 +43,11 @@ def build_agent_context(session: AgentSession) -> dict[str, Any]:
     return redact_android_narratives({
         "goal": session.goal,
         "iteration_count": session.iteration_count,
+        "planner": {
+            "profile_id": session.planner_binding.profile_id,
+            "mode": session.planner_binding.mode,
+            "model": session.planner_binding.model,
+        },
         "remaining_budget": {
             "iterations": max(0, session.budget.max_iterations - session.iteration_count),
             "actions": max(0, session.budget.max_total_actions - session.total_attempted_actions),
