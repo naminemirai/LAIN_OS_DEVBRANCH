@@ -45,11 +45,11 @@
   "lainSuggestWork": {
     "canonicalIssue": 6,
     "source": "@LAIN / Suggest Work",
-    "sourceHead": "054dcfa3e52452376d545f91f221322847f2eb07",
+    "sourceHead": "f96bd6e6429faaf8a7d8af5a753b66b46e4511b9",
     "tasks": [
       {
         "id": "TASK-001",
-        "title": "Reconcile PR #4 with current main and re-run acceptance",
+        "title": "Reconcile PR #4 with current main and restore mergeability",
         "priority": "P0"
       },
       {
