@@ -2,7 +2,7 @@
 
 ## TASK-003: Implement bounded native planner transport
 **Priority:** P1
-**Updated:** 2026-10-02 18:53
+**Updated:** 2026-10-02 18:59
 
 Implement Phase 2 P2-04 after TASK-002: cancellable Android-native HTTP transport shared by Cloud and Local OpenAI-compatible planner profiles.
 
@@ -32,12 +32,24 @@ Acceptance:
 - Added Android `INTERNET` permission while preserving global cleartext deny.
 - Structured failure mapping covers required DNS/unreachable, refused, TLS, 401/403, 404, timeout/408, 429, 5xx, cancellation, oversized, malformed, and unsupported response cases.
 - Verify workflow #62 completed successfully on PR head `7316494`.
-- Android workflow #51 is currently in progress at build/unit/lint on API 24 and 35; no Android pass claim yet.
+- Android workflow #51 failed on both API jobs in
+  `NativePlannerTransportTest.rejectsOversizedMalformedAndUnsupportedResponses`;
+  the malformed-response case returned a non-failure and the forced cast failed at
+  test line 130. Instrumentation was skipped.
+- Fresh GitHub review on head `7316494` does not pass (review ID
+  `5397679657`); PR #8 remains draft and non-mergeable.
 
 ### Blockers / deferred verification
 
-- `gh-review-loop` is blocked in this runtime because `gh` is unavailable (`gh: command not found`, exit 127); no alternate reviewer state was inferred.
+- The JVM test exercises Android `org.json.JSONObject` through local Android
+  stubs, so its malformed-JSON assertion is not truthful in that environment.
+  Validation must become platform-neutral for JVM coverage or move to Android
+  instrumentation before the workflow can pass.
 - Arbitrary user-entered private-LAN HTTP remains blocked by Android's global cleartext deny. The transport validates explicit Local/private-address opt-in, but enabling dynamic RFC1918 cleartext would require a material security/compatibility decision; this branch does not globally weaken cleartext policy or bypass it with raw sockets.
-- Android build, JVM tests, instrumentation, and lint remain UNVERIFIED until workflow #51 completes; tests were authored before production changes but not locally executed under the build-first directive.
+- The accepted-binding/runtime-policy mismatch must be resolved: reject Local
+  cleartext at the binding boundary for this release, or implement a narrowly safe
+  Android policy. Global cleartext enablement and raw-socket bypass remain rejected.
+- Verify workflow #62 passed. Android workflow #51 failed; Android
+  instrumentation and any later skipped steps remain untested.
 
 ---
