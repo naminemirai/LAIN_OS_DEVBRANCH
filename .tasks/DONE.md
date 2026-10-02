@@ -32,3 +32,27 @@ Do not merge without explicit owner approval and fresh final-head evidence.
 
 
 ---
+## TASK-002: Implement Android Keystore-backed planner SecretStore
+**Priority:** P1
+**Updated:** 2026-10-02 01:40
+
+Implement Phase 2 P2-03: Android-native credential persistence for planner profiles using opaque credential references.
+
+Acceptance:
+- credential survives app restart;
+- raw secret never appears in Python durable state, Binder/IPC responses, audit, logs, screenshots/settings export, or planner context;
+- replace and remove operations work;
+- missing credential produces an explicit configuration failure;
+- focused leakage and adversarial tests cover the boundary;
+- existing backup/device-transfer exclusion posture remains intact.
+
+
+### Done summary
+
+- Added native Android Keystore AES-GCM credential storage with opaque references.
+- Added create/replace/resolve/contains/remove behavior and explicit missing/invalid/storage errors.
+- Kept the secret API native-only; no Binder/Python secret command was added.
+- Authored instrumentation coverage; owner deferred running verification/testing for this build-first phase.
+- Handed implementation to review in PR #7; no merge performed.
+
+---
