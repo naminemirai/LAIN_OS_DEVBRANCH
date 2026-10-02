@@ -81,6 +81,17 @@ replay automatically. Select interrupted work and explicitly Resume, approve a
 fresh pending action, or Stop it. Existing audit-ahead reconciliation remains
 authoritative. Ambiguous requests are never automatically retried.
 
+## Stop scheduling correction
+
+After PR #3 merged, review established a race where Stop could lose its worker
+wake-up as an action entered a confirmation pause. Wake-ups now enter the same
+single-worker queue as runtime steps, so a Stop arriving during the transition
+still settles cancellation. A deterministic JVM regression exercises this case;
+the Android workflow runs it alongside APK assembly, lint, and instrumentation.
+Version `0.1.4-interface` requires fresh physical acceptance, including Stop at
+the confirmation transition. Earlier emulator and Termux evidence does not
+certify this changed APK.
+
 ## Evidence status for this coding pass
 
 Verification resumed at the owner's request on 2026-10-01. Fresh focused Python
@@ -120,7 +131,7 @@ and merging was corrected in `android/app/build.gradle.kts`.
 
 The output is `android/app/build/outputs/apk/debug/app-debug.apk`; the delivered
 copy is `/workspace/artifacts/LAIN_OS-interface-debug.apk`. Its package is
-`dev.lain.os`, version `0.1.3-interface` (version code 4), with arm64-v8a and x86_64 support and a
+`dev.lain.os`, version `0.1.4-interface` (version code 5), with arm64-v8a and x86_64 support and a
 minimum Android API level of 24. It is debug-signed; no release signing was done.
 The earlier updated assembly reported `BUILD SUCCESSFUL in 34s`, exit 0, with all
 48 tasks executed. Connection regression tests were subsequently compiled along
