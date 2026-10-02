@@ -1,5 +1,33 @@
 # In Progress
 
+## TASK-002: Implement Android Keystore-backed planner SecretStore
+**Priority:** P1
+**Updated:** 2026-10-02 15:18
+
+Fresh GitHub PR review of PR #7 head `f41f8acf26a89b936b8eb8da5eca3f9581cab779` did not pass.
+
+Required corrections:
+- bind each encrypted credential record to its exact `credential_ref` (and preferably record version/domain separator) with AES-GCM AAD on both encryption and decryption;
+- add an adversarial swapped/renamed-record test that fails closed;
+- fix the first-use `planner-secrets` directory creation race by re-checking `isDirectory` when `mkdirs()` returns false;
+- add a concurrent-initialization regression if practical;
+- preserve the native-only secret boundary and existing backup/device-transfer posture.
+
+Acceptance:
+- both review findings are addressed on the PR branch;
+- authored tests cover the fixes; under the owner's current review policy, unrun tests remain explicitly labeled untested rather than passed;
+- a fresh GitHub PR review passes before merge.
+
+### Plan
+
+- Add stable AES-GCM AAD derived from record version/domain and exact credential_ref for encrypt/decrypt.
+- Add adversarial swapped-record coverage and a first-use directory race regression if practical.
+- Re-check directory existence after mkdirs() false before failing.
+- Keep native-only secret boundaries and backup posture unchanged.
+- Update PR receipt with tests authored but not run unless a check is needed to prevent obvious breakage.
+
+---
+
 ## TASK-001: Reconcile PR #4 with current main and restore mergeability
 **Priority:** P0
 **Updated:** 2026-10-02 15:17
