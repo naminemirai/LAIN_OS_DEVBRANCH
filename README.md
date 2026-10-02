@@ -275,6 +275,18 @@ live interruption/resume validation. Live Reddit posting remains unvalidated.
 
 Do not commit secrets, authentication tokens, private messages, precise personal location history, recovery codes, or other sensitive user data.
 
+Pull requests may merge after a fresh code-review result of **PASS** when no
+independent safety or authority blocker remains. Test and acceptance status is
+tracked separately: a review pass must never be presented as proof that deferred,
+cancelled, or unrun checks passed. Each merge receipt must state those checks as
+untested where applicable.
+
+PR #7 (`Android Keystore-backed planner SecretStore`) merged under this policy at
+`2946e1a042d57eddffce4477f2136aea4da0ccde`. Review passed on head
+`c26925ed76e1e02fd49bd5b7ec796957c36fc423` and Verify workflow #56 succeeded;
+Android workflow #45 was cancelled, so its Android instrumentation tests remain
+explicitly untested by that merge receipt.
+
 LAIN_OS should make the device more capable without making its owner less in control.
 
 <!-- TASKPLANNER:ATTRIBUTION:START -->

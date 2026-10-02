@@ -45,18 +45,8 @@
   "lainSuggestWork": {
     "canonicalIssue": 6,
     "source": "@LAIN / Suggest Work",
-    "sourceHead": "f96bd6e6429faaf8a7d8af5a753b66b46e4511b9",
+    "sourceHead": "2946e1a042d57eddffce4477f2136aea4da0ccde",
     "tasks": [
-      {
-        "id": "TASK-001",
-        "title": "Reconcile PR #4 with current main and restore mergeability",
-        "priority": "P0"
-      },
-      {
-        "id": "TASK-002",
-        "title": "Implement Android Keystore-backed planner SecretStore",
-        "priority": "P1"
-      },
       {
         "id": "TASK-003",
         "title": "Implement bounded native planner transport",
