@@ -19,4 +19,14 @@ Do not merge without explicit owner approval and fresh final-head evidence.
 - Verify the reconciled head with available repository/CI evidence and inspect the final diff for unrelated changes.
 - Update PR #4 to the reconciled head; physical Android Stop-at-confirmation acceptance remains an owner/device gate before merge.
 
+
+### Progress
+
+- Reconciled PR #4 non-force at `6217be8ec2b3d4bd20993c46239bf0425543617c`; current `main@5a424f886f93fdc7cab4e94893e41821980e8e9d` is now an ancestor.
+- Final diff remains exactly the intended 7 files; branch is 0 behind and 2 ahead.
+- Verify workflow #33: SUCCESS.
+- Android workflow #22: SUCCESS on API 24 and API 35, including build/APK, JVM unit tests, lint, and emulator instrumentation.
+- BLOCKED: physical Android Stop-at-confirmation-transition acceptance from `docs/ANDROID_DEVICE_ACCEPTANCE.md` must still be observed on-device before merge readiness.
+- `gh-review-loop` has not been invoked because the task is not merge-ready until that physical gate passes.
+
 ---
