@@ -36,7 +36,9 @@ internal class SecretStoreException(
 
 internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
     private val root = File(context.applicationContext.filesDir, STORE_DIRECTORY).apply {
-        if (!exists() && !mkdirs()) throw SecretStoreException(ERROR_STORAGE_FAILED)
+        if (!exists() && !mkdirs() && !isDirectory) {
+            throw SecretStoreException(ERROR_STORAGE_FAILED)
+        }
         if (!isDirectory) throw SecretStoreException(ERROR_STORAGE_FAILED)
     }
 
@@ -46,7 +48,7 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
             val credentialRef = "cred_" + UUID.randomUUID().toString().replace("-", "")
             val target = secretFile(credentialRef)
             if (!target.exists()) {
-                writeEncrypted(target, secret)
+                writeEncrypted(target, credentialRef, secret)
                 return credentialRef
             }
         }
@@ -57,7 +59,7 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
         validateSecret(secret)
         val target = secretFile(credentialRef)
         if (!target.exists()) throw SecretStoreException(ERROR_CREDENTIAL_MISSING)
-        writeEncrypted(target, secret)
+        writeEncrypted(target, credentialRef, secret)
     }
 
     override fun resolve(credentialRef: String): String {
@@ -72,7 +74,7 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
         } catch (exc: Exception) {
             throw SecretStoreException(ERROR_CREDENTIAL_INVALID, exc)
         }
-        return decrypt(payload)
+        return decrypt(payload, credentialRef)
     }
 
     override fun contains(credentialRef: String): Boolean = secretFile(credentialRef).exists()
@@ -106,11 +108,13 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
         }
     }
 
-    private fun writeEncrypted(target: File, secret: String) {
+    private fun writeEncrypted(target: File, credentialRef: String, secret: String) {
         val plaintext = secret.toByteArray(Charsets.UTF_8)
+        val aad = associatedData(credentialRef)
         val record = try {
             val cipher = Cipher.getInstance(CIPHER)
             cipher.init(Cipher.ENCRYPT_MODE, secretKey())
+            cipher.updateAAD(aad)
             val ciphertext = cipher.doFinal(plaintext)
             JSONObject()
                 .put("v", RECORD_VERSION)
@@ -124,6 +128,7 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
             throw SecretStoreException(ERROR_STORAGE_FAILED, exc)
         } finally {
             plaintext.fill(0)
+            aad.fill(0)
         }
 
         if (record.size > MAX_RECORD_BYTES) throw SecretStoreException(ERROR_STORAGE_FAILED)
@@ -145,7 +150,8 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
         }
     }
 
-    private fun decrypt(payload: ByteArray): String {
+    private fun decrypt(payload: ByteArray, credentialRef: String): String {
+        val aad = associatedData(credentialRef)
         val plaintext = try {
             val raw = JSONObject(payload.toString(Charsets.UTF_8))
             if (raw.length() != 3 || raw.optInt("v", -1) != RECORD_VERSION ||
@@ -159,11 +165,14 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
             }
             val cipher = Cipher.getInstance(CIPHER)
             cipher.init(Cipher.DECRYPT_MODE, secretKey(), GCMParameterSpec(GCM_TAG_BITS, iv))
+            cipher.updateAAD(aad)
             cipher.doFinal(ciphertext)
         } catch (exc: SecretStoreException) {
             throw exc
         } catch (exc: Exception) {
             throw SecretStoreException(ERROR_CREDENTIAL_INVALID, exc)
+        } finally {
+            aad.fill(0)
         }
         return try {
             plaintext.toString(Charsets.UTF_8)
@@ -171,6 +180,9 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
             plaintext.fill(0)
         }
     }
+
+    private fun associatedData(credentialRef: String): ByteArray =
+        "$AAD_DOMAIN:$RECORD_VERSION:$credentialRef".toByteArray(Charsets.UTF_8)
 
     private fun secretKey(): SecretKey {
         val lockFile = File(root, KEY_LOCK_FILE)
@@ -213,6 +225,7 @@ internal class AndroidKeystoreSecretStore(context: Context) : SecretStore {
         private const val KEYSTORE = "AndroidKeyStore"
         private const val KEY_ALIAS = "dev.lain.os.planner.credentials.v1"
         private const val CIPHER = "AES/GCM/NoPadding"
+        private const val AAD_DOMAIN = "dev.lain.os.planner.secret-store"
         private const val RECORD_VERSION = 1
         private const val GCM_TAG_BITS = 128
         private const val GCM_IV_BYTES = 12
