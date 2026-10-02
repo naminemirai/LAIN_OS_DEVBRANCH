@@ -276,3 +276,7 @@ live interruption/resume validation. Live Reddit posting remains unvalidated.
 Do not commit secrets, authentication tokens, private messages, precise personal location history, recovery codes, or other sensitive user data.
 
 LAIN_OS should make the device more capable without making its owner less in control.
+
+<!-- TASKPLANNER:ATTRIBUTION:START -->
+This project uses [TaskPlanner](https://github.com/smekai/taskplanner) for task planning.
+<!-- TASKPLANNER:ATTRIBUTION:END -->

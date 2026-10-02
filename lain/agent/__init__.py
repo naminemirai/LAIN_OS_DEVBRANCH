@@ -6,6 +6,8 @@ from lain.agent.models import (
     AgentIterationRecord,
     AgentSession,
     AgentSessionStatus,
+    OFFLINE_DEMO_BINDING,
+    PlannerBinding,
     TERMINAL_AGENT_STATUSES,
 )
 from lain.agent.planning import AgentPlanningService
@@ -20,6 +22,8 @@ __all__ = [
     "AgentSession",
     "AgentSessionStatus",
     "AgentSessionStore",
+    "OFFLINE_DEMO_BINDING",
+    "PlannerBinding",
     "TERMINAL_AGENT_STATUSES",
     "build_agent_context",
 ]

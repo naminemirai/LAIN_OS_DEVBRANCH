@@ -3,7 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 from enum import Enum
 import math
+import ipaddress
 from typing import Any
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from lain.errors import ErrorCode, LainError
@@ -75,6 +77,163 @@ _ALLOWED_TRANSITIONS = {
 
 def _invalid(message: str, **details: Any) -> LainError:
     return LainError(ErrorCode.AGENT_SESSION_INVALID, message, details=details)
+
+
+def _validate_planner_endpoint(mode: str, base_url: str, allow_insecure_lan_http: bool) -> None:
+    try:
+        parsed = urlsplit(base_url)
+        hostname = parsed.hostname
+        port = parsed.port
+    except ValueError as exc:
+        raise _invalid("planner base_url is invalid") from exc
+    if (
+        not hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise _invalid("planner base_url is invalid")
+    if parsed.scheme == "https":
+        return
+    if parsed.scheme != "http" or mode != "local" or not allow_insecure_lan_http:
+        raise _invalid("planner base_url must use HTTPS")
+    try:
+        address = ipaddress.ip_address(hostname)
+    except ValueError as exc:
+        raise _invalid("insecure local planner must use a private address literal") from exc
+    private_networks = (
+        ipaddress.ip_network("10.0.0.0/8"),
+        ipaddress.ip_network("172.16.0.0/12"),
+        ipaddress.ip_network("192.168.0.0/16"),
+        ipaddress.ip_network("fc00::/7"),
+        ipaddress.ip_network("fe80::/10"),
+    )
+    if not address.is_loopback and not any(address in network for network in private_networks):
+        raise _invalid("insecure local planner must use a private address literal")
+
+
+@dataclass(frozen=True, slots=True)
+class PlannerBinding:
+    profile_id: str
+    mode: str
+    protocol: str
+    base_url: str
+    model: str
+    credential_ref: str | None
+    timeout_seconds: float
+    max_response_bytes: int
+    response_mode: str
+    allow_insecure_lan_http: bool
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.profile_id, str) or not self.profile_id.strip():
+            raise _invalid("planner profile_id must be non-empty")
+        if self.mode not in {"demo", "cloud", "local"}:
+            raise _invalid("planner mode is invalid")
+        if self.protocol not in {"demo_v1", "openai_compatible_v1"}:
+            raise _invalid("planner protocol is invalid")
+        if not isinstance(self.base_url, str) or not isinstance(self.model, str):
+            raise _invalid("planner endpoint/model fields are invalid")
+        if self.credential_ref is not None and (
+            not isinstance(self.credential_ref, str) or not self.credential_ref
+        ):
+            raise _invalid("planner credential_ref is invalid")
+        if (
+            not isinstance(self.timeout_seconds, (int, float))
+            or isinstance(self.timeout_seconds, bool)
+            or not math.isfinite(self.timeout_seconds)
+            or self.timeout_seconds < 0
+        ):
+            raise _invalid("planner timeout_seconds is invalid")
+        if (
+            not isinstance(self.max_response_bytes, int)
+            or isinstance(self.max_response_bytes, bool)
+            or self.max_response_bytes < 0
+        ):
+            raise _invalid("planner max_response_bytes is invalid")
+        if self.response_mode not in {"none", "json_schema", "json_object"}:
+            raise _invalid("planner response_mode is invalid")
+        if not isinstance(self.allow_insecure_lan_http, bool):
+            raise _invalid("planner allow_insecure_lan_http is invalid")
+        if self.mode == "demo":
+            if (
+                self.protocol != "demo_v1"
+                or self.base_url
+                or self.credential_ref is not None
+                or self.timeout_seconds != 0
+                or self.max_response_bytes != 0
+                or self.response_mode != "none"
+                or self.allow_insecure_lan_http
+            ):
+                raise _invalid("demo planner binding is invalid")
+        else:
+            if (
+                self.protocol != "openai_compatible_v1"
+                or not self.base_url.strip()
+                or not self.model.strip()
+                or self.timeout_seconds <= 0
+                or self.max_response_bytes <= 0
+                or self.response_mode == "none"
+            ):
+                raise _invalid("OpenAI-compatible planner binding is invalid")
+            if self.mode == "cloud" and self.allow_insecure_lan_http:
+                raise _invalid("cloud planner cannot allow insecure LAN HTTP")
+            _validate_planner_endpoint(self.mode, self.base_url, self.allow_insecure_lan_http)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "profile_id": self.profile_id,
+            "mode": self.mode,
+            "protocol": self.protocol,
+            "base_url": self.base_url,
+            "model": self.model,
+            "credential_ref": self.credential_ref,
+            "timeout_seconds": self.timeout_seconds,
+            "max_response_bytes": self.max_response_bytes,
+            "response_mode": self.response_mode,
+            "allow_insecure_lan_http": self.allow_insecure_lan_http,
+        }
+
+    @classmethod
+    def from_dict(cls, raw: dict[str, Any]) -> "PlannerBinding":
+        required = {
+            "profile_id", "mode", "protocol", "base_url", "model", "credential_ref",
+            "timeout_seconds", "max_response_bytes", "response_mode", "allow_insecure_lan_http",
+        }
+        try:
+            if not isinstance(raw, dict) or set(raw) != required:
+                raise ValueError("fields")
+            return cls(
+                profile_id=raw["profile_id"],
+                mode=raw["mode"],
+                protocol=raw["protocol"],
+                base_url=raw["base_url"],
+                model=raw["model"],
+                credential_ref=raw["credential_ref"],
+                timeout_seconds=raw["timeout_seconds"],
+                max_response_bytes=raw["max_response_bytes"],
+                response_mode=raw["response_mode"],
+                allow_insecure_lan_http=raw["allow_insecure_lan_http"],
+            )
+        except LainError:
+            raise
+        except (KeyError, TypeError, ValueError, OverflowError) as exc:
+            raise _invalid("planner binding is invalid") from exc
+
+
+OFFLINE_DEMO_BINDING = PlannerBinding(
+    profile_id="offline-demo",
+    mode="demo",
+    protocol="demo_v1",
+    base_url="",
+    model="offline_demo",
+    credential_ref=None,
+    timeout_seconds=0.0,
+    max_response_bytes=0,
+    response_mode="none",
+    allow_insecure_lan_http=False,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -260,8 +419,11 @@ class AgentSession:
     budget: AgentBudget
     cumulative_runtime_seconds: float
     terminal_reason: str | None
+    planner_binding: PlannerBinding = OFFLINE_DEMO_BINDING
 
     def __post_init__(self) -> None:
+        if not isinstance(self.planner_binding, PlannerBinding):
+            raise _invalid("planner_binding must be a PlannerBinding")
         if self.version != "1":
             raise _invalid("unsupported agent session schema version", version=self.version)
         try:
@@ -325,12 +487,13 @@ class AgentSession:
             "budget": self.budget.to_dict(),
             "cumulative_runtime_seconds": self.cumulative_runtime_seconds,
             "terminal_reason": self.terminal_reason,
+            "planner_binding": self.planner_binding.to_dict(),
         }
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "AgentSession":
         try:
-            required = {
+            legacy_required = {
                 "version",
                 "session_id",
                 "goal",
@@ -344,7 +507,8 @@ class AgentSession:
                 "cumulative_runtime_seconds",
                 "terminal_reason",
             }
-            if set(raw) != required:
+            fields = set(raw)
+            if fields != legacy_required and fields != legacy_required | {"planner_binding"}:
                 raise ValueError("fields")
             if raw["version"] != "1":
                 raise ValueError("version")
@@ -365,6 +529,11 @@ class AgentSession:
                 budget=AgentBudget.from_dict(raw["budget"]),
                 cumulative_runtime_seconds=float(raw["cumulative_runtime_seconds"]),
                 terminal_reason=raw["terminal_reason"],
+                planner_binding=(
+                    PlannerBinding.from_dict(raw["planner_binding"])
+                    if "planner_binding" in raw
+                    else OFFLINE_DEMO_BINDING
+                ),
             )
         except LainError:
             raise
