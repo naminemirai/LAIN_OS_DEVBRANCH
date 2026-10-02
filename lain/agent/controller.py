@@ -13,6 +13,8 @@ from lain.agent.models import (
     AgentIterationRecord,
     AgentSession,
     AgentSessionStatus,
+    OFFLINE_DEMO_BINDING,
+    PlannerBinding,
     TERMINAL_AGENT_STATUSES,
 )
 from lain.agent.planning import AgentPlanningService
@@ -36,6 +38,7 @@ class AgentController:
         *,
         monotonic_clock: Callable[[], float] = monotonic,
         now: Callable[[], str] = utc_now,
+        planner_binding_provider: Callable[[], PlannerBinding] | None = None,
     ):
         self.planning = planning
         self.runtime = runtime
@@ -43,11 +46,15 @@ class AgentController:
         self.default_budget = default_budget
         self.monotonic_clock = monotonic_clock
         self.now = now
+        self.planner_binding_provider = planner_binding_provider or (lambda: OFFLINE_DEMO_BINDING)
 
     def create(self, goal: str) -> AgentSession:
         if not isinstance(goal, str) or not goal.strip():
             raise LainError(ErrorCode.ARGUMENT_INVALID, "goal must be a non-empty string")
         timestamp = self.now()
+        planner_binding = self.planner_binding_provider()
+        if not isinstance(planner_binding, PlannerBinding):
+            raise LainError(ErrorCode.PLANNER_UNAVAILABLE, "planner binding is unavailable")
         budget = replace(
             self.default_budget,
             max_actions_per_batch=self.planning.max_actions,
@@ -64,6 +71,7 @@ class AgentController:
             budget=budget,
             cumulative_runtime_seconds=0.0,
             terminal_reason=None,
+            planner_binding=planner_binding,
         )
         self.store.save(session)
         return session
