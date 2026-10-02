@@ -41,5 +41,27 @@
   "tags": [],
   "insertPosition": "top",
   "aiPlanRequired": true,
-  "sortBy": "priority"
+  "sortBy": "priority",
+  "lainSuggestWork": {
+    "canonicalIssue": 6,
+    "source": "@LAIN / Suggest Work",
+    "sourceHead": "ed596ffa3cbd10a448c932ce1cbe3429768ea3c8",
+    "tasks": [
+      {
+        "id": "TASK-001",
+        "title": "Reconcile PR #4 with current main and re-run acceptance",
+        "priority": "P0"
+      },
+      {
+        "id": "TASK-002",
+        "title": "Implement Android Keystore-backed planner SecretStore",
+        "priority": "P1"
+      },
+      {
+        "id": "TASK-003",
+        "title": "Implement bounded native planner transport",
+        "priority": "P1"
+      }
+    ]
+  }
 }
