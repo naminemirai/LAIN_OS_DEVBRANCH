@@ -1,5 +1,8 @@
 # Work Log
 
+## 2026-10-03 — TASK-005
+PR #10 passed fresh whole-diff review on head `1d35244b83292f309f3cb1eb0dd16e5254587abc`; Verify #150 and Android #139 succeeded, with Android API 24/API 35 build, unit, lint, and instrumentation jobs green. Draft state was the mergeability gate; after marking ready, GitHub reported mergeable=true and the PR squash-merged as `16fd0aa363576f897282dd932b8a56609884ff86`. Physical-device acceptance remains unverified.
+
 ## 2026-10-02 — PR review and queue reconciliation
 PR #9 passed fresh review `5398751890` on head `e0ca01f`, Verify #72 succeeded, and it squash-merged as `11906c4`; Android #61 was untested by the merge decision and subsequently succeeded. The imported orchestration tree was then removed by repository-native cleanup `47566d0`. PR #8 remains blocked by review `5398751852`; TASK-003 remains the sole canonical task and no new task was created.
 
