@@ -66,8 +66,10 @@ class PlannerSettingsUiTest {
                 .perform(scrollTo(), replaceText("https://api.example.invalid/v1"), closeSoftKeyboard())
             onView(withId(R.id.planner_model))
                 .perform(scrollTo(), replaceText("model-a"), closeSoftKeyboard())
-            onView(withId(R.id.planner_credential))
-                .perform(scrollTo(), replaceText(firstSecret), closeSoftKeyboard())
+            scenario.onActivity {
+                it.findViewById<android.widget.EditText>(R.id.planner_credential)
+                    .setText(firstSecret)
+            }
             onView(withId(R.id.planner_save)).perform(scrollTo(), click())
             onView(withId(R.id.planner_select)).perform(scrollTo(), click())
 
@@ -81,8 +83,10 @@ class PlannerSettingsUiTest {
                 assertFalse(rendered.contains(firstSecret))
             }
 
-            onView(withId(R.id.planner_credential))
-                .perform(scrollTo(), replaceText(secondSecret), closeSoftKeyboard())
+            scenario.onActivity {
+                it.findViewById<android.widget.EditText>(R.id.planner_credential)
+                    .setText(secondSecret)
+            }
             onView(withId(R.id.planner_save)).perform(scrollTo(), click())
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
