@@ -1,5 +1,77 @@
 # Next
 
+## TASK-033: Implement bounded external speech provider adapter
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, speech, privacy
+**Updated:** 2026-10-03
+
+### Goal
+
+Implement replaceable external STT/TTS adapters through the Phase-2 speech interfaces and TASK-032 provider-job lifecycle while preserving local authority, secret isolation, bounded cost, cancellation, and explicit provider identity.
+
+### Scope
+
+- Adapt configured remote transcription and synthesis providers to the existing Phase-2 request/result/cancellation contracts.
+- Route asynchronous provider work through TASK-032 rather than introducing provider-specific polling, retry, reconciliation, or durable-job state.
+- Keep credentials opaque in the native/provider boundary; exclude raw secrets from workflow state, planner payloads, logs, audit, IPC, artifacts, and exported settings.
+- Enforce request/audio/text/result size, timeout, provider-call, retry, and applicable cost ceilings inherited from workflow budgets.
+- Validate returned audio/transcript metadata and provenance before downstream consumption.
+- Surface throttling, authentication, timeout, provider failure, malformed/oversized result, unsupported cancellation, and privacy-relevant provider identity explicitly.
+- No implicit Local-to-Cloud/provider fallback, generic authenticated HTTP capability, voice cloning, or always-listening behavior.
+
+### Dependencies
+
+- TASK-009 through TASK-015 complete: stable Phase-2 speech contracts and acceptance.
+- TASK-018 and TASK-020 through TASK-024 complete: artifact, revision, wait/reconciliation/budget semantics.
+- TASK-032 complete: bounded external provider job abstraction.
+
+### Plan
+
+- Map Phase-2 STT/TTS contracts onto TASK-032 submit/poll/cancel/result primitives.
+- Define the minimum provider adapter configuration and opaque credential-reference boundary.
+- Add deterministic fake-provider tests for transcription/synthesis success and provider failure classes.
+- Verify cancellation, stale revision, restart/reconciliation, throttling/backoff interaction, budget exhaustion, and malformed/oversized result handling.
+- Validate synthesis artifacts before workflow consumption and record provider/model/provenance without secret material.
+- Exercise at least one replaceable adapter implementation or protocol-compatible fixture without coupling trusted workflow semantics to provider-specific responses.
+
+### Acceptance
+
+- The same Phase-2 speech interfaces operate with a configured remote STT/TTS adapter without changing turn-manager or trusted workflow authority.
+- Provider credentials never enter durable/returned LAIN surfaces.
+- Provider selection is explicit and never silently falls back across privacy/cost boundaries.
+- Cancellation and failure states are truthful; unsupported remote cancellation is not reported as cancelled.
+- Rate limits/retries/timeouts/call counts/bytes/cost intersect with persisted workflow budgets and cannot reset on restart.
+- Remote synthesis output is validated, hashed, revision-bound, and provenance-recorded before use.
+- Provider text/status/result fields cannot authorize capabilities, approvals, spending, or workflow completion.
+
+### Verification
+
+- Phase-2 interface compatibility tests using deterministic fake transports.
+- STT/TTS success plus auth, 429, 5xx, timeout, cancellation, malformed/oversized-result negatives.
+- Restart/reconciliation/stale-revision and budget-intersection tests.
+- Secret-leak scans across durable state/log/audit/IPC/exported settings.
+- Artifact validation/hash/provenance tests for returned audio.
+- Canonical portable verification, Android API matrix where platform integration applies, and architecture/security/privacy review.
+
+### Expected result
+
+Configured external speech services become replaceable bounded adapters behind LAIN's existing speech and workflow contracts without becoming authority, secrecy, or budget bypasses.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines Phase 5 R5.2 as STT/TTS through the Phase-2 interface with secret handling and throttling/error behavior.
+- Current TaskPlanner represents R5.1 as TASK-032 but has no task/open issue/open PR for R5.2.
+
+### Projection basis
+
+- Voice workflows need remote speech as an optional replaceable provider path after the local speech interface and durable provider-job lifecycle stabilize.
+- Implementing R5.2 before media generation keeps provider integration incremental and exercises TASK-032 on bounded speech payloads before larger media results.
+
+### Risks / unknowns
+
+- Provider protocols differ in streaming, cancellation, billing, and audio format support; adapter-specific details must not leak into trusted speech/workflow contracts.
+- Live-provider acceptance may require user credentials and network access; deterministic fake evidence must remain distinct from live-provider evidence.
+- Provider privacy disclosure UI is sequenced separately under R5.6 and must not be falsely claimed complete here.
+
 ## TASK-032: Define bounded external provider job abstraction
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, workflow, network
 **Updated:** 2026-10-03
