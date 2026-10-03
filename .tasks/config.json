@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 35,
+  "nextId": 36,
   "states": [
     {
       "name": "Backlog",
@@ -211,10 +211,16 @@
         "title": "Implement bounded external image/media generation adapter",
         "priority": "P1",
         "order": 28
+      },
+      {
+        "id": "TASK-035",
+        "title": "Implement aggregate provider spending controls",
+        "priority": "P1",
+        "order": 29
       }
     ],
     "issue": 6,
-    "repo_head": "e0412c1cefaa61c8b6a0289f13a56bdda4570d14",
-    "next_action": "Continue TASK-008: PR #15 merged green; close remaining installed GUI/runtime Cloud+Local happy-path acceptance before advancing TASK-009."
+    "repo_head": "fdcbcb594b263404ec2d7cae02ba7ec22734201d",
+    "next_action": "Continue TASK-008 installed Cloud+Local GUI/runtime happy-path acceptance; Phase 5 sequences TASK-032→033→034→035."
   }
 }
