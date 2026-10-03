@@ -8,6 +8,18 @@ printed or changed here.
 
 ## Current standalone APK Phase-1 revalidation — IN PROGRESS (2026-10-03)
 
+### Current patched candidate
+
+- PR #16 candidate head: `59c58639c15227fc7216f321b3a0f8f59f2bc499`.
+- TDD RED: `712507319e082da4fe4935c9f4888f3284ca4b1f`, Android #272 failed on the intentionally absent plain diagnostic/status contracts.
+- Verify #286 on the candidate head: **GREEN**.
+- Android #275 on API 24/35: **IN PROGRESS**.
+- Candidate fixes: zero-argument schema generation, transport-only plain connection probe, explicit request/rate-limit/server/transport diagnostic statuses, planner-neutral Run copy, and blocking in-flight Stop regression.
+- **No physical acceptance claim exists for this patched candidate yet.** The exact APK from this head becomes the only valid next physical artifact if Android #275 completes GREEN.
+
+The older `c700eed` record below remains the evidence that discovered the defects; it is not the current acceptance candidate.
+
+
 This is a separate, newer acceptance track from the historical Termux capability record below. Evidence must not be conflated.
 
 Candidate source/build:
