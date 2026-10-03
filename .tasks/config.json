@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 29,
+  "nextId": 30,
   "states": [
     {
       "name": "Backlog",
@@ -175,10 +175,16 @@
         "title": "Integrate a bounded Android-capable video renderer",
         "priority": "P1",
         "order": 22
+      },
+      {
+        "id": "TASK-029",
+        "title": "Implement real video inspection",
+        "priority": "P1",
+        "order": 23
       }
     ],
     "issue": 6,
-    "repo_head": "a06fd35df912f517605433b57f23b6669129e687",
+    "repo_head": "6798ce816e737d339e1388ec8faec13dd6d0fab8",
     "next_action": "Execute TASK-008: close the Phase-1 planner acceptance and adversarial gate; do not start Phase 2 until it passes."
   }
 }
