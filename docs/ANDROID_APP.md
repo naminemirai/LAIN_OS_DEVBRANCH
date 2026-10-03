@@ -81,75 +81,32 @@ replay automatically. Select interrupted work and explicitly Resume, approve a
 fresh pending action, or Stop it. Existing audit-ahead reconciliation remains
 authoritative. Ambiguous requests are never automatically retried.
 
-## Stop scheduling correction
+## Stop scheduling
 
-After PR #3 merged, review established a race where Stop could lose its worker
-wake-up as an action entered a confirmation pause. Wake-ups now enter the same
-single-worker queue as runtime steps, so a Stop arriving during the transition
-still settles cancellation. A deterministic JVM regression exercises this case;
-the Android workflow runs it alongside APK assembly, lint, and instrumentation.
-Version `0.1.4-interface` requires fresh physical acceptance, including Stop at
-the confirmation transition. Earlier emulator and Termux evidence does not
-certify this changed APK.
+Stop wake-ups enter the same single-worker queue as runtime steps, so a Stop
+arriving while an action enters a confirmation pause still settles cancellation.
+A deterministic JVM regression exercises this case alongside APK assembly, lint,
+and instrumentation. Version `0.1.4-interface` still requires current physical
+acceptance for Stop at the confirmation transition; older emulator or Termux
+evidence does not certify a changed APK.
 
-## Evidence status for this coding pass
+## Verification status
 
-Verification resumed at the owner's request on 2026-10-01. Fresh focused Python
-tests passed (19); the canonical suite and Android portable helper each passed
-251 tests. APK assembly, instrumentation compilation, and Android lint passed
-with Gradle reporting 86 tasks (25 executed, 61 up-to-date). Lint's API 27 theme
-attribute was moved out of the API 24 base resources. Android 12+ cloud backup
-and device transfer now explicitly exclude application data.
+The latest recorded interface verification includes 19 focused Python tests, 251
+tests in the canonical portable suite, 251 through the Android portable helper,
+APK assembly, instrumentation compilation, and Android lint. The Android emulator
+matrix covers API 24 and API 35; the API 24 run passed all nine applicable
+instrumentation cases after the compatibility fixes documented in source.
 
-The Android workflow builds both APKs, runs lint, and executes instrumentation
-on API 24 and API 35 emulators. The API 24 emulator passed all nine applicable instrumentation tests after
-removing an inline theme font-family override that crashed button inflation on
-Android 7. The API 26 binding-death callback test runs on newer platforms.
-Identical runtime polls no longer rebuild the screen, and unchanged results
-preserve selectable text views. The API 24 suite also passed this regression.
-Exact CI heads and emulator results are recorded in
-[PR #3](https://github.com/null0entry/LAIN_OS_DEVBRANCH/pull/3). Physical acceptance
-remains open; use [the native APK checklist](ANDROID_DEVICE_ACCEPTANCE.md).
-Earlier paused-pass evidence below describes the initial build only.
+The package is `dev.lain.os`, version `0.1.4-interface` (version code 5), supports
+arm64-v8a and x86_64, and has minimum Android API level 24. Debug artifacts are
+debug-signed and do not constitute a production release.
 
-Source baseline: `main@7abec73ea4bd096b4b6c69cf66745bf6115412e1`. The initial
-connector-restored snapshot was moved into a real Git worktree when Git transport
-became available: branch `feature/android-interface-v1` in
-`/workspace/LAIN_OS_ANDROID_CHECKOUT/.worktrees/android-interface`. Published
-history is preserved. The interface and Android CI have been published on that
-feature branch in draft PR #3; no merge was performed.
+Physical-device acceptance remains required for native adapters, Binder behavior,
+approval handling, rotation/rebind, interruption, recovery, and measured Stop
+latency. Use [the native APK checklist](ANDROID_DEVICE_ACCEPTANCE.md).
 
-During the initial coding pass, the owner paused verification runs. Python and
-Android tests were authored without running them. Verification has now resumed
-as recorded above; physical-device acceptance and latency measurement remain open.
-
-After the owner enabled network access, debug APK assembly completed successfully
-with Gradle 8.11.1, a full Temurin JDK 17, Android SDK 35/build tools 35.0.0, and the
-pinned dependencies. The initial build reported `BUILD SUCCESSFUL in 1m 4s` with 48 tasks
-(41 executed, 7 up-to-date). The missing dependency between Python source copying
-and merging was corrected in `android/app/build.gradle.kts`.
-
-The output is `android/app/build/outputs/apk/debug/app-debug.apk`; the delivered
-copy is `/workspace/artifacts/LAIN_OS-interface-debug.apk`. Its package is
-`dev.lain.os`, version `0.1.4-interface` (version code 5), with arm64-v8a and x86_64 support and a
-minimum Android API level of 24. It is debug-signed; no release signing was done.
-The earlier updated assembly reported `BUILD SUCCESSFUL in 34s`, exit 0, with all
-48 tasks executed. Connection regression tests were subsequently compiled along
-with the other instrumentation cases.
-
-Maven Central returned HTTP 429 during this build. A local Gradle init script
-selected Google's Maven Central mirror without changing dependency versions.
-The environment proxy and its CA were preserved. The exact build command and
-local setup are recorded in `/workspace/build-evidence/BUILD.md`; the successful
-initial log is `/workspace/build-evidence/android-build-0.1.1.log`; resumed build
-and lint output is `/workspace/build-evidence/android-validation-build.log`. Early attempts were blocked
-by sandbox networking and an installed JRE lacking a compiler; those build
-prerequisites were subsequently resolved.
-
-The prior Termux hardware evidence does not certify these new native adapters.
-Before claiming this interface usable or merge-ready, install the APK
-and complete native adapter, Binder, approval, rotation, interruption, and recovery
-acceptance. Verification commands:
+Verification commands:
 
 ```sh
 python -m unittest tests.test_app_control tests.test_app_native -v
@@ -157,9 +114,9 @@ python scripts/verify.py
 ./android/gradlew --project-dir android :app:connectedDebugAndroidTest
 ```
 
-The initial instrumentation cases do not yet cover every device failure contract
-in the implementation plan. Full foreign-application IPC rejection, in-flight
-rotation/rebind, clipboard restrictions, chooser behavior, stale approvals,
-backgrounding races, and measured Stop latency remain device acceptance work.
-Voice conversation, media workflows, provider integrations, and YouTube publishing
-are later stages of the voice-agent brief.
+The current instrumentation set does not cover every physical-device failure
+contract. Foreign-application IPC rejection, in-flight rotation/rebind, clipboard
+restrictions, chooser behavior, stale approvals, backgrounding races, and measured
+Stop latency remain device acceptance work. Voice conversation, media workflows,
+provider integrations, and YouTube publishing are later product stages.
+
