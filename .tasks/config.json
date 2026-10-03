@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 18,
+  "nextId": 19,
   "states": [
     {
       "name": "Backlog",
@@ -115,10 +115,16 @@
         "title": "Implement bounded DAG scheduler",
         "priority": "P1",
         "order": 12
+      },
+      {
+        "id": "TASK-018",
+        "title": "Implement immutable artifact workspace",
+        "priority": "P1",
+        "order": 13
       }
     ],
     "issue": 6,
-    "repo_head": "16ff6ae6dd8aaf3fccf25aa6a8c20332e4efa0e6",
-    "next_action": "TASK-006 is In Progress; continue dependency order through TASK-017."
+    "repo_head": "a97905acf651835fc95bcf69e2ea5e866d07b39c",
+    "next_action": "TASK-006 is In Progress; continue dependency order through TASK-018."
   }
 }
