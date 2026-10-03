@@ -1,5 +1,9 @@
 # LAIN_OS 1.0 Roadmap
 
+**LAIN — Loyal Autonomous Intelligence Network**
+
+LAIN is an open-source autonomous intelligence platform. "Loyal" describes alignment to the human using the system; local-first operation remains a core technical principle rather than the expansion of the acronym.
+
 Version: 1.0-roadmap-r2
 Status: Active planning baseline
 Date: 2026-10-03
@@ -1056,7 +1060,7 @@ After the 1.0 trust/recovery/product loop is stable:
 - priority/preemption;
 - resource arbitration.
 
-### 1.5 — Multi-device Local Autonomous Intelligent Networking
+### 1.5 — Multi-device LAIN networking
 - authenticated peer discovery;
 - capability advertisement;
 - delegated typed actions;
