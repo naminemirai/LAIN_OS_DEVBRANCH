@@ -1,8 +1,6 @@
 # LAIN_OS Android interface — approved scope
 
-The owner approved a GUI packaged as an APK for the existing LAIN_OS runtime on
-2026-10-01. This is the first slice of the voice-agent brief; voice, media,
-workflow graphs, and YouTube integration remain outside this slice.
+This specification defines the first standalone APK interface for the existing LAIN_OS runtime. Voice, media, workflow graphs, and YouTube integration are later product stages.
 
 Build a standalone Kotlin/AndroidX application embedding Python locally. It must
 not depend on Termux, an external Python installation, or a separate server.
@@ -26,9 +24,4 @@ the actual settled outcome of an action already in flight. It does not claim
 rollback or guarantee that an external effect was prevented. Owner inspection
 and Stop must remain available while the worker holds its execution lease.
 
-The owner paused verification runs for this coding pass. Tests may be authored,
-but tests, security verification, CI, and installed-device acceptance are deferred.
-APK assembly is permitted to produce the requested artifact when tooling and
-network access permit it. A successful build is not installed-device acceptance.
-No public release, merge, deployment, upload, paid service, or provider credential
-provisioning is authorized. Do not claim readiness from unrun acceptance checks.
+Verification must distinguish source-level tests, APK assembly, emulator/instrumentation results, and physical-device acceptance. A successful build alone is not installed-device acceptance. Production release requires release signing, current security verification, and the documented device acceptance gates. Provider credentials are never bundled into the application.
