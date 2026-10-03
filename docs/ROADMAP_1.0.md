@@ -2,7 +2,6 @@
 
 Version: 1.0-roadmap-r2
 Status: Active planning baseline
-Revision baseline: main@1b805338b26cd9f089559ddf1bd1244ff0a0ee79
 Date: 2026-10-03
 Role: Repository planning artifact
 
@@ -164,7 +163,7 @@ R0.1 — Physical Android interface acceptance
 
 R0.2 — Release-state hygiene
 - Ensure architecture/spec/README claims match fresh evidence.
-- Keep TaskPlanner canonical and free of duplicate or stale tasks.
+- Keep release/version/migration metadata consistent with the shipped product.
 - Keep secrets and external orchestration context out of repository state.
 
 R0.3 — Regression baseline
