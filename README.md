@@ -292,7 +292,7 @@ after review `5398751890` passed on head
 `e0ca01f4bd0f6ee08ee5db500d654a33f038dff8`. The focused contract passed 5/5,
 the imported inventory tests passed 4/4, and Verify workflow #72 succeeded.
 Android workflow #61 was still in progress at merge time, so it was untested by
-the merge decision and is not claimed passed. Repository-native cleanup
+the merge decision; it subsequently completed successfully. Repository-native cleanup
 `47566d0a87ce06f1ba1e3ca45a7dac37e8bf0232` subsequently removed that imported
 orchestration tree from `main`.
 
