@@ -7,7 +7,7 @@
 
 ## Goal
 
-Turn the existing Android GUI + embedded runtime from a deterministic demo into a real natural-language LAIN client where the user can choose the source of model intelligence while keeping authorization, execution, verification, budgets, and audit local and authoritative.
+Turn the existing Android GUI + embedded runtime from a deterministic demo into a real natural-language LAIN_OS client where the user can choose the source of model intelligence while keeping authorization, execution, verification, budgets, and audit local and authoritative.
 
 Initial provider modes:
 
