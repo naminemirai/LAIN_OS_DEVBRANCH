@@ -6,6 +6,78 @@
 
 ### Goal
 
+Add the bounded interaction layer that lets user speech interrupt synthesized playback while preventing synthesized audio or partial recognition from becoming authoritative user intent.
+
+### Scope
+
+- Detect user speech onset during playback and stop/duck playback through TASK-012.
+- Keep microphone capture and playback state coordinated without introducing an always-listening mode.
+- Prevent synthesized output from being accepted as a user transcript/turn.
+- Prevent partial/interim recognition from authorizing consequential work.
+- Route only final accepted user turns through TASK-011.
+- Keep “interrupt speech playback” distinct from “cancel underlying task.”
+- Do not implement workflow progress narration or broad acoustic DSP beyond the minimum echo/loopback guards required by the voice turn boundary.
+
+### Dependencies
+
+- TASK-010 complete: Android microphone lifecycle.
+- TASK-011 complete: authoritative turn manager.
+- TASK-012 complete: cancellable speech playback.
+
+### Plan
+
+- Define the minimal barge-in coordinator over microphone/playback/turn state.
+- Stop or duck playback on verified user-speech onset without changing task state.
+- Add explicit synthesized-audio suppression/echo guard before transcript acceptance.
+- Route only final non-echo transcripts into the turn manager.
+- Add deterministic tests for interruption, echo rejection, partial-transcript non-authority, and Stop-talking-vs-Stop-task separation.
+
+### Acceptance
+
+- User speech during synthesis stops or ducks playback promptly.
+- Playback interruption alone does not cancel the task.
+- Synthesized speech cannot become a user command through the normal microphone/transcription path.
+- Partial/interim transcripts cannot authorize capabilities, approvals, or task revisions.
+- Final accepted user speech still reaches the turn manager after playback interruption.
+- Microphone/playback resources settle cleanly after interruption.
+- Typed fallback remains unaffected.
+
+### Verification
+
+- Focused barge-in coordinator tests.
+- Negative tests for synthesized-audio loopback and partial-transcript authority.
+- Android instrumentation for playback interruption and microphone/playback lifecycle interaction.
+- Regression separating Stop talking from Stop task.
+- Canonical Android verification after implementation.
+
+### Expected result
+
+LAIN_OS supports natural conversational interruption without allowing its own speech, partial recognition, or playback state to cross the trusted user-intent boundary.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R2.5 Barge-in and echo protection: stop/duck playback on speech, prevent synthesized speech from becoming a command, and ensure partial recognition cannot authorize consequential actions.
+- No current TaskPlanner task, open issue, or open PR represents R2.5.
+
+### Projection basis
+
+- Barge-in is required for the Phase-2 conversational exit gate and must sit above established microphone, turn, and playback contracts rather than being embedded separately in each layer.
+- Explicit echo/partial guards prevent a voice feedback loop from crossing LAIN_OS authority boundaries.
+
+### Risks / unknowns
+
+- Reference-device interruption latency is measured in R2.7, not claimed by this task.
+- Device-specific acoustic echo cancellation may vary; this task should enforce semantic loopback guards even when platform DSP is limited.
+- Wake-word/always-listening behavior remains explicitly out of 1.0 scope.
+
+---
+
+## TASK-013: Implement voice barge-in and echo protection
+**Priority:** P2 | **Tags:** overseer-assigned, developer, phase-2, voice, safety
+**Updated:** 2026-10-03
+
+### Goal
+
 Allow user speech to interrupt active synthesis without confusing synthesized audio or partial recognition with authoritative user intent.
 
 ### Scope
