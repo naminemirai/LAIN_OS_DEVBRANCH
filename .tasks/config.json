@@ -45,44 +45,38 @@
   "lainTaskSequencer": {
     "canonical_tasks": [
       {
-        "id": "TASK-005",
-        "title": "Implement persistent PlannerProfile selection",
-        "priority": "P1",
-        "order": 1
-      },
-      {
         "id": "TASK-006",
         "title": "Wire profile-selected planner runtime bridge",
         "priority": "P1",
-        "order": 2
+        "order": 1
       },
       {
         "id": "TASK-007",
         "title": "Build Planner Settings and inert connection diagnostics",
         "priority": "P1",
-        "order": 3
+        "order": 2
       },
       {
         "id": "TASK-008",
         "title": "Close Phase-1 planner acceptance and adversarial gate",
         "priority": "P1",
-        "order": 4
+        "order": 3
       },
       {
         "id": "TASK-009",
         "title": "Define bounded speech provider interfaces",
         "priority": "P2",
-        "order": 5
+        "order": 4
       },
       {
         "id": "TASK-010",
         "title": "Implement Android microphone lifecycle",
         "priority": "P2",
-        "order": 6
+        "order": 5
       }
     ],
     "issue": 6,
-    "repo_head": "95087f0406bc69a8f09f6cd0c430bd3a5df6d6e4",
-    "next_action": "Continue TASK-005 / PR #10. Then TASK-006 -> TASK-007 -> TASK-008. TASK-009 begins Phase 2 speech contracts; TASK-010 follows with Android microphone lifecycle."
+    "repo_head": "07f631111289b678ab9e471f1233d246b650342d",
+    "next_action": "TASK-006 is In Progress. TASK-007 follows TASK-006; TASK-008 closes Phase 1; TASK-009 and TASK-010 begin Phase 2 in order."
   }
 }
