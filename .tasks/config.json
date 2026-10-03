@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 32,
+  "nextId": 33,
   "states": [
     {
       "name": "Backlog",
@@ -193,10 +193,16 @@
         "title": "Close Phase-4 with a real offline golden video fixture",
         "priority": "P1",
         "order": 25
+      },
+      {
+        "id": "TASK-032",
+        "title": "Define bounded external provider job abstraction",
+        "priority": "P1",
+        "order": 26
       }
     ],
     "issue": 6,
-    "repo_head": "664178b676091ca9b950d14e27c72249b92488f8",
-    "next_action": "Continue TASK-008: close remaining Phase-1 acceptance gaps with truthful evidence; physical-device acceptance remains unverified. Phase 4 now sequences through TASK-031 offline golden fixture."
+    "repo_head": "67ad592a5e4fd9aab4dc5296a74bad43ee490de5",
+    "next_action": "Continue TASK-008 through PR #15 acceptance evidence; after Phase 4, TASK-032 establishes the shared bounded external-provider job lifecycle before concrete provider adapters."
   }
 }
