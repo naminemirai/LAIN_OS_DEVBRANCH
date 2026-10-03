@@ -1,5 +1,75 @@
 # Next
 
+## TASK-027: Define deterministic media timeline representation
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, timeline
+**Updated:** 2026-10-03
+
+### Goal
+
+Define a strict deterministic timeline model that binds scenes, image/audio artifacts, captions, transitions, and output constraints into one renderer-ready revision without embedding rendering authority or provider behavior.
+
+### Scope
+
+- Define ordered scene records with stable IDs and explicit start/duration semantics.
+- Reference immutable image and narration/audio artifacts from TASK-025/TASK-026 rather than copying media payloads into timeline state.
+- Represent captions/subtitles with bounded text and timing.
+- Represent bounded transition type/duration and output constraints such as target dimensions, frame rate, duration, and audio expectations.
+- Bind timeline identity to workflow revision and exact referenced artifact hashes.
+- Reject overlaps/gaps/invalid timing combinations according to a documented deterministic contract.
+- Do not implement rendering, codec invocation, preview UI, external providers, or publication.
+
+### Dependencies
+
+- TASK-025 complete: media artifact schemas.
+- TASK-026 complete: bounded narration pipeline.
+- TASK-018 immutable artifact workspace and TASK-020 revision semantics.
+
+### Plan
+
+- Define minimal closed timeline/scene/caption/transition models.
+- Validate referenced artifact type/hash/revision compatibility.
+- Compute deterministic total duration and normalized scene ordering.
+- Enforce bounded dimensions/frame rate/transition/caption timing and exact output constraints.
+- Add serialization/round-trip, invalid-reference, timing, revision, and determinism tests.
+
+### Acceptance
+
+- Equivalent inputs serialize to one deterministic timeline representation.
+- Every scene references exact immutable artifact identities and current workflow revision.
+- Caption and transition timing cannot exceed scene/timeline bounds.
+- Missing, stale-revision, wrong-media-type, duplicate-scene, invalid-duration, or inconsistent output constraints fail closed.
+- Total timeline duration is deterministic and derived from validated scene timing.
+- Timeline data cannot grant capabilities, approve effects, invoke renderers, or bypass verification.
+- Revision of any referenced upstream artifact requires a new timeline revision rather than silent in-place mutation.
+
+### Verification
+
+- Focused timeline validation/round-trip/determinism tests.
+- Scene ordering, overlap/gap, caption, transition, and total-duration tests.
+- Wrong-type/hash/revision artifact-reference negatives.
+- Output-bound and malformed-metadata tests.
+- Canonical portable verification plus fresh architecture review.
+
+### Expected result
+
+Phase 4 has a stable renderer-neutral timeline contract connecting verified media artifacts into a deterministic 30–60 second video plan without coupling representation to execution.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.3 Timeline representation immediately after R4.2 narration.
+- Current TaskPlanner represents R4.1 and R4.2 as TASK-025 and TASK-026; no current task, issue, or open PR represents R4.3.
+
+### Projection basis
+
+- Renderer and inspection layers need one deterministic source of scene timing and exact artifact references before a rendering toolchain can be selected safely.
+
+### Risks / unknowns
+
+- Exact transition catalog and frame-rate choices should remain minimal until renderer support is proven.
+- Advanced editing, keyframes, effects, and nonlinear tracks are outside 1.0 scope.
+
+---
+
 ## TASK-026: Implement bounded narration pipeline
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, narration
 **Updated:** 2026-10-03
