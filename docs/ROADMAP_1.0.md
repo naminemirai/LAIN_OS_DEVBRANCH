@@ -104,6 +104,8 @@ The repository already contains substantial pre-1.0 infrastructure:
 
 ### Active product work
 
+**Current candidate update (2026-10-03):** PR #16 has advanced beyond the original defect-discovery build to `59c58639c15227fc7216f321b3a0f8f59f2bc499`. TDD RED `712507319e082da4fe4935c9f4888f3284ca4b1f` failed Android #272 on the deliberately missing plain diagnostic/status contracts. Verify #286 passes on the corrected candidate; Android #275 is still running. The candidate removes structured-output generation from Test connection, adds explicit 400/429/5xx/transport diagnostic classes, preserves the zero-argument schema fix and blocking Stop regression, and changes the Run label to planner-neutral copy. Physical acceptance remains open until the exact GREEN APK completes the full Galaxy matrix.
+
 The current implementation focus is **TASK-008 Phase-1 planner acceptance on the physical Galaxy**, after automated installed-workbench acceptance reached GREEN on PR #16 head `c700eed0b9de6964729a6b038eaa565daf44864d` (Verify #270; Android #259).
 
 Current physical evidence from the exact GREEN debug build:
