@@ -6,9 +6,9 @@ Status: product design specification. This document defines intended application
 
 ## Product intent
 
-LAIN_OS is a voice-first autonomous agent suite that converts natural conversation into complex, verified action sequences under its owner's control. The owner speaks normally, receives spoken responses while work progresses, and can interrupt, revise, pause, or stop a task. Specialist workers share one coherent conversational interface and operate through the trusted runtime.
+LAIN_OS is a voice-first autonomous agent suite that converts natural conversation into complex, verified action sequences under the user's control. The user speaks normally, receives spoken responses while work progresses, and can interrupt, revise, pause, or stop a task. Specialist workers share one coherent conversational interface and operate through the trusted runtime.
 
-Flagship scenario: “Turn this idea into a YouTube video and post it.” Success means a real rendered video, owner review when required, authorized upload/publication, and an independently retrieved result. A generated script, mocked upload, or planner assertion is not completion.
+Flagship scenario: “Turn this idea into a YouTube video and post it.” Success means a real rendered video, user review when required, authorized upload/publication, and an independently retrieved result. A generated script, mocked upload, or planner assertion is not completion.
 
 Interpretation: “my voices” means the user's spoken input and selectable agent speech voices. Voice cloning, multiple simultaneous speakers, and multiple independently speaking agent personas are not assumed requirements. They can be added after clarification. Use licensed stock speech voices initially.
 
@@ -26,7 +26,7 @@ than replacing it with direct model-driven execution.
 
 ## Recommended architecture
 
-Use a native Android conversational client embedding the existing Python control core, plus replaceable speech, reasoning, media, rendering, and publishing adapters. Execute supported local operations locally. Allow owner-configured remote services for resource-intensive work, with explicit disclosure of data leaving the device and trusted spending limits.
+Use a native Android conversational client embedding the existing Python control core, plus replaceable speech, reasoning, media, rendering, and publishing adapters. Execute supported local operations locally. Allow user-configured remote services for resource-intensive work, with explicit disclosure of data leaving the device and trusted spending limits.
 
 Alternatives considered: an entirely local implementation improves offline operation but makes initial speech/media performance and phone resource use harder; a thin cloud client accelerates integrations but weakens local ownership and depends on a server. Recommend the hybrid approach, retaining local policy, durable state, and control. Provider and renderer selection remains an implementation research decision, not a dependency commitment.
 
@@ -36,7 +36,7 @@ Separate subsystems:
 - Orchestration: durable task graph, specialist roles, dependencies, bounded replanning, progress evidence, cancellation, and recovery.
 - Trusted capabilities: typed local/device operations and narrowly scoped provider/render/upload operations behind policy.
 - Artifact workspace: versioned scripts, narration, visual assets, captions, rendered files, manifests, and provenance.
-- Publishing: owner account authorization, private upload staging, processing checks, exact publication approval, and independent result lookup.
+- Publishing: user account authorization, private upload staging, processing checks, exact publication approval, and independent result lookup.
 
 Agent roles are restricted logical workers, not privileged independent executors. A script writer, visual planner, editor, and publisher receive only the context and capabilities needed for their task. Model output cannot select arbitrary executors, import code, change policy, or authorize spending. Workers share durable artifacts and typed results rather than unlimited transcripts.
 
@@ -62,11 +62,11 @@ Use pending, ready, running, waiting_for_owner, succeeded, failed, cancelled, an
 
 Retain existing finite controller defaults within each bounded execution run. Long media jobs use explicit durable wait/poll stages and task-level limits; they do not silently increase the controller's runtime budget. Persist deadlines, retry counts, estimated/actual costs, provider job IDs, and output ownership. Provider estimates cannot grant spending authority.
 
-Keep read-only owner inspection and emergency stop available even when a worker lease is held. Enforce one active workflow initially. Parallel specialist execution is optional later and requires compatible leases, fixed output ownership, and aggregate budgets.
+Keep read-only user inspection and emergency stop available even when a worker lease is held. Enforce one active workflow initially. Parallel specialist execution is optional later and requires compatible leases, fixed output ownership, and aggregate budgets.
 
 ## Flagship video workflow
 
-V1 scope: a short narrated video assembled from owner-provided or authorized generated images, captions, and simple transitions. Arbitrary cinematic video generation, avatars, and voice cloning are later extensions. Proposed offline fixture: a 30–60 second video using bundled licensed assets; it must exercise a real renderer and inspect the actual output.
+V1 scope: a short narrated video assembled from user-provided or authorized generated images, captions, and simple transitions. Arbitrary cinematic video generation, avatars, and voice cloning are later extensions. Proposed offline fixture: a 30–60 second video using bundled licensed assets; it must exercise a real renderer and inspect the actual output.
 
 Stages: capture idea → outline/script → narration → visual assets → render → inspect preview → upload privately → check processing → approve publication → publish → retrieve video metadata/link.
 
@@ -74,17 +74,17 @@ Proposed capability families, each requiring schema, risk, permissions, environm
 
 | Family | Purpose | Required evidence |
 |---|---|---|
-| speech.transcribe / speech.synthesize | Convert owner speech and render narration | Final transcript metadata; decodable audio and duration |
+| speech.transcribe / speech.synthesize | Convert user speech and render narration | Final transcript metadata; decodable audio and duration |
 | media.generate_image | Produce bounded requested visuals | Downloaded, decodable asset; dimensions/hash and provenance |
 | media.render_video / media.inspect_video | Assemble and inspect the video | Actual file, streams, duration, dimensions, audio, and file hash |
-| youtube.upload / youtube.status | Upload to the owner's channel and inspect processing | Persisted upload/video ID and independent authenticated lookup |
+| youtube.upload / youtube.status | Upload to the user's channel and inspect processing | Persisted upload/video ID and independent authenticated lookup |
 | youtube.publish | Apply approved public metadata/visibility | Retrieved visibility and metadata associated with the exact video ID |
 
 These names are proposals, not existing registry entries. Text planning can remain a planner task; do not register generic “execute agent code” or arbitrary authenticated HTTP capabilities.
 
 External generation may transmit private data and incur cost. Uploading privately is still an external write and needs account/data-transfer authority. Bind approvals to exact artifact hash, destination channel, title, description, visibility, policy revision, nonce, and expiry. Never treat “post it” in a design example as permission to publish a real test video now. Avoid claiming a published video is publicly accessible while processing or visibility verification is incomplete.
 
-Use owner-selected OAuth account authorization and minimum required scopes. Store tokens with Keystore-backed protection in the app. Scope, verification, quota, resumable-upload behavior, and platform metadata requirements must be checked against current official documentation during implementation. Never request passwords or copy tokens into build artifacts.
+Use user-selected OAuth account authorization and minimum required scopes. Store tokens with Keystore-backed protection in the app. Scope, verification, quota, resumable-upload behavior, and platform metadata requirements must be checked against current official documentation during implementation. Never request passwords or copy tokens into build artifacts.
 
 ## Delivery graph and acceptance
 
@@ -98,10 +98,10 @@ The product dependency graph is ordered by the interfaces and trust boundaries e
 | F3 | F1 | Durable workflow graph: dependencies, artifact hashes, bounded workers, revisions, cancellation, crash recovery, and uncertain-effect reconciliation tests |
 | F4 | F2,F3 | Offline video fixture: actual narration/assets/rendered video, media inspection, preview/export; preserve mobile responsiveness and stop behavior |
 | F5 | F3,F4 | Provider adapters: configured speech/media/planner integration, cancellable transport, budgets, throttling/error handling; fake transports first |
-| F6 | F2,F5 | YouTube authorization, resumable upload, processing checks, exact publication gate, lookup; contract tests first, owner-authorized private live test separately |
+| F6 | F2,F5 | YouTube authorization, resumable upload, processing checks, exact publication gate, lookup; contract tests first, user-authorized private live test separately |
 | F7 | F1–F6 | End-to-end spoken idea-to-video scenario, interruption/revision/recovery, final installed APK checks and release-readiness report |
 
-A 1.0 claim requires the documented core scope to work through real installed artifacts, not just adapters mocked in tests. Missing device, build/signing infrastructure, live credentials, or required acceptance evidence remains explicit. Preserve CLI compatibility and existing tests. No public release claim for a debug APK. Keep persistent owner-controlled release signing and reviewed update/state migration behavior.
+A 1.0 claim requires the documented core scope to work through real installed artifacts, not just adapters mocked in tests. Missing device, build/signing infrastructure, live credentials, or required acceptance evidence remains explicit. Preserve CLI compatibility and existing tests. No public release claim for a debug APK. Keep persistent maintainer-controlled release signing and reviewed update/state migration behavior.
 
 ## Design summary
 
