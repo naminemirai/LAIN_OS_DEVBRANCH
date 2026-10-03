@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 13,
+  "nextId": 14,
   "states": [
     {
       "name": "Backlog",
@@ -85,10 +85,16 @@
         "title": "Implement cancellable speech playback",
         "priority": "P2",
         "order": 7
+      },
+      {
+        "id": "TASK-013",
+        "title": "Implement voice barge-in and echo protection",
+        "priority": "P2",
+        "order": 8
       }
     ],
     "issue": 6,
-    "repo_head": "f94969022acec4f20f7f7cdc1f6c8f6fad0af638",
-    "next_action": "TASK-006 is In Progress. TASK-007 -> TASK-008 close Phase 1. TASK-009 -> TASK-010 -> TASK-011 -> TASK-012 begin Phase 2 in dependency order."
+    "repo_head": "db9ff4296ac5c84182e31419ff191ec11daeb670",
+    "next_action": "TASK-006 is In Progress. TASK-007 -> TASK-008 close Phase 1. TASK-009 -> TASK-010 -> TASK-011 -> TASK-012 -> TASK-013 proceed through Phase 2."
   }
 }
