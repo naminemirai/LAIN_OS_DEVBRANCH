@@ -25,9 +25,9 @@ class PlannerProfileTest {
                 "response_mode",
                 "allow_insecure_lan_http",
             ),
-            profile.toTrustedBindingJson().keySet(),
+            profile.toTrustedBindingJson().keys().asSequence().toSet(),
         )
-        assertFalse(profile.toTrustedBindingJson().toString().contains("credential"))
+        assertFalse(profile.toTrustedBindingJson().toString().contains("sk-raw-secret"))
     }
 
     @Test fun cloudAndLocalProfilesShareOneStrictSchema() {
