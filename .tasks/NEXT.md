@@ -1,5 +1,76 @@
 # Next
 
+## TASK-034: Implement bounded external image/media generation adapter
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, media, provenance
+**Updated:** 2026-10-03
+
+### Goal
+
+Implement replaceable external image/media generation behind TASK-032's bounded provider-job lifecycle with strict request bounds and independent download, decode, hash, revision, and provenance validation before workflow consumption.
+
+### Scope
+
+- Map bounded image/media generation requests onto TASK-032 submit/poll/cancel/result contracts.
+- Bound dimensions, output count, prompt/request bytes, downloaded bytes, timeout, provider calls, retries, and applicable workflow cost.
+- Treat provider URLs, MIME labels, filenames, dimensions, status text, and hashes as untrusted claims.
+- Download only through a constrained result-retrieval path; validate actual bytes with the approved decoder before artifact promotion.
+- Hash validated bytes and commit them through TASK-018/TASK-025 artifact/provenance boundaries bound to the current workflow revision.
+- Surface auth, 429/5xx, timeout, unsupported cancellation, expired/missing result, redirect/policy violation, malformed/oversized payload, decode failure, and metadata mismatch explicitly.
+- No generic authenticated fetch capability, arbitrary URL-following, implicit provider fallback, publication authority, or provider-controlled workflow completion.
+
+### Dependencies
+
+- TASK-018, TASK-020 through TASK-025 complete: artifact, revision, wait/reconciliation/budget, acceptance, and media schema semantics.
+- TASK-031 complete: proven local media pipeline.
+- TASK-032 complete: bounded external provider job abstraction.
+
+### Plan
+
+- Define the smallest provider-neutral generation request/result mapping using existing media schemas.
+- Reuse provider-job identity, deadlines, cancellation, reconciliation, and budget accounting.
+- Add deterministic fake-provider tests for synchronous/asynchronous results and hostile provider metadata.
+- Constrain result retrieval and validate decoded media bytes independently of provider assertions.
+- Record immutable provider/model/request fingerprint/result hash/provenance without credentials.
+- Verify stale revision, restart, duplicate operation, budget exhaustion, cancellation, malformed download, redirect abuse, and decoder failure.
+
+### Acceptance
+
+- Configured remote generation produces only bounded validated media artifacts compatible with existing workflow/media contracts.
+- Dimensions/count/bytes/calls/time/retries/cost cannot exceed the intersection of adapter and persisted workflow ceilings.
+- Provider-supplied metadata or URLs cannot bypass retrieval policy, decoder validation, artifact hashing, revision checks, or trusted workflow authority.
+- Invalid, stale, partial, oversized, mismatched, or undecodable downloads never become workflow-consumable artifacts.
+- Provider selection never silently crosses Local/Cloud/privacy boundaries.
+- Raw credentials remain absent from durable and returned LAIN surfaces.
+
+### Verification
+
+- Request-boundary and schema tests for dimensions/count/bytes/time/cost limits.
+- Fake-provider submit/poll/cancel/result tests including auth, 429, 5xx, timeout, expired result, redirects, malformed/oversized payloads.
+- Real decoder validation against valid and corrupt/mismatched fixtures.
+- Hash/revision/provenance and stale/duplicate/restart/reconciliation negatives.
+- Secret-leak and hostile URL/metadata tests.
+- Canonical verification plus architecture/security/privacy review; Android/platform checks where decoder/retrieval integration requires them.
+
+### Expected result
+
+Remote image/media generation becomes a bounded replaceable artifact source; only independently validated, hashed, current-revision media enters the workflow.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R5.3 as image/media generation with bounded dimensions/count, provenance metadata, download validation, decoder validation, and hashing before workflow consumption.
+- Current TaskPlanner represents R5.1/R5.2 as TASK-032/TASK-033 but has no task/open issue/open PR for R5.3.
+
+### Projection basis
+
+- External generation must reuse the same durable provider lifecycle and media artifact trust boundaries before Phase-5 budget/retry/privacy controls can be accepted end to end.
+- Independent decoding and hashing prevents provider metadata from becoming trusted artifact evidence.
+
+### Risks / unknowns
+
+- Provider result delivery varies across inline bytes, signed URLs, redirects, retention windows, and formats; unsupported retrieval semantics must fail explicitly.
+- Decoder/platform format support may vary; accepted formats must remain an explicit bounded allowlist.
+- Live-provider acceptance may require credentials/network access and must remain distinct from deterministic fixture evidence.
+
 ## TASK-033: Implement bounded external speech provider adapter
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, speech, privacy
 **Updated:** 2026-10-03
