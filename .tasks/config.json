@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 15,
+  "nextId": 16,
   "states": [
     {
       "name": "Backlog",
@@ -97,10 +97,16 @@
         "title": "Implement voice progress narration",
         "priority": "P2",
         "order": 9
+      },
+      {
+        "id": "TASK-015",
+        "title": "Close Phase-2 voice acceptance gate",
+        "priority": "P1",
+        "order": 10
       }
     ],
     "issue": 6,
-    "repo_head": "8b21415b36c32ecefebb97a2531c46a441e3e041",
-    "next_action": "TASK-006 is In Progress. TASK-007 -> TASK-008 close Phase 1. TASK-009 -> TASK-010 -> TASK-011 -> TASK-012 -> TASK-013 -> TASK-014 proceed through Phase 2."
+    "repo_head": "529ba8f45989859cac9fb62ab867b84199752a19",
+    "next_action": "TASK-006 is In Progress. TASK-007 -> TASK-008 close Phase 1. TASK-009 -> TASK-015 complete Phase 2 in dependency order."
   }
 }
