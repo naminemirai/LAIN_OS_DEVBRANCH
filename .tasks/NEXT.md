@@ -351,7 +351,6 @@ LAIN_OS can speak concise progress while work continues, with speech treated as 
 
 ---
 
-
 ## TASK-013: Implement voice barge-in and echo protection
 **Priority:** P2 | **Tags:** overseer-assigned, developer, phase-2, voice, safety
 **Updated:** 2026-10-03
@@ -705,64 +704,6 @@ Phase 2 has a stable, bounded speech-provider seam that can support replaceable 
 - Concrete codec/container choices may need adjustment when Android capture/playback constraints are implemented; keep the initial interface minimal and extensible rather than provider-specific.
 - Streaming/partial-transcript support may require a later compatible extension; do not over-specify it before turn-manager requirements are implemented.
 - Provider credential storage/selection may share later settings infrastructure, but this task must not invent that UI or persistence prematurely.
-
----
-
-## TASK-007: Build Planner Settings and inert connection diagnostics
-**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-1, android-ui
-**Updated:** 2026-10-03
-
-### Goal
-
-Expose safe user control of Demo, Cloud, and Local planner profiles in the Android GUI and make the active source of intelligence visible.
-
-### Scope
-
-- Add Planner settings for create/edit/delete/select profile.
-- Provide mode, endpoint, model, timeout/bounds, and credential save/replace/remove controls appropriate to each mode.
-- Never reveal a stored credential after save.
-- Add bounded `Test Connection` diagnostics that create no agent session and execute no capability.
-- Show active provider/model in the Workbench.
-- Surface structured recovery states for authentication, model, TLS, timeout, unreachable, unsupported response, and missing credential failures.
-
-### Dependencies
-
-- TASK-005 complete: profile persistence.
-- TASK-006 complete: profile-selected bridge/runtime factory.
-- Existing TASK-002 SecretStore and TASK-003 native transport.
-
-### Plan
-
-- Add the smallest settings surface around the established profile/secret APIs.
-- Wire credential-state controls to opaque refs only.
-- Implement Test Connection through a diagnostic-only transport path.
-- Display active planner identity in Workbench without leaking secrets.
-- Add restart/UI-state and failure-state coverage.
-
-### Acceptance
-
-- User can select Demo/Cloud/Local and create/edit/select/delete profiles.
-- Settings survive process/app restart.
-- Credential state is visible only as saved/missing/replace/remove; raw secret is never rendered or returned.
-- Test Connection cannot create a session, execute a capability, modify filesystem/device state, or bypass trusted planning validation.
-- Workbench clearly identifies the selected provider/model.
-- Structured failure messages correspond to transport/profile error states.
-
-### Verification
-
-- Android UI/instrumentation coverage for profile lifecycle and restart.
-- Test Connection side-effect-negative tests.
-- Secret-leak regression over UI text, IPC results, profile files, logs, audit, and checkpoints.
-- Canonical Android build/lint/instrumentation gates.
-
-### Expected result
-
-A user can configure and visibly select real planner intelligence from the Android app, diagnose the endpoint safely, and return to the Workbench knowing exactly which planner source will be used.
-
-### Evidence / projection basis
-
-- No implemented settings/profile UI is found on current main; `Test Connection` exists only in planning documentation.
-- R1.6/P2-06 is the direct dependency after the runtime bridge and is required for the Phase-1 installed-GUI exit gate.
 
 ---
 
