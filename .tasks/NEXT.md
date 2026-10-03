@@ -1,5 +1,75 @@
 # Next
 
+## TASK-029: Implement real video inspection
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, inspection
+**Updated:** 2026-10-03
+
+### Goal
+
+Independently inspect the actual renderer output and promote it to a verified video artifact only when the file exists, decodes, contains the required streams, matches declared dimensions and duration bounds, and has a recorded content hash.
+
+### Scope
+
+- Inspect only a completed TASK-028 output resolved through the immutable artifact workspace and current workflow revision.
+- Use a bounded Android-compatible media probe/decoder path; do not trust filename extensions, planner claims, renderer exit status, or metadata sidecars as verification.
+- Verify file existence/readability, container decode, at least one video stream, expected audio presence, pixel dimensions, duration tolerance, byte bounds, and full-file hash.
+- Bind inspection evidence to the exact render attempt, timeline revision, renderer identity, input artifact hashes, output artifact identity, and workflow revision.
+- Persist explicit inspection success/failure without mutating the rendered bytes or granting preview/export/publication authority.
+- Do not implement rendering, preview/export UI, sharing, publication, cloud media generation, or generic file probing.
+
+### Dependencies
+
+- TASK-028 complete: a bounded renderer produces a candidate video artifact.
+- TASK-025 complete: media artifact schema and immutable identity.
+- TASK-018, TASK-020, TASK-023, and TASK-024 complete: immutable artifacts, revision invalidation, aggregate budgets, and durable-workflow acceptance.
+
+### Plan
+
+- Define a closed inspection request/result contract over immutable video artifact references.
+- Select or reuse the smallest Android-compatible probe/decoder surface that exposes stream, dimension, duration, and decode evidence under cancellation and resource bounds.
+- Compute the candidate file hash independently and compare all observed properties with the render/timeline contract.
+- Promote verification atomically only after every required check passes for the current revision.
+- Add real-fixture, malformed-container, corrupt/truncated, missing-stream, metadata-mismatch, stale-revision, cancellation, timeout, and duplicate-resume coverage.
+
+### Acceptance
+
+- A valid TASK-028 output is independently opened and decoded, with observed video stream, expected audio stream, dimensions, duration, byte size, and content hash recorded.
+- Renderer exit success, file presence alone, extension/MIME claims, or sidecar metadata cannot produce inspection success.
+- Missing, unreadable, empty, truncated, corrupt, oversized, unsupported-codec, no-video, unexpected-no-audio, wrong-dimension, duration-mismatch, or hash-mismatch output fails closed.
+- Inspection evidence is bound to the exact candidate artifact, render attempt, timeline/input hashes, tool identity/version, and current workflow revision.
+- Cancellation, timeout, process death, or stale revision cannot promote a candidate to verified state.
+- Resume reuses only matching durable completed evidence or reruns inspection; it never guesses success from a partial record.
+- Inspection exposes no arbitrary path, command, shell, preview, export, sharing, or publication surface.
+
+### Verification
+
+- Contract tests using one real valid offline video fixture with asserted streams, dimensions, duration tolerance, byte size, and hash.
+- Corrupt, truncated, malformed-container, unsupported-codec, missing-audio/video, wrong-dimension/duration/hash, hostile-path, and oversized-file negatives.
+- Cancellation, timeout, stale-revision, process-restart, partial-record, and duplicate-resume tests.
+- Canonical portable verification, Android build/lint/tests, and supported emulator/device decode evidence kept explicitly separated.
+- Fresh architecture/security review of path handling, resource bounds, evidence atomicity, and authority boundaries.
+
+### Expected result
+
+Phase 4 can distinguish a genuinely decodable, contract-matching video from a merely produced file and expose durable inspection evidence for preview and the offline golden fixture without widening execution or publication authority.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.5 Video inspection immediately after R4.4 Renderer and explicitly requires existence, decode, video/audio streams, dimensions, duration, and file hash.
+- Current TaskPlanner, open issues, and open PRs end Phase-4 planning at TASK-028/R4.4; no current repository-native record represents R4.5.
+
+### Projection basis
+
+- R4.6 preview/export and R4.7 offline golden fixture need independently verified media properties; treating renderer completion as inspection would make later acceptance circular.
+
+### Risks / unknowns
+
+- Android decoder/container behavior can differ by API level and device codec availability; evidence must label platform/API/device and keep portable structural checks distinct.
+- Full decode may be resource-expensive; bounded sampling versus full-stream validation must be chosen explicitly without overstating assurance.
+- The inspection tool may share libraries with the renderer; independent observation still requires a separate verification path and result contract.
+
+---
+
 ## TASK-028: Integrate a bounded Android-capable video renderer
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, renderer
 **Updated:** 2026-10-03
