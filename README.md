@@ -287,6 +287,15 @@ PR #7 (`Android Keystore-backed planner SecretStore`) merged under this policy a
 Android workflow #45 was cancelled, so its Android instrumentation tests remain
 explicitly untested by that merge receipt.
 
+PR #9 merged under this policy at `11906c484ebd91d480178b64728c91684f931115`
+after review `5398751890` passed on head
+`e0ca01f4bd0f6ee08ee5db500d654a33f038dff8`. The focused contract passed 5/5,
+the imported inventory tests passed 4/4, and Verify workflow #72 succeeded.
+Android workflow #61 was still in progress at merge time, so it was untested by
+the merge decision and is not claimed passed. Repository-native cleanup
+`47566d0a87ce06f1ba1e3ca45a7dac37e8bf0232` subsequently removed that imported
+orchestration tree from `main`.
+
 LAIN_OS should make the device more capable without making its owner less in control.
 
 <!-- TASKPLANNER:ATTRIBUTION:START -->

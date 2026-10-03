@@ -1,5 +1,8 @@
 # Work Log
 
+## 2026-10-02 — PR review and queue reconciliation
+PR #9 passed fresh review `5398751890` on head `e0ca01f`, Verify #72 succeeded, and it squash-merged as `11906c4`; Android #61 was still in progress at merge time and is not claimed passed. The imported orchestration tree was subsequently removed by repository-native cleanup `47566d0`. PR #8 remains blocked by review `5398751852`; TASK-003 remains the sole canonical task and no new task was created.
+
 ## 2026-10-02 — PR #8 review reconciliation
 Fresh review on head `7316494` does not pass (review `5397679657`): Android #51 fails the malformed-response JVM test on both API jobs, instrumentation was skipped, and Local cleartext remains an unresolved contract/security mismatch. TASK-003 stays In Progress; no new task was created.
 

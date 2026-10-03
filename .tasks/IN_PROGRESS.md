@@ -63,6 +63,6 @@ Acceptance:
 - Expected result: accepted planner bindings are executable under Android policy,
   the failing JVM assertion is truthful, and the review passes without weakening
   global cleartext protections.
-- Fresh unchanged-head review remains blocked (review ID `5398033574`).
+- Fresh unchanged-head review remains blocked (review ID `5398751852`).
 
 ---

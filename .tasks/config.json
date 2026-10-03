@@ -48,11 +48,11 @@
         "id": "TASK-003",
         "title": "Implement bounded native planner transport",
         "priority": "P1",
-        "order": 2
+        "order": 1
       }
     ],
     "issue": 6,
-    "repo_head": "57a39a1e951c95b2783a4cd8920069288a44b6e0",
-    "next_action": "Resolve TASK-003 planner transport blockers using repository-native engineering state."
+    "repo_head": "47566d0a87ce06f1ba1e3ca45a7dac37e8bf0232",
+    "next_action": "Resolve TASK-003's Local HTTP security/compatibility decision, then make malformed-response validation truthful and rerun Android verification."
   }
 }
