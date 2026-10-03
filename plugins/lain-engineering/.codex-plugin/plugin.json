@@ -1,0 +1,26 @@
+{
+  "name": "lain-engineering",
+  "version": "0.0.0-dev",
+  "description": "Agentic engineering with durable goals for autonomous coding agents",
+  "homepage": "https://github.com/naminemirai/LAIN_OS_DEVBRANCH",
+  "repository": "https://github.com/naminemirai/LAIN_OS_DEVBRANCH",
+  "license": "Apache-2.0",
+  "keywords": ["agentic-engineering", "coding-agents", "autonomous-development", "repository-bootstrap", "goal-management", "github-issues", "codex", "claude-code"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "LAIN Engineering",
+    "shortDescription": "Agentic engineering goals",
+    "longDescription": "LAIN Engineering gives autonomous coding agents a reviewed, prioritized, and resumable agentic-engineering loop for repository bootstrapping and durable goals in GitHub Issues. It coordinates implementation under repository policy while unresolved safety decisions remain blocking.",
+    "category": "Developer Tools",
+    "capabilities": ["Write"],
+    "websiteURL": "https://github.com/naminemirai/LAIN_OS_DEVBRANCH",
+    "composerIcon": "./assets/composer-icon.png",
+    "logo": "./assets/logo.png",
+    "logoDark": "./assets/logo-dark.png",
+    "defaultPrompt": [
+      "Review and initialize this project's engineering policy.",
+      "Capture a durable project goal.",
+      "Work all available goals until blocked."
+    ]
+  }
+}

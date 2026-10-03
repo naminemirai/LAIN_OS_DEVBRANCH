@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "lain-engineering",
+  "version": "0.0.0-dev",
+  "description": "Agentic engineering with durable goals for autonomous coding agents",
+  "homepage": "https://github.com/naminemirai/LAIN_OS_DEVBRANCH",
+  "repository": "https://github.com/naminemirai/LAIN_OS_DEVBRANCH",
+  "license": "Apache-2.0",
+  "keywords": ["agentic-engineering", "coding-agents", "autonomous-development", "repository-bootstrap", "goal-management", "github-issues", "codex", "claude-code"]
+}
