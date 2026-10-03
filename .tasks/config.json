@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 30,
+  "nextId": 31,
   "states": [
     {
       "name": "Backlog",
@@ -181,10 +181,16 @@
         "title": "Implement real video inspection",
         "priority": "P1",
         "order": 23
+      },
+      {
+        "id": "TASK-030",
+        "title": "Build verified video preview and explicit export UI",
+        "priority": "P1",
+        "order": 24
       }
     ],
     "issue": 6,
-    "repo_head": "6bdf0de11957253e510fb0ef8f0a11ee1634657f",
+    "repo_head": "3f3ae3af9cc627dd1cd6b4adde56b5b1ca71ff67",
     "next_action": "Continue TASK-008 after PR #13: re-inventory remaining Phase-1 acceptance gaps and add only the next missing integrated adversarial slice; physical-device evidence remains unverified."
   }
 }
