@@ -1,5 +1,23 @@
 # Done
 
+## TASK-006: Wire profile-selected planner runtime bridge
+**Priority:** P1
+**Updated:** 2026-10-03
+
+### Done summary
+
+- Added the Android/Python planner bridge over the native bounded transport while preserving native ownership of raw credentials and HTTP.
+- Planner selection is keyed from each session's pinned `PlannerBinding`; Demo stays offline and Cloud/Local never auto-fallback across modes.
+- Stop/lifecycle cancellation propagates into the active native planner call and maps to an explicit cancelled agent state.
+- Verify workflow #173 succeeded.
+- Android workflow #162 succeeded after a targeted API 35 rerun; API 24 and API 35 build, unit, lint, and instrumentation gates are green.
+- The first API 35 attempt failed with unrelated Espresso window-focus failures after emulator/ADB startup trouble; the isolated retry succeeded without product-code changes.
+- Fresh post-CI review found no submitted review threads and no product-code overlap with newer main planning commits.
+- PR #11 squash-merged as `f8cff695f4dfdac5cdf5bffa33b2d5dc70776bb2`.
+- Physical-device acceptance remains unverified and is not claimed.
+
+---
+
 ## TASK-005: Implement persistent PlannerProfile selection
 **Priority:** P1
 **Updated:** 2026-10-03
