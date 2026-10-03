@@ -1,5 +1,73 @@
 # Next
 
+## TASK-025: Define media artifact schemas
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, artifacts
+**Updated:** 2026-10-03
+
+### Goal
+
+Define strict durable image/audio/video artifact metadata contracts that Phase 4 media stages can exchange without guessing MIME, codec, dimensions, duration, hash, or provenance.
+
+### Scope
+
+- Define bounded schema records for image, audio, and video artifacts.
+- Include immutable content hash, media type/MIME, codec/container identifiers where applicable, dimensions, duration, byte size, provenance, producer node, workflow revision, and verification state.
+- Reuse TASK-018 immutable artifact identities and TASK-020 revision semantics.
+- Fail closed on impossible/contradictory metadata, hash mismatch, invalid dimensions/duration, or unsupported type combinations.
+- Keep metadata non-authoritative: it cannot grant capabilities, approvals, execution, or publication rights.
+- Do not implement synthesis, timelines, rendering, inspection tooling, preview UI, or provider adapters.
+
+### Dependencies
+
+- TASK-024 complete: Phase-3 durable-workflow acceptance gate.
+- TASK-018 artifact workspace contracts remain authoritative.
+
+### Plan
+
+- Inventory existing artifact metadata and hashing primitives.
+- Define minimal closed image/audio/video metadata variants with shared immutable identity/provenance fields.
+- Add strict validation for MIME/codec/container/dimensions/duration/size combinations.
+- Add serialization/round-trip and corrupt/inconsistent metadata tests.
+- Document the contract consumed by later narration, timeline, renderer, and inspector tasks.
+
+### Acceptance
+
+- Image artifacts require valid dimensions and image media identity.
+- Audio artifacts require valid duration and audio media identity.
+- Video artifacts require valid dimensions, duration, and video media identity.
+- Every artifact references immutable verified content identity and workflow revision/provenance.
+- Invalid negative/zero dimensions, non-finite duration, impossible MIME/type pairings, oversized metadata, or hash mismatch fail explicitly.
+- Metadata cannot authorize capabilities, approval, publication, or execution.
+- Existing generic artifact workspace behavior remains reusable rather than duplicated.
+
+### Verification
+
+- Focused schema validation and round-trip tests.
+- Cross-type invalid-combination tests.
+- Hash/provenance/revision integrity tests.
+- Metadata size-bound/corruption tests.
+- Canonical portable verification plus fresh architecture review.
+
+### Expected result
+
+Phase 4 gains one stable media-artifact contract that narration, timeline, rendering, inspection, preview, and export can share without parallel type systems.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.1 Media artifact schemas as the first Phase-4 work package.
+- Current planning reaches the Phase-3 acceptance gate at TASK-024; no open task, issue, or PR represents R4.1.
+
+### Projection basis
+
+- Every later Phase-4 stage exchanges real media files; stabilizing media identity and metadata first prevents renderer/inspector/UI-specific schemas from diverging.
+
+### Risks / unknowns
+
+- Final supported codec/container list should remain minimal until the chosen Android-compatible rendering path is proven.
+- Rich metadata extraction belongs to video inspection, not this schema task.
+
+---
+
 ## TASK-024: Close Phase-3 durable-workflow acceptance gate
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, acceptance, adversarial
 **Updated:** 2026-10-03
