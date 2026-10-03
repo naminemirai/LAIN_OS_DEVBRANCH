@@ -1,5 +1,75 @@
 # Next
 
+## TASK-021: Implement durable wait and poll stages
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, waiting
+**Updated:** 2026-10-03
+
+### Goal
+
+Add durable bounded waiting semantics for long provider, render, and upload stages without holding a worker indefinitely or silently extending controller budgets.
+
+### Scope
+
+- Persist explicit waiting state, wake/deadline metadata, provider/job identity references, poll attempt counts, and last observed provider state.
+- Release active worker ownership while a node is waiting.
+- Resume only when the persisted wake condition is reached or an external completion signal is reconciled.
+- Bound poll intervals, total attempts, and deadline behavior under existing aggregate/runtime constraints.
+- Preserve exact workflow revision and operation identity across process restart.
+- Keep waiting metadata non-authoritative: it cannot grant capabilities, approve effects, or bypass verification.
+- Do not implement provider-specific polling adapters, external-effect reconciliation, aggregate budget accounting, or publication behavior.
+
+### Dependencies
+
+- TASK-016 workflow persistence.
+- TASK-017 bounded DAG scheduler.
+- TASK-020 workflow revision invalidation.
+
+### Plan
+
+- Define a minimal durable waiting/poll state transition for workflow nodes.
+- Persist wake deadline, attempt count, provider/job reference, and last safe observation atomically.
+- Release scheduler lease when entering waiting and reacquire only when the node is eligible to poll.
+- Enforce bounded backoff/poll count/deadline without consuming unbounded active controller time.
+- Add restart, deadline, duplicate-poll, stale-revision, and cancellation tests.
+
+### Acceptance
+
+- Long-running nodes can enter a durable waiting state without retaining an active worker lease.
+- Process restart preserves wait deadline, poll count, provider/job reference, and workflow revision exactly.
+- Polling cannot occur before the persisted wake condition or after terminal deadline/cancellation.
+- Poll attempts are bounded and cannot silently extend the node/controller budget.
+- A stale workflow revision cannot resume or poll a superseded operation.
+- Waiting state cannot authorize capabilities, approvals, or external effects.
+- Completion observations remain subject to normal verification/reconciliation before downstream nodes unlock.
+
+### Verification
+
+- Focused wait-state transition and restart round-trip tests.
+- Deadline/backoff/poll-limit tests with deterministic clocks.
+- Lease-release/reacquisition tests against the scheduler.
+- Negative stale-revision, cancellation, and duplicate-poll tests.
+- Canonical portable verification and fresh architecture review.
+
+### Expected result
+
+LAIN_OS can pause durable workflow nodes for long external or rendering jobs and resume them truthfully after restart without blocking workers, replaying polls, or inventing extra runtime budget.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.6 Durable wait/poll stages directly after revision invalidation.
+- Current TaskPlanner state represents R3.1–R3.5 as TASK-016 through TASK-020; no open task, issue, or PR represents R3.6.
+
+### Projection basis
+
+- Later media rendering, provider jobs, upload processing, and external reconciliation require persistent wait semantics that do not tie up execution workers or rely on in-memory timers.
+
+### Risks / unknowns
+
+- Provider-specific status schemas remain adapter concerns and must not leak into the core waiting model.
+- External side-effect uncertainty belongs to TASK-022/R3.7 rather than being folded into polling.
+
+---
+
 ## TASK-020: Implement workflow revision invalidation
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, revisions
 **Updated:** 2026-10-03
