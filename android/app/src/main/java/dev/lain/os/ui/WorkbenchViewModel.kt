@@ -11,7 +11,7 @@ import dev.lain.os.runtime.RuntimeClient
 import org.json.JSONObject
 
 class WorkbenchViewModel(application: Application, private val saved: SavedStateHandle) : AndroidViewModel(application) {
-    internal companion object {
+    companion object {
         @Volatile
         var runtimeClientFactory: (Application) -> RuntimeClient = { app -> RuntimeClient(app) }
     }
@@ -42,8 +42,6 @@ class WorkbenchViewModel(application: Application, private val saved: SavedState
     private fun change(update: (WorkbenchState) -> WorkbenchState) {
         val before = current()
         val after = update(before)
-        // Polling identical JSON must not rebuild the owner's screen or clear
-        // text selection. Real connection, approval, and result changes publish.
         if (before.connected == after.connected && before.ready == after.ready &&
             before.startupFailed == after.startupFailed && before.pending == after.pending &&
             before.message == after.message && before.session?.toString() == after.session?.toString() &&
@@ -79,7 +77,6 @@ class WorkbenchViewModel(application: Application, private val saved: SavedState
 
     fun reconnect() {
         if (current().connected && current().ready) return
-        // Inspect durable state after rebinding; no saved mutation is replayed.
         client.reconnect()
     }
 
@@ -94,7 +91,6 @@ class WorkbenchViewModel(application: Application, private val saved: SavedState
 
     fun stop() {
         val session = current().session ?: return
-        // Stop is available independently of the ordinary mutation button state.
         client.request("stop", JSONObject().put("session_id", session.getString("session_id"))) { reply ->
             change { it.copy(message = if (reply.optBoolean("ok"))
                 "Stop requested. An in-flight action may still settle." else "Stop not acknowledged; inspect state") }
@@ -144,7 +140,6 @@ class WorkbenchViewModel(application: Application, private val saved: SavedState
             }
             val history = reply.optJSONArray("sessions") ?: org.json.JSONArray()
             var sid = saved.get<String>("session_id")
-            // Find existing durable work on a cold start; never automatically resume.
             if (sid == null) {
                 for (i in 0 until history.length()) {
                     val item = history.getJSONObject(i)
