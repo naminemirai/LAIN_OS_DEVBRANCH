@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 4,
+  "nextId": 5,
   "states": [
     {
       "name": "Backlog",
@@ -42,16 +42,23 @@
   "insertPosition": "top",
   "aiPlanRequired": true,
   "sortBy": "priority",
-  "lainSuggestWork": {
-    "canonicalIssue": 6,
-    "source": "@LAIN / Suggest Work",
-    "sourceHead": "2a36bea1129a472b4d84bc603427e46eb0c10f7b",
-    "tasks": [
+  "lainTaskSequencer": {
+    "canonical_tasks": [
+      {
+        "id": "TASK-004",
+        "title": "Complete open LAIN engineering workflow migration",
+        "priority": "P1",
+        "order": 1
+      },
       {
         "id": "TASK-003",
         "title": "Implement bounded native planner transport",
-        "priority": "P1"
+        "priority": "P1",
+        "order": 2
       }
-    ]
+    ],
+    "issue": 6,
+    "repo_head": "f8dec08464c78dcbb47e0e4d0a57a4d84fad619a",
+    "next_action": "Convert PR #9's migration contract to discoverable unittest coverage, verify the intended red failures, then implement the plugin migration."
   }
 }

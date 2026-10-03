@@ -1,5 +1,50 @@
 # In Progress
 
+## TASK-004: Complete open LAIN engineering workflow migration
+**Priority:** P1
+**Updated:** 2026-10-02 20:03
+
+Complete PR #9's migration from person-specific ZzzOps engineering skills to
+functional LAIN workflow names without weakening safety boundaries.
+
+### Sequence
+
+1. **Make the migration contract executable (started).**
+   - Observable outcome: every contract assertion is discovered by the canonical
+     `unittest` runner and compares parsed skill metadata and resolved feedback
+     targets, not substrings.
+   - Dependencies: none.
+   - Verification: run the focused contract test through `python -m unittest`.
+   - Expected result: the test is discovered and fails because the
+     `plugins/lain-engineering` implementation is not yet present.
+2. **Implement the bounded migration.**
+   - Observable outcome: the functional skill tree and neutral plugin manifests
+     exist, feedback targets are repository/configuration-derived, and policy
+     approval is iterative while unresolved safety decisions remain blocking.
+   - Dependencies: executable red contract from step 1.
+   - Verification: run the focused contract test and inspect the complete diff
+     for retired invocations and preserved safety boundaries.
+   - Expected result: the focused contract passes with no person-specific or
+     retired skill identifiers.
+3. **Run repository gates and re-review PR #9.**
+   - Observable outcome: canonical verification exercises the contract and a
+     fresh whole-diff review has no correctness or safety blocker.
+   - Dependencies: step 2.
+   - Verification: `python scripts/verify.py`, required CI, and fresh PR review.
+   - Expected result: checks pass with explicit status and the PR is merge-ready
+     under the review-only policy.
+
+### Evidence / progress
+
+- PR #9 head `323cdc28461a52530ba02c42a75633afb683fb63` adds only
+  `tests/test_lain_engineering_plugin.py`; the referenced plugin tree is absent.
+- Verify #65 and Android #54 succeeded, but the five module-level pytest-style
+  functions are not discovered by the canonical `unittest` runner and remain
+  untested by those green workflows.
+- Fresh review does not pass (review ID `5398033512`). No merge was performed.
+
+---
+
 ## TASK-003: Implement bounded native planner transport
 **Priority:** P1
 **Updated:** 2026-10-02 18:59
@@ -51,5 +96,18 @@ Acceptance:
   Android policy. Global cleartext enablement and raw-socket bypass remain rejected.
 - Verify workflow #62 passed. Android workflow #51 failed; Android
   instrumentation and any later skipped steps remain untested.
+
+### Sequenced continuation
+
+- Observable outcome: Local HTTP validation and Android runtime policy describe
+  one truthful supported contract, and malformed JSON is validated on a
+  platform-neutral boundary or truthful instrumentation path.
+- Dependencies: explicit cleartext compatibility/security decision.
+- Verification: focused malformed-response test, Android workflow, manifest
+  policy test, and fresh whole-diff review.
+- Expected result: accepted planner bindings are executable under Android policy,
+  the failing JVM assertion is truthful, and the review passes without weakening
+  global cleartext protections.
+- Fresh unchanged-head review remains blocked (review ID `5398033574`).
 
 ---
