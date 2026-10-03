@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 26,
+  "nextId": 27,
   "states": [
     {
       "name": "Backlog",
@@ -157,10 +157,16 @@
         "title": "Define media artifact schemas",
         "priority": "P1",
         "order": 19
+      },
+      {
+        "id": "TASK-026",
+        "title": "Implement bounded narration pipeline",
+        "priority": "P1",
+        "order": 20
       }
     ],
     "issue": 6,
-    "repo_head": "c5cb213cc06bc05716f79dcc69d501c0a4b0ef0c",
-    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 4 begins only after TASK-024, with TASK-025 media artifact schemas."
+    "repo_head": "dcd8a94d7313fe05006c4faac1c92bc68d7832f1",
+    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 4 begins after TASK-024 with TASK-025 -> TASK-026."
   }
 }
