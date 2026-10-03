@@ -94,7 +94,7 @@ internal class PlannerProfileStore internal constructor(private val root: File) 
 
     private fun readStateLocked(): State {
         val atomic = AtomicFile(stateFile)
-        if (!atomic.exists()) return State(emptyMap(), PlannerProfile.DEMO_ID)
+        if (!stateFile.exists()) return State(emptyMap(), PlannerProfile.DEMO_ID)
         return try {
             val payload = atomic.readFully()
             if (payload.isEmpty() || payload.size > MAX_STATE_BYTES) {
