@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 5,
+  "nextId": 8,
   "states": [
     {
       "name": "Backlog",
@@ -49,10 +49,28 @@
         "title": "Implement bounded native planner transport",
         "priority": "P1",
         "order": 1
+      },
+      {
+        "id": "TASK-005",
+        "title": "Implement persistent PlannerProfile selection",
+        "priority": "P1",
+        "order": 2
+      },
+      {
+        "id": "TASK-006",
+        "title": "Wire profile-selected planner runtime bridge",
+        "priority": "P1",
+        "order": 3
+      },
+      {
+        "id": "TASK-007",
+        "title": "Build Planner Settings and inert connection diagnostics",
+        "priority": "P1",
+        "order": 4
       }
     ],
     "issue": 6,
-    "repo_head": "47566d0a87ce06f1ba1e3ca45a7dac37e8bf0232",
-    "next_action": "Resolve TASK-003's Local HTTP security/compatibility decision, then make malformed-response validation truthful and rerun Android verification."
+    "repo_head": "767fb2af20e4a36e8f4dc2ac29b736145e108e5e",
+    "next_action": "TASK-005 can start immediately. Integrate PR #8 before TASK-006; TASK-007 follows TASK-006."
   }
 }
