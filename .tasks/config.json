@@ -45,32 +45,26 @@
   "lainTaskSequencer": {
     "canonical_tasks": [
       {
-        "id": "TASK-003",
-        "title": "Implement bounded native planner transport",
-        "priority": "P1",
-        "order": 1
-      },
-      {
         "id": "TASK-005",
         "title": "Implement persistent PlannerProfile selection",
         "priority": "P1",
-        "order": 2
+        "order": 1
       },
       {
         "id": "TASK-006",
         "title": "Wire profile-selected planner runtime bridge",
         "priority": "P1",
-        "order": 3
+        "order": 2
       },
       {
         "id": "TASK-007",
         "title": "Build Planner Settings and inert connection diagnostics",
         "priority": "P1",
-        "order": 4
+        "order": 3
       }
     ],
     "issue": 6,
-    "repo_head": "767fb2af20e4a36e8f4dc2ac29b736145e108e5e",
-    "next_action": "TASK-005 can start immediately. Integrate PR #8 before TASK-006; TASK-007 follows TASK-006."
+    "repo_head": "c217ca76cc41ae24eb14357bf8ce3022f29b8534",
+    "next_action": "TASK-005 is In Progress. TASK-006 is blocked only on TASK-005; TASK-007 follows TASK-006."
   }
 }
