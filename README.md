@@ -1,12 +1,15 @@
 # LAIN_OS
 
-**Loyal Autonomous Intelligence Network**
+**Local Autonomous Intelligence Network Operating System**
 
-`LAIN_OS` is the canonical project and repository name. The Python import namespace remains `lain` for compatibility and ergonomics.
+LAIN_OS is the open-source software platform we are building: a local-first operating system for autonomous intelligence, beginning on Android and designed to expand across trusted devices and nodes.
 
-LAIN_OS is an open-source, local-first autonomous intelligence platform for turning an Android device into a human-controlled execution environment for AI-assisted work.
+## Naming
 
-**Loyal** describes the platform's alignment: LAIN serves the human using it rather than a vendor, advertiser, or remote service. **Local-first** remains a technical design principle: execution, authority, durable state, and user data should stay on the user's device whenever practical.
+- **LAIN** — **Loyal Autonomous Intelligence Network**: the broader philosophy and network identity. "Loyal" describes alignment to the human using the system rather than a vendor, advertiser, or remote service.
+- **LAIN_OS** — **Local Autonomous Intelligence Network Operating System**: the concrete software platform. "Local" describes its architectural priority: execution, authority, durable state, and user data stay on the user's hardware whenever practical.
+
+`LAIN_OS` remains the canonical project and repository name. The Python import namespace remains `lain` for compatibility and ergonomics.
 
 The core idea is simple:
 
