@@ -1,6 +1,7 @@
 import json
 import tempfile
 import unittest
+import threading
 from pathlib import Path
 
 from lain.agent import AgentBudget, AgentController, AgentPlanningService, AgentSessionStatus, AgentSessionStore
@@ -238,6 +239,57 @@ class AppControllerPlannerBridgeTests(unittest.TestCase):
                 self.assertEqual(stored.total_attempted_actions, 0)
                 self.assertEqual(len(bridge.calls), 1)
                 self.assertEqual(list((Path(directory) / "workspace").iterdir()), [])
+
+
+class BlockingNativePlannerBridge:
+    def __init__(self):
+        self.entered = threading.Event()
+        self.cancelled = threading.Event()
+
+    def execute(self, binding_json, request_body):
+        self.entered.set()
+        self.cancelled.wait(5)
+        return json.dumps({"ok": False, "error": "PLANNER_CANCELLED"})
+
+    def cancel(self):
+        self.cancelled.set()
+
+
+class PlannerStopIntegrationTests(unittest.TestCase):
+    def test_stop_cancels_deliberately_blocking_planner_call(self):
+        with tempfile.TemporaryDirectory() as directory:
+            bridge = BlockingNativePlannerBridge()
+            app = AppController(
+                Path(directory),
+                planner_profiles=FakePlannerProfiles(cloud_binding()),
+                planner_bridge=bridge,
+            )
+            started = json.loads(app.dispatch(json.dumps({
+                "version": 1,
+                "command": "start",
+                "arguments": {"goal": "wait"},
+            })))
+            session_id = started["session"]["session_id"]
+
+            worker = threading.Thread(target=app.advance)
+            worker.start()
+            self.assertTrue(bridge.entered.wait(2))
+
+            stopped = json.loads(app.dispatch(json.dumps({
+                "version": 1,
+                "command": "stop",
+                "arguments": {"session_id": session_id},
+            })))
+            worker.join(5)
+
+            self.assertTrue(stopped["ok"])
+            self.assertTrue(stopped["stop_requested"])
+            self.assertTrue(bridge.cancelled.is_set())
+            self.assertFalse(worker.is_alive())
+            self.assertEqual(
+                app.store.load(session_id).status,
+                AgentSessionStatus.CANCELLED,
+            )
 
 
 class PlannerCancellationControllerTests(unittest.TestCase):
