@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 9,
+  "nextId": 10,
   "states": [
     {
       "name": "Backlog",
@@ -67,10 +67,16 @@
         "title": "Close Phase-1 planner acceptance and adversarial gate",
         "priority": "P1",
         "order": 4
+      },
+      {
+        "id": "TASK-009",
+        "title": "Define bounded speech provider interfaces",
+        "priority": "P2",
+        "order": 5
       }
     ],
     "issue": 6,
-    "repo_head": "560fb0c3369d5151ce645061423849fe72b02a4e",
-    "next_action": "TASK-005 is In Progress. TASK-006 follows TASK-005, TASK-007 follows TASK-006, and TASK-008 closes the Phase-1 acceptance gate before Voice Conversation."
+    "repo_head": "6afef3e08566098e99d2b6b972983c52ec7abdd2",
+    "next_action": "TASK-005 remains In Progress on PR #10. After TASK-005, execute TASK-006 -> TASK-007 -> TASK-008; once the Phase-1 gate passes, TASK-009 begins Phase 2 with bounded speech provider interfaces."
   }
 }
