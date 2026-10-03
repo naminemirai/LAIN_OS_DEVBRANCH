@@ -1,5 +1,76 @@
 # Next
 
+## TASK-032: Define bounded external provider job abstraction
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, workflow, network
+**Updated:** 2026-10-03
+
+### Goal
+
+Define one provider-neutral, durable job contract for bounded external submit/poll/cancel/result retrieval without granting provider responses, job IDs, or retry hints any trusted execution authority.
+
+### Scope
+
+- Define typed submit, poll, cancel-support, terminal-status, and result-artifact retrieval contracts for asynchronous external providers.
+- Bind every job to workflow/revision/provider identity, request fingerprint, deadlines, budgets, and durable operation identity.
+- Reuse TASK-021 durable waits, TASK-022 reconciliation, TASK-023 budgets, and TASK-018 artifact provenance rather than creating provider-specific schedulers or stores.
+- Represent unsupported cancellation, uncertain submission, provider loss, rate limiting, malformed status/result, stale revision, and result validation failure explicitly.
+- Keep provider credentials opaque and outside planner payloads, durable workflow state, logs, audit, IPC results, and artifacts.
+- Do not implement a concrete STT/TTS/media provider, generic authenticated HTTP capability, implicit fallback, or spending authority.
+
+### Dependencies
+
+- TASK-018 complete: immutable artifact workspace.
+- TASK-020 through TASK-024 complete: revision, durable wait, reconciliation, aggregate budgets, and Phase-3 acceptance.
+- TASK-031 complete: Phase-4 local media acceptance before external-provider complexity.
+
+### Plan
+
+- Inventory existing planner/speech transport lifecycle and durable workflow primitives for reusable status/error/cancellation vocabulary.
+- Specify the smallest typed provider job request/identity/state/result model.
+- Map submit uncertainty to reconciliation and polling to persisted wait/deadline semantics.
+- Require downloaded result bytes to enter existing artifact validation/hash/provenance boundaries before workflow consumption.
+- Add deterministic fake-provider contract tests for success, async polling, cancellation, unsupported cancel, timeout, 429/5xx, malformed responses, stale revision, restart, uncertain submit, duplicate operation identity, and budget exhaustion.
+- Document adapter obligations and explicit non-authority boundaries for later R5.2/R5.3 implementations.
+
+### Acceptance
+
+- One typed contract represents synchronous or asynchronous provider jobs without provider-specific workflow state.
+- Restart cannot replay an uncertain submit or reset deadlines, retry counters, call counts, byte/cost ceilings, or operation identity.
+- Provider job IDs/status text/retry hints/results cannot authorize capabilities, approvals, spending, or workflow success.
+- Polling and cancellation are bounded and truthful; unsupported cancellation is distinct from success.
+- Result artifacts are validated, hashed, revision-bound, and provenance-recorded before downstream use.
+- Local/provider selection never silently changes to another provider.
+- Raw credentials remain absent from durable and returned LAIN surfaces.
+
+### Verification
+
+- Contract/schema round-trip and strict invalid-input tests.
+- Deterministic fake-provider submit/poll/cancel/result tests.
+- Crash/restart/reconciliation and duplicate-operation tests.
+- Deadline/rate-limit/retry/budget intersection tests with deterministic clocks.
+- Stale-revision, malformed-status/result, oversized-result, hash/provenance, and secret-leak negatives.
+- Canonical portable verification plus architecture/security review of the provider boundary.
+
+### Expected result
+
+Later speech and media adapters can plug into one durable bounded job lifecycle while local workflow authority, budgets, reconciliation, artifact verification, and privacy semantics remain authoritative.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines Phase 5 R5.1 as provider job abstraction with submit, poll, cancellation support, terminal status, and result artifact retrieval.
+- Current TaskPlanner state ends Phase 4 at TASK-031; no existing task, open issue, or open PR represents R5.1.
+
+### Projection basis
+
+- R5.2 speech and R5.3 media adapters both need the same durable asynchronous lifecycle; establishing it once prevents duplicated provider-specific polling/retry/reconciliation state.
+- Phase-5 exit requires replaceable remote providers under bounded budgets/failure handling without changing trusted local semantics.
+
+### Risks / unknowns
+
+- Concrete providers vary in idempotency, cancellation, billing, and result-retention semantics; the contract must represent unsupported/uncertain states rather than normalize them into false success.
+- Cost fields may be estimates until providers expose actual usage and must never grant spending authority.
+- Provider-specific privacy disclosures remain a later R5.6 concern.
+
 ## TASK-031: Close Phase-4 with a real offline golden video fixture
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, acceptance, golden-fixture
 **Updated:** 2026-10-03
