@@ -6,7 +6,6 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.ConnectException
 import java.net.HttpURLConnection
-import java.net.InetAddress
 import java.net.SocketTimeoutException
 import java.net.URI
 import java.net.URL
@@ -46,54 +45,17 @@ internal data class PlannerBinding(
         val uri = try { URI(baseUrl) } catch (exc: Exception) {
             throw IllegalArgumentException("invalid planner endpoint", exc)
         }
-        val host = uri.host?.removePrefix("[")?.removeSuffix("]")
         require(
-            !host.isNullOrBlank() &&
+            !uri.host.isNullOrBlank() &&
                 uri.userInfo == null &&
                 uri.query == null &&
                 uri.fragment == null
         )
-        when (uri.scheme?.lowercase()) {
-            "https" -> Unit
-            "http" -> require(
-                mode == "local" &&
-                    allowInsecureLanHttp &&
-                    isAllowedPrivateLiteral(host)
-            )
-            else -> throw IllegalArgumentException("planner endpoint must use HTTP(S)")
+        require(uri.scheme?.lowercase() == "https") {
+            "Android planner transport requires HTTPS"
         }
     }
 
-    private fun isAllowedPrivateLiteral(host: String): Boolean {
-        parseIpv4(host)?.let { octets ->
-            return octets[0] == 127 ||
-                octets[0] == 10 ||
-                (octets[0] == 172 && octets[1] in 16..31) ||
-                (octets[0] == 192 && octets[1] == 168)
-        }
-        if (!host.contains(':') || host.contains('%')) return false
-        val address = try { InetAddress.getByName(host).address } catch (_: Exception) { return false }
-        if (address.size != 16) return false
-        val first = address[0].toInt() and 0xff
-        val second = address[1].toInt() and 0xff
-        val loopback = address.dropLast(1).all { it.toInt() == 0 } && address.last().toInt() == 1
-        return loopback || first in 0xfc..0xfd || (first == 0xfe && second in 0x80..0xbf)
-    }
-
-    private fun parseIpv4(host: String): IntArray? {
-        val parts = host.split('.')
-        if (parts.size != 4) return null
-        val values = IntArray(4)
-        for ((index, part) in parts.withIndex()) {
-            if (part.isEmpty() || !part.all(Char::isDigit) || (part.length > 1 && part[0] == '0')) {
-                return null
-            }
-            val value = part.toIntOrNull() ?: return null
-            if (value !in 0..255) return null
-            values[index] = value
-        }
-        return values
-    }
 }
 
 internal sealed interface PlannerTransportResult {
