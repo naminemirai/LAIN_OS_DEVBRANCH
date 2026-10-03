@@ -2,15 +2,14 @@
 
 Run on real F-Droid Termux plus matching Termux:API. This document records the
 completed v1 acceptance and remains the procedure for future revalidation. Execute
-one step, inspect its result, then continue. Do not install from a moving branch
-without checking the exact reviewed SHA. No credential contents are printed or
-changed here.
+one step, inspect its result, then continue. Use a fixed source revision or packaged
+artifact and record its exact identity before testing. No credential contents are
+printed or changed here.
 
 ## Acceptance record
 
-Manual acceptance completed on Android 16 at exact feature head
-`0d7efe584b78a050c2817b2ab3e3f555e2450dff`, later merged unchanged into
-`main` by merge commit `4f718038db6065328895b261c92ae7504ca25aad`.
+Manual acceptance completed on Android 16 for source revision
+`0d7efe584b78a050c2817b2ab3e3f555e2450dff`.
 
 Observed results:
 
@@ -24,39 +23,36 @@ Observed results:
 - Audit records redacted clipboard/share `content` as `[REDACTED]` and preserved
   the expected risk and policy decisions.
 
-GitHub Actions Verify run #7 passed on the accepted feature head. The merge commit
-then passed Verify run #8 with 232 tests. This is manual hardware evidence plus
-portable CI, not automated Android hardware CI.
+Portable verification for this accepted implementation lineage recorded 232 tests.
+This is manual hardware evidence plus portable automated verification, not automated
+Android hardware verification.
 
 The physical timeout found during acceptance was traced to the filtered subprocess
 environment omitting Android runtime variables required by Termux:API on Android
-16. The accepted head preserves those required runtime variables while continuing
-to exclude provider/executor credentials.
+16. The accepted implementation preserves those required runtime variables while
+continuing to exclude provider/executor credentials.
 
 Any later runtime-affecting change to the Android command transport, adapters,
 policy, verification semantics, command arguments, environment propagation,
 clipboard handling, or share behavior requires a fresh hardware acceptance run.
 
-## 1. Confirm exact PR head
+## 1. Confirm exact source revision
 
-From the existing repository, run this first command and compare its full SHA
-with the final PR report:
+From the source checkout used to build/test the candidate, record the exact revision:
 
 ```sh
-git ls-remote origin refs/heads/feature/android-capabilities-v1
+git rev-parse HEAD
 ```
 
-Do not continue unless it matches. The PR must first have green CI, completed
-review and a reported head SHA; these instructions alone are not merge-readiness.
+Do not change source during the acceptance run. If testing a packaged artifact
+instead of a checkout, record the package version and cryptographic checksum.
 
-## 2. Isolated worktree
+## 2. Isolated checkout
 
-```sh
-git fetch origin feature/android-capabilities-v1
-```
+For source-based testing, create a detached worktree at the recorded revision:
 
 ```sh
-LAIN_HW_HEAD=$(git rev-parse FETCH_HEAD)
+LAIN_HW_HEAD=$(git rev-parse HEAD)
 git worktree add --detach "$HOME/lain-android-v1-${LAIN_HW_HEAD}" "$LAIN_HW_HEAD"
 ```
 
@@ -65,8 +61,9 @@ cd "$HOME/lain-android-v1-${LAIN_HW_HEAD}"
 git rev-parse HEAD
 ```
 
-Compare again. Commands below use `python -m lain` from this worktree, avoiding
-an older installed console script. No global package/configuration changes needed.
+Confirm the value matches the recorded source revision. Commands below use
+`python -m lain` from this isolated checkout so an older installed console script
+cannot affect the result.
 
 ## 3. Non-destructive helper and isolated request fixtures
 
@@ -191,6 +188,4 @@ Inspect trusted action history, verification and final checkpoint. Existing
 policy/confirmation/budgets remain authoritative. This is optional networked
 planner acceptance, not a prerequisite for offline deterministic capabilities.
 
-For future runtime-affecting changes, repeat this procedure against the new exact
-reviewed head and preserve the resulting evidence through review. No automatic
-cleanup or modification of unrelated user data is performed.
+For future runtime-affecting changes, repeat this procedure against the new exact source revision and preserve the resulting evidence with the release/test record. No automatic cleanup or modification of unrelated user data is performed.
