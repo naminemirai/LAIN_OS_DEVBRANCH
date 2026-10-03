@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 31,
+  "nextId": 32,
   "states": [
     {
       "name": "Backlog",
@@ -187,10 +187,16 @@
         "title": "Build verified video preview and explicit export UI",
         "priority": "P1",
         "order": 24
+      },
+      {
+        "id": "TASK-031",
+        "title": "Close Phase-4 with a real offline golden video fixture",
+        "priority": "P1",
+        "order": 25
       }
     ],
     "issue": 6,
-    "repo_head": "d52a7c5459d01a96419db9a1525fca47bacd0622",
-    "next_action": "Continue TASK-008 after PR #14: re-inventory remaining Phase-1 acceptance gaps, especially installed GUI/runtime happy-path evidence and secret-surface inspection; physical-device evidence remains unverified."
+    "repo_head": "664178b676091ca9b950d14e27c72249b92488f8",
+    "next_action": "Continue TASK-008: close remaining Phase-1 acceptance gaps with truthful evidence; physical-device acceptance remains unverified. Phase 4 now sequences through TASK-031 offline golden fixture."
   }
 }
