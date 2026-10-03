@@ -7,6 +7,7 @@ import java.util.UUID
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.json.JSONObject
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -93,6 +94,32 @@ class PlannerSettingsManagerTest {
         } finally {
             root.deleteRecursively()
         }
+    }
+
+    @Test fun connectionDiagnosticProbeDoesNotRequireStructuredModelOutput() {
+        val profile = PlannerProfile(
+            id = "probe",
+            name = "Probe",
+            mode = "cloud",
+            protocol = "openai_compatible_v1",
+            baseUrl = "https://api.example.invalid/v1",
+            model = "model-a",
+            credentialRef = "cred_0123456789abcdef0123456789abcdef",
+            timeoutSeconds = 30.0,
+            maxResponseBytes = 1_048_576,
+            responseMode = "json_schema",
+            allowInsecureLanHttp = false,
+        )
+
+        val request = JSONObject(buildPlannerConnectionDiagnosticRequest(profile))
+
+        assertEquals("model-a", request.getString("model"))
+        assertEquals(1, request.getInt("max_completion_tokens"))
+        assertFalse(request.has("response_format"))
+        assertEquals(
+            "Reply with OK.",
+            request.getJSONArray("messages").getJSONObject(0).getString("content"),
+        )
     }
 
     @Test fun testConnectionIsReadOnlyWithRespectToProfileState() {
