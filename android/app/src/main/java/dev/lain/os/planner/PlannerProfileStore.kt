@@ -168,12 +168,12 @@ internal class PlannerProfileStore internal constructor(private val root: File) 
         }
     }
 
-    private inline fun <T> withLock(block: () -> T): T {
+    private fun <T> withLock(block: () -> T): T = synchronized(PROCESS_LOCK) {
         try {
             RandomAccessFile(lockFile, "rw").channel.use { channel ->
                 val lock = channel.lock()
                 try {
-                    return block()
+                    block()
                 } finally {
                     lock.release()
                 }
@@ -202,6 +202,7 @@ internal class PlannerProfileStore internal constructor(private val root: File) 
         private const val STATE_VERSION = 1
         private const val MAX_PROFILES = 32
         private const val MAX_STATE_BYTES = 512 * 1024
+        private val PROCESS_LOCK = Any()
         private val STATE_FIELDS = setOf("version", "active_profile_id", "profiles")
     }
 }
