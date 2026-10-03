@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "lain-local"
 version = "0.0.1"
-description = "Local Autonomous Intelligent Networking runtime"
+description = "Loyal Autonomous Intelligence Network runtime"
 requires-python = ">=3.11"
 dependencies = []
 
