@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 23,
+  "nextId": 24,
   "states": [
     {
       "name": "Backlog",
@@ -139,10 +139,16 @@
         "title": "Implement external-effect reconciliation",
         "priority": "P1",
         "order": 16
+      },
+      {
+        "id": "TASK-023",
+        "title": "Implement aggregate workflow budgets",
+        "priority": "P1",
+        "order": 17
       }
     ],
     "issue": 6,
-    "repo_head": "e8d306908406085c4db577d5b103a665c7b9f238",
-    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 3 advances through TASK-016 -> TASK-022 in dependency order."
+    "repo_head": "7ac757c4f4c7ba8be03ebd45c6f8214543159208",
+    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 3 advances through TASK-016 -> TASK-023 in dependency order."
   }
 }
