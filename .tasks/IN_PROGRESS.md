@@ -20,7 +20,7 @@ Create the provider-neutral Android planner profile store required to select Dem
 
 - Existing `PlannerBinding` validation/session-pinning groundwork on main.
 - Existing TASK-002 Keystore-backed `SecretStore`.
-- No hard dependency on TASK-003 transport integration; do not duplicate or modify native transport work owned by PR #8.
+- TASK-003 native transport is integrated on main; do not duplicate its transport implementation.
 
 ### Plan
 
@@ -51,8 +51,8 @@ LAIN_OS has a durable, non-secret source of planner identity/configuration that 
 
 ### Evidence / projection basis
 
-- Code search on `main@06ead233185f3e90e2f979bd798aa6d407e22f1c` finds `PlannerBinding` and session pinning but no `PlannerProfile`/profile-store implementation.
+- Code search on pre-task `main@04e4a5b2b0fd947ca423415de5c469e9a7650c04` finds `PlannerBinding` and session pinning but no `PlannerProfile`/profile-store implementation.
 - `docs/PLUGGABLE_MODEL_RUNTIME.md` defines P2-02/R1.2 as a prerequisite for the runtime bridge.
-- This task unlocks TASK-006 while PR #8 completes transport integration.
+- TASK-003 is integrated; completing this task is now the remaining dependency that unlocks TASK-006.
 
 ---
