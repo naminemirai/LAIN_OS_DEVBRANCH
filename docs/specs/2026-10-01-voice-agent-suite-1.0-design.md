@@ -6,6 +6,8 @@ Status: product design specification. This document defines intended application
 
 ## Product intent
 
+LAIN_OS is the **Local Autonomous Intelligence Network Operating System**, the concrete software platform implementing the broader **LAIN — Loyal Autonomous Intelligence Network** identity.
+
 LAIN_OS is a voice-first autonomous agent suite that converts natural conversation into complex, verified action sequences under the user's control. The user speaks normally, receives spoken responses while work progresses, and can interrupt, revise, pause, or stop a task. Specialist workers share one coherent conversational interface and operate through the trusted runtime.
 
 Flagship scenario: “Turn this idea into a YouTube video and post it.” Success means a real rendered video, user review when required, authorized upload/publication, and an independently retrieved result. A generated script, mocked upload, or planner assertion is not completion.
