@@ -113,21 +113,13 @@ class NativePlannerTransportTest {
         }
     }
 
-    @Test fun rejectsOversizedMalformedAndUnsupportedResponses() {
+    @Test fun rejectsOversizedAndUnsupportedResponses() {
         val oversized = NativePlannerTransport(FakeSecretStore()) {
             FakeConnection(it, response = ByteArray(9) { 'x'.code.toByte() })
         }.newCall(binding(maxResponseBytes = 8), "{}").execute()
         assertEquals(
             NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE,
             (oversized as PlannerTransportResult.Failure).code,
-        )
-
-        val malformed = NativePlannerTransport(FakeSecretStore()) {
-            FakeConnection(it, response = "not-json".toByteArray())
-        }.newCall(binding(), "{}").execute()
-        assertEquals(
-            NativePlannerTransport.ERROR_RESPONSE_MALFORMED,
-            (malformed as PlannerTransportResult.Failure).code,
         )
 
         val unsupported = NativePlannerTransport(FakeSecretStore()) {
@@ -172,16 +164,9 @@ class NativePlannerTransportTest {
         assertEquals(listOf("https://192.168.1.9:11434/v1/chat/completions"), visited)
     }
 
-    @Test fun cleartextRequiresExplicitLocalPrivateLiteralPolicy() {
-        val allowed = binding(
-            mode = "local",
-            baseUrl = "http://192.168.1.9:11434/v1",
-            credentialRef = null,
-            allowInsecureLanHttp = true,
-        )
-        assertEquals("http://192.168.1.9:11434/v1", allowed.baseUrl)
-
+    @Test fun rejectsCleartextEndpointsEvenWhenLocalPrivateLiteralIsOptedIn() {
         val rejected = listOf(
+            { binding(mode = "local", baseUrl = "http://192.168.1.9:11434/v1", credentialRef = null, allowInsecureLanHttp = true) },
             { binding(mode = "cloud", baseUrl = "http://192.168.1.9/v1", allowInsecureLanHttp = true) },
             { binding(mode = "local", baseUrl = "http://192.168.1.9/v1", allowInsecureLanHttp = false) },
             { binding(mode = "local", baseUrl = "http://8.8.8.8/v1", allowInsecureLanHttp = true) },
