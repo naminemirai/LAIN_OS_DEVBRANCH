@@ -156,6 +156,89 @@ class AppControllerPlannerBridgeTests(unittest.TestCase):
             self.assertEqual(stored.planner_binding.mode, "local")
             self.assertEqual(len(bridge.calls), 1)
 
+    def test_required_transport_failures_are_terminal_without_fallback(self):
+        failures = (
+            ("PLANNER_DNS_UNREACHABLE", AgentSessionStatus.FAILED),
+            ("PLANNER_CONNECTION_REFUSED", AgentSessionStatus.FAILED),
+            ("PLANNER_TLS_FAILED", AgentSessionStatus.FAILED),
+            ("PLANNER_AUTH_REJECTED", AgentSessionStatus.FAILED),
+            ("PLANNER_MODEL_NOT_FOUND", AgentSessionStatus.FAILED),
+            ("PLANNER_TIMEOUT", AgentSessionStatus.FAILED),
+            ("PLANNER_RATE_LIMITED", AgentSessionStatus.FAILED),
+            ("PLANNER_SERVER_ERROR", AgentSessionStatus.FAILED),
+            ("PLANNER_CANCELLED", AgentSessionStatus.CANCELLED),
+            ("PLANNER_RESPONSE_TOO_LARGE", AgentSessionStatus.FAILED),
+            ("PLANNER_RESPONSE_MALFORMED", AgentSessionStatus.FAILED),
+            ("PLANNER_RESPONSE_UNSUPPORTED", AgentSessionStatus.FAILED),
+            ("PLANNER_CREDENTIAL_MISSING", AgentSessionStatus.FAILED),
+        )
+        for error, expected_status in failures:
+            with self.subTest(error=error), tempfile.TemporaryDirectory() as directory:
+                binding = cloud_binding("local")
+                bridge = FakeNativePlannerBridge({"ok": False, "error": error})
+                app = AppController(
+                    Path(directory),
+                    planner_profiles=FakePlannerProfiles(binding),
+                    planner_bridge=bridge,
+                )
+                reply = json.loads(app.dispatch(json.dumps({
+                    "version": 1,
+                    "command": "start",
+                    "arguments": {"goal": "finish"},
+                })))
+
+                self.assertFalse(app.advance())
+
+                stored = app.store.load(reply["session"]["session_id"])
+                self.assertEqual(stored.status, expected_status)
+                self.assertEqual(stored.planner_binding.mode, "local")
+                self.assertEqual(stored.planner_binding.profile_id, "local-primary")
+                self.assertEqual(len(bridge.calls), 1)
+
+    def test_malformed_and_unknown_capability_outputs_never_execute(self):
+        decisions = (
+            "not-json",
+            json.dumps({
+                "status": "continue",
+                "reason": "bypass",
+                "actions": [{
+                    "id": "untrusted-1",
+                    "type": "unknown.capability",
+                    "arguments": {},
+                }],
+            }),
+        )
+        for decision in decisions:
+            with self.subTest(decision=decision), tempfile.TemporaryDirectory() as directory:
+                response = {
+                    "ok": True,
+                    "body": json.dumps({
+                        "choices": [{
+                            "message": {"content": decision},
+                            "finish_reason": "stop",
+                        }],
+                    }),
+                }
+                bridge = FakeNativePlannerBridge(response)
+                app = AppController(
+                    Path(directory),
+                    planner_profiles=FakePlannerProfiles(cloud_binding()),
+                    planner_bridge=bridge,
+                )
+                reply = json.loads(app.dispatch(json.dumps({
+                    "version": 1,
+                    "command": "start",
+                    "arguments": {"goal": "finish"},
+                })))
+
+                self.assertFalse(app.advance())
+
+                stored = app.store.load(reply["session"]["session_id"])
+                self.assertEqual(stored.status, AgentSessionStatus.FAILED)
+                self.assertEqual(stored.total_attempted_actions, 0)
+                self.assertEqual(len(bridge.calls), 1)
+                self.assertEqual(list((Path(directory) / "workspace").iterdir()), [])
+
 
 class PlannerCancellationControllerTests(unittest.TestCase):
     def test_planner_cancelled_transitions_session_to_cancelled(self):
