@@ -99,7 +99,7 @@ python -m lain --workspace /tmp/lain-demo execute request.json --confirm a1 --js
 
 Requests use the typed [ACTION_PROTOCOL](specs/ACTION_PROTOCOL.md). Filesystem operations are restricted to configured roots, consequential actions require an explicit action ID passed to `--confirm`, and results distinguish execution from verification. Android actions report `unsupported` outside a supported Termux environment rather than simulating success.
 
-## Developer workflow
+## Build and verification
 
 Install the package in editable mode and run the canonical portable verification suite:
 
@@ -108,7 +108,7 @@ python -m pip install -e .
 python scripts/verify.py
 ```
 
-The verifier compiles the package, runs the unit tests, checks the Git diff for whitespace errors, and scans runtime source for unsafe execution primitives and the repository for stale project naming. GitHub Actions runs this same script automatically for every pull request and every push to `main`.
+The verifier compiles the package, runs the unit tests, checks the Git diff for whitespace errors, and scans runtime source for unsafe execution primitives and the repository for stale project naming. The same verifier is used by automated repository checks.
 
 ### Android Capability Expansion v1
 
@@ -273,33 +273,8 @@ autonomous session with two independently verified file writes before returning
 complete. Manual device evidence is not automated Android CI and does not claim
 live interruption/resume validation. Live Reddit posting remains unvalidated.
 
-## Repository policy
+## Security and data handling
 
-Do not commit secrets, authentication tokens, private messages, precise personal location history, recovery codes, or other sensitive user data.
-
-Pull requests may merge after a fresh code-review result of **PASS** when no
-independent safety or authority blocker remains. Test and acceptance status is
-tracked separately: a review pass must never be presented as proof that deferred,
-cancelled, or unrun checks passed. Each merge receipt must state those checks as
-untested where applicable.
-
-PR #7 (`Android Keystore-backed planner SecretStore`) merged under this policy at
-`2946e1a042d57eddffce4477f2136aea4da0ccde`. Review passed on head
-`c26925ed76e1e02fd49bd5b7ec796957c36fc423` and Verify workflow #56 succeeded;
-Android workflow #45 was cancelled, so its Android instrumentation tests remain
-explicitly untested by that merge receipt.
-
-PR #9 merged under this policy at `11906c484ebd91d480178b64728c91684f931115`
-after review `5398751890` passed on head
-`e0ca01f4bd0f6ee08ee5db500d654a33f038dff8`. The focused contract passed 5/5,
-the imported inventory tests passed 4/4, and Verify workflow #72 succeeded.
-Android workflow #61 was still in progress at merge time, so it was untested by
-the merge decision; it subsequently completed successfully. Repository-native cleanup
-`47566d0a87ce06f1ba1e3ca45a7dac37e8bf0232` subsequently removed that imported
-orchestration tree from `main`.
+Secrets, authentication tokens, private messages, precise personal location history, recovery codes, and other sensitive user data must not be embedded in source, build artifacts, planner context, logs, audit output, or exported settings.
 
 LAIN_OS should make the device more capable without making its owner less in control.
-
-<!-- TASKPLANNER:ATTRIBUTION:START -->
-This project uses [TaskPlanner](https://github.com/smekai/taskplanner) for task planning.
-<!-- TASKPLANNER:ATTRIBUTION:END -->
