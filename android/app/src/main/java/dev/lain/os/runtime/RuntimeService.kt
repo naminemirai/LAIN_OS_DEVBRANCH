@@ -78,6 +78,7 @@ class RuntimeService : Service() {
             if (startupFailed) "APP_START_FAILED" else "APP_STARTING")
         val command = JSONObject(payload).optString("command")
         if (command in RuntimeProtocol.readCommands) {
+            if (command == "stop") plannerBridge?.cancel()
             val result = python.callAttr("dispatch", payload).toString()
             if (command == "stop") kick()
             return bounded(result)
