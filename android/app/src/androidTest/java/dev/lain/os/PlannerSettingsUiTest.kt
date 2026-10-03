@@ -50,6 +50,33 @@ class PlannerSettingsUiTest {
             ?.toSet()
             ?: emptySet()
 
+    private fun rawFilesUnder(root: java.io.File): Sequence<java.io.File> = sequence {
+        if (!root.exists()) return@sequence
+        if (root.isFile) {
+            yield(root)
+            return@sequence
+        }
+        for (child in root.listFiles().orEmpty()) yieldAll(rawFilesUnder(child))
+    }
+
+    private fun assertSecretAbsentFromDurableFiles(activity: MainActivity, secret: String) {
+        val roots = listOf(
+            activity.filesDir,
+            java.io.File(activity.applicationInfo.dataDir, "shared_prefs"),
+            java.io.File(activity.applicationInfo.dataDir, "databases"),
+        )
+        roots.asSequence()
+            .flatMap(::rawFilesUnder)
+            .filter { it.isFile && it.length() <= 4L * 1024L * 1024L }
+            .forEach { file ->
+                val bytes = runCatching { file.readBytes() }.getOrElse { return@forEach }
+                assertFalse(
+                    "raw planner credential leaked to durable file: " + file.relativeTo(java.io.File(activity.applicationInfo.dataDir)).path,
+                    bytes.toString(Charsets.UTF_8).contains(secret),
+                )
+            }
+    }
+
     private fun visibleText(view: View): String {
         val own = if (view is TextView) view.text?.toString().orEmpty() else ""
         if (view !is ViewGroup) return own
@@ -82,6 +109,7 @@ class PlannerSettingsUiTest {
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
                 assertFalse(rendered.contains(firstSecret))
+                assertSecretAbsentFromDurableFiles(it, firstSecret)
             }
 
             enter(scenario, R.id.planner_credential, secondSecret)
@@ -89,6 +117,8 @@ class PlannerSettingsUiTest {
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
                 assertFalse(rendered.contains(secondSecret))
+                assertSecretAbsentFromDurableFiles(it, firstSecret)
+                assertSecretAbsentFromDurableFiles(it, secondSecret)
                 assertEquals("", it.findViewById<TextView>(R.id.planner_credential).text.toString())
             }
 
@@ -113,6 +143,8 @@ class PlannerSettingsUiTest {
                     it.findViewById<TextView>(R.id.active_planner).text.toString()
                         .contains("model-a")
                 )
+                assertSecretAbsentFromDurableFiles(it, firstSecret)
+                assertSecretAbsentFromDurableFiles(it, secondSecret)
             }
 
             click(scenario, R.id.planner_delete)
