@@ -122,6 +122,25 @@ class PlannerSettingsManagerTest {
         )
     }
 
+    @Test fun connectionDiagnosticPreservesSafeHttpFailureClasses() {
+        assertEquals(
+            PlannerConnectionStatus.REQUEST_REJECTED,
+            plannerConnectionStatusFor(NativePlannerTransport.ERROR_HTTP_REJECTED),
+        )
+        assertEquals(
+            PlannerConnectionStatus.RATE_LIMITED,
+            plannerConnectionStatusFor(NativePlannerTransport.ERROR_RATE_LIMITED),
+        )
+        assertEquals(
+            PlannerConnectionStatus.SERVER_ERROR,
+            plannerConnectionStatusFor(NativePlannerTransport.ERROR_SERVER),
+        )
+        assertEquals(
+            PlannerConnectionStatus.TRANSPORT_FAILURE,
+            plannerConnectionStatusFor(NativePlannerTransport.ERROR_TRANSPORT_FAILED),
+        )
+    }
+
     @Test fun testConnectionIsReadOnlyWithRespectToProfileState() {
         val root = tempRoot("planner-settings-diagnostic-")
         try {
