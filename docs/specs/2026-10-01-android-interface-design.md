@@ -21,7 +21,7 @@ Android operations fail closed until their native adapters are implemented.
 
 Stop immediately acknowledges the request, prevents further actions, and records
 the actual settled outcome of an action already in flight. It does not claim
-rollback or guarantee that an external effect was prevented. Owner inspection
+rollback or guarantee that an external effect was prevented. User inspection
 and Stop must remain available while the worker holds its execution lease.
 
 Verification must distinguish source-level tests, APK assembly, emulator/instrumentation results, and physical-device acceptance. A successful build alone is not installed-device acceptance. Production release requires release signing, current security verification, and the documented device acceptance gates. Provider credentials are never bundled into the application.
