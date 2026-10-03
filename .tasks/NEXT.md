@@ -1,5 +1,76 @@
 # Next
 
+## TASK-028: Integrate a bounded Android-capable video renderer
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, renderer
+**Updated:** 2026-10-03
+
+### Goal
+
+Select and integrate the smallest Android-compatible rendering toolchain that turns a validated TASK-027 timeline plus immutable media artifacts into one deterministic video artifact under trusted bounds, cancellation, and explicit failure semantics.
+
+### Scope
+
+- Evaluate only renderer options that can be packaged and licensed for the supported Android app and invoked through a fixed trusted boundary.
+- Define a typed render request derived from the validated timeline; never accept planner-supplied commands or shell fragments.
+- Resolve every input by immutable artifact identity/hash and current workflow revision before renderer launch.
+- Enforce explicit output path, dimensions, frame rate, duration tolerance, byte/storage limits, active runtime budget, and cancellation.
+- Persist render attempt/result provenance and add the output through TASK-018/TASK-025 artifact contracts only after bounded process completion.
+- Treat process crash, timeout, cancellation, resource exhaustion, malformed output, or missing output as explicit stage failure.
+- Do not implement video inspection, preview/export UI, cloud media generation, publication, or generic command execution.
+
+### Dependencies
+
+- TASK-027 complete: deterministic media timeline representation.
+- TASK-025 complete: media artifact schemas.
+- TASK-018, TASK-020, TASK-023, and TASK-024 complete: immutable artifacts, revision invalidation, aggregate budgets, and Phase-3 durability acceptance.
+
+### Plan
+
+- Record an evidence-based renderer/toolchain decision covering Android packaging, ABI/API support, licensing, deterministic invocation, cancellation, and output support.
+- Reuse the existing constrained process/cancellation boundary or introduce only the minimum renderer-specific adapter required.
+- Translate validated timeline records into fixed arguments/config without shell interpolation.
+- Stage output atomically, enforce resource budgets, and attach exact input/timeline/toolchain provenance.
+- Add fake-adapter contract tests plus one real offline render path using bounded licensed fixture inputs.
+
+### Acceptance
+
+- A validated current-revision timeline produces a real video file at a deterministic artifact path.
+- Renderer selection has recorded Android packaging/licensing/API evidence and no generic shell or arbitrary command surface.
+- Every render binds exact timeline revision, input artifact hashes, renderer identity/version, output constraints, and final content hash.
+- Unknown codecs/transitions, stale or missing inputs, invalid paths, insufficient storage, timeout, cancellation, crash, nonzero exit, or missing/oversized output fail closed.
+- Partial output cannot be promoted to a verified media artifact or unlock downstream workflow nodes.
+- Duplicate resume reuses a verified identical result or restarts only under durable current-revision state; it never silently duplicates uncertain work.
+- Existing Stop/cancellation and aggregate budgets remain authoritative.
+
+### Verification
+
+- Renderer adapter contract tests with fixed argv/config and hostile-input/path negatives.
+- Cancellation, timeout, crash, disk/resource-limit, stale-revision, partial-output, and duplicate-resume tests.
+- Determinism/provenance/hash assertions across repeated identical fixtures.
+- One real Android-compatible offline fixture render in CI or a clearly separated supported emulator/device evidence path.
+- Canonical portable verification, Android build/lint/tests, license/architecture/security review.
+
+### Expected result
+
+Phase 4 gains a real bounded renderer that converts the deterministic timeline into an immutable video artifact without exposing arbitrary execution or treating an uninspected file as verified output.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.4 Renderer immediately after R4.3 timeline representation.
+- Current TaskPlanner ends Phase-4 planning at TASK-027/R4.3; no existing task, open issue, or open PR represents R4.4.
+
+### Projection basis
+
+- R4.5 video inspection and R4.7 offline golden fixture require a real renderer output, while selecting the toolchain before timeline/schema contracts would create avoidable coupling.
+
+### Risks / unknowns
+
+- The exact toolchain and supported codec/container set remain an evidence-backed implementation decision constrained by Android packaging and licensing.
+- Emulator rendering may not represent physical-device performance; evidence must remain labeled by environment.
+- Renderer binaries can materially affect APK size and ABI support; keep the integration replaceable and bounded without creating a generic process framework.
+
+---
+
 ## TASK-027: Define deterministic media timeline representation
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, timeline
 **Updated:** 2026-10-03
