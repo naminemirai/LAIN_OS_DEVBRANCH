@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 36,
+  "nextId": 37,
   "states": [
     {
       "name": "Backlog",
@@ -217,10 +217,16 @@
         "title": "Implement aggregate provider spending controls",
         "priority": "P1",
         "order": 29
+      },
+      {
+        "id": "TASK-036",
+        "title": "Close Voice-First LAIN Preview physical Galaxy acceptance",
+        "priority": "P1",
+        "order": 30
       }
     ],
     "issue": 6,
-    "repo_head": "fdcbcb594b263404ec2d7cae02ba7ec22734201d",
-    "next_action": "Continue TASK-008 installed Cloud+Local GUI/runtime happy-path acceptance; Phase 5 sequences TASK-032→033→034→035."
+    "repo_head": "cff0afbfcae302859f54103f5e6b5bc9747da3d7",
+    "next_action": "Continue TASK-008; then TASK-009→TASK-015; TASK-036 is the physical Galaxy gate for the Voice-First LAIN Preview."
   }
 }
