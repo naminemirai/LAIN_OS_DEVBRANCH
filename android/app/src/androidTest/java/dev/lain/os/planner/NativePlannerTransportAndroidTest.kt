@@ -53,7 +53,7 @@ class NativePlannerTransportAndroidTest {
         assertFalse(NetworkSecurityPolicy.getInstance().isCleartextTrafficPermitted)
     }
 
-    @Test fun malformedPlannerResponseIsRejectedByAndroidJsonRuntime() {
+    @Test fun malformedAndTrailingPlannerResponsesAreRejectedByAndroidJsonRuntime() {
         val binding = PlannerBinding(
             profileId = "instrumentation",
             mode = "local",
@@ -66,15 +66,17 @@ class NativePlannerTransportAndroidTest {
             responseMode = "json_object",
             allowInsecureLanHttp = false,
         )
-        val transport = NativePlannerTransport(NoCredentialSecretStore) { url ->
-            FakeConnection(url, "not-json".toByteArray())
+        for (body in listOf("not-json", "[]", "{\"choices\":[]}garbage")) {
+            val transport = NativePlannerTransport(NoCredentialSecretStore) { url ->
+                FakeConnection(url, body.toByteArray())
+            }
+
+            val result = transport.newCall(binding, "{}").execute()
+
+            assertEquals(
+                NativePlannerTransport.ERROR_RESPONSE_MALFORMED,
+                (result as PlannerTransportResult.Failure).code,
+            )
         }
-
-        val result = transport.newCall(binding, "{}").execute()
-
-        assertEquals(
-            NativePlannerTransport.ERROR_RESPONSE_MALFORMED,
-            (result as PlannerTransportResult.Failure).code,
-        )
     }
 }
