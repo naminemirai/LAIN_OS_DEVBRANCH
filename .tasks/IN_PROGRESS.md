@@ -41,8 +41,9 @@ functional LAIN workflow names without weakening safety boundaries.
   and repository-derived feedback-target cases for HTTPS and SSH origins.
 - Focused canonical execution discovers 5 tests and fails all 5 for the intended
   red-state reason: `plugins/lain-engineering` is absent.
-- Fresh review still does not pass (review ID `5398246491`). Verify #67 is in
-  progress and Android #56 is queued; neither is claimed passed. No merge was
+- Fresh review still does not pass (review ID `5398246491`). Verify #67 now
+  fails the expected 5 discovered contract tests because the plugin is absent;
+  Android #56 remains in progress and is not claimed passed. No merge was
   performed.
 
 ---
