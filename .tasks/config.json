@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 28,
+  "nextId": 29,
   "states": [
     {
       "name": "Backlog",
@@ -169,10 +169,16 @@
         "title": "Define deterministic media timeline representation",
         "priority": "P1",
         "order": 21
+      },
+      {
+        "id": "TASK-028",
+        "title": "Integrate a bounded Android-capable video renderer",
+        "priority": "P1",
+        "order": 22
       }
     ],
     "issue": 6,
-    "repo_head": "f37ec90f5608f72fe6b1aec6a938313ce12cf545",
-    "next_action": "Continue TASK-007 / PR #12. Phase 4 begins after TASK-024 with TASK-025 -> TASK-026 -> TASK-027."
+    "repo_head": "589cdf7440e24ce2fcd0288d79e773c9f129bd27",
+    "next_action": "Continue TASK-007 / PR #12. Phase 4 remains ordered TASK-025 -> TASK-026 -> TASK-027 -> TASK-028."
   }
 }
