@@ -82,7 +82,7 @@ class AppControlTests(unittest.TestCase):
 
         reply = self.send("start", goal="Create demo file")
         self.assertFalse(reply["ok"])
-        self.assertEqual(self.app.store.list_sessions(), [])
+        self.assertEqual(self.app.store.list_sessions(), ())
 
     def test_unknown_control_command_rejected(self):
         self.assertFalse(self.send("shell", command_line="id")["ok"])
