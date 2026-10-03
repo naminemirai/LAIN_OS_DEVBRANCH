@@ -1,53 +1,5 @@
 # In Progress
 
-## TASK-004: Complete open LAIN engineering workflow migration
-**Priority:** P1
-**Updated:** 2026-10-02 20:56
-
-Complete PR #9's migration from person-specific ZzzOps engineering skills to
-functional LAIN workflow names without weakening safety boundaries.
-
-### Sequence
-
-1. **Make the migration contract executable (completed).**
-   - Observable outcome: every contract assertion is discovered by the canonical
-     `unittest` runner and compares parsed skill metadata and resolved feedback
-     targets, not substrings.
-   - Dependencies: none.
-   - Verification: run the focused contract test through `python -m unittest`.
-   - Expected result: the test is discovered and fails because the
-     `plugins/lain-engineering` implementation is not yet present.
-2. **Implement the bounded migration (next).**
-   - Observable outcome: the functional skill tree and neutral plugin manifests
-     exist, feedback targets are repository/configuration-derived, and policy
-     approval is iterative while unresolved safety decisions remain blocking.
-   - Dependencies: executable red contract from step 1.
-   - Verification: run the focused contract test and inspect the complete diff
-     for retired invocations and preserved safety boundaries.
-   - Expected result: the focused contract passes with no person-specific or
-     retired skill identifiers.
-3. **Run repository gates and re-review PR #9.**
-   - Observable outcome: canonical verification exercises the contract and a
-     fresh whole-diff review has no correctness or safety blocker.
-   - Dependencies: step 2.
-   - Verification: `python scripts/verify.py`, required CI, and fresh PR review.
-   - Expected result: checks pass with explicit status and the PR is merge-ready
-     under the review-only policy.
-
-### Evidence / progress
-
-- PR #9 head `2dde8da3ac4aedf52cdb76ef65ddd320325ff039` now uses
-  discoverable `unittest.TestCase` coverage, exact parsed frontmatter names,
-  and repository-derived feedback-target cases for HTTPS and SSH origins.
-- Focused canonical execution discovers 5 tests and fails all 5 for the intended
-  red-state reason: `plugins/lain-engineering` is absent.
-- Fresh review still does not pass (review ID `5398246491`). Verify #67 now
-  fails the expected 5 discovered contract tests because the plugin is absent;
-  Android #56 remains in progress and is not claimed passed. No merge was
-  performed.
-
----
-
 ## TASK-003: Implement bounded native planner transport
 **Priority:** P1
 **Updated:** 2026-10-02 18:59
