@@ -1,5 +1,66 @@
 # Next
 
+## TASK-038: Implement explicit provider privacy disclosure and data-sharing state
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, privacy, disclosure
+
+### Goal
+Make every off-device provider transfer explicit and profile-specific so users can see what text, audio, or images will leave the device and Local selection can never silently become Cloud.
+
+### Scope
+- Define a typed data-sharing state per planner, speech, and media provider profile.
+- Show provider identity and the exact payload classes that may leave the device before first remote use and in active workflow status.
+- Bind disclosure state to the selected profile and workflow revision.
+- Require renewed acknowledgement when provider identity or disclosed data classes materially change.
+- Preserve Local-only behavior without automatic Cloud fallback.
+- Keep credentials and payload contents out of disclosure/audit surfaces; disclose categories and destination identity, not secrets.
+
+### Dependencies
+- TASK-032 provider-job abstraction.
+- TASK-033 external speech adapter.
+- TASK-034 external image/media adapter.
+- TASK-035 provider spending controls.
+- TASK-037 retry/backoff policy.
+
+### Plan
+- Define minimal provider identity, payload-class, destination, and acknowledgement models.
+- Integrate disclosure checks at remote submit boundaries shared by planner/speech/media paths.
+- Add UI/status presentation for configured and active provider sharing state.
+- Persist acknowledgement provenance without persisting sensitive payloads.
+- Add provider/profile/revision change and Local-to-Cloud fallback negatives.
+- Verify restart, retry, reconciliation, and cancellation preserve the same disclosure authority.
+
+### Acceptance
+- Before remote submission, the user can see which provider receives text, audio, images, or generated artifacts.
+- Disclosure and acknowledgement are bound to the exact provider profile, destination, payload classes, and workflow revision.
+- Provider/profile/data-class changes invalidate stale acknowledgement.
+- Local selection never becomes Cloud automatically.
+- Retry, restart, or reconciliation cannot bypass disclosure.
+- Raw credentials and payload contents remain absent from disclosure, audit, IPC, and exported settings.
+
+### Verification
+- Provider/payload-class disclosure matrix for planner, STT/TTS, and media generation.
+- Profile/destination/revision-change invalidation tests.
+- Local-only and no-implicit-fallback adversarial tests.
+- Restart/retry/reconciliation/cancellation tests.
+- Secret and payload-content leak scans.
+- Installed Android UI/status acceptance plus canonical verification and architecture/security/privacy review.
+
+### Expected result
+Remote providers remain replaceable and bounded while users have durable, truthful control over which data categories leave the device and where they go.
+
+### Evidence basis
+- `docs/ROADMAP_1.0.md` R5.6 explicitly requires disclosure when text/audio/images leave the device, profile-specific sharing state, and no automatic Local-to-Cloud transition.
+- Current TaskPlanner represents R5.1 through R5.5 as TASK-032 through TASK-037; no existing task, open issue, or open PR represents R5.6.
+
+### Projection basis
+- This is the final missing Phase-5 work package and is required before the Phase-5 exit gate can truthfully claim bounded remote-provider use without privacy-semantic drift.
+- A shared disclosure boundary prevents planner, speech, and media adapters from implementing incompatible consent semantics.
+
+### Risks / unknowns
+- Provider routing may involve regional or proxy endpoints; unsupported destination ambiguity must remain explicit.
+- Disclosures must be clear without persisting sensitive payload content.
+- Acknowledgement lifetime must avoid both click fatigue and stale authority reuse.
+
 ## TASK-037: Implement bounded provider retry and backoff policy
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, retry, backoff, reconciliation
 **Updated:** 2026-10-03
