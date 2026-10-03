@@ -1,5 +1,76 @@
 # Next
 
+## TASK-018: Implement immutable artifact workspace
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, artifacts
+**Updated:** 2026-10-03
+
+### Goal
+
+Add the durable artifact workspace required for multi-stage workflows, using immutable content identity and explicit revision/provenance metadata without turning artifacts into executable authority.
+
+### Scope
+
+- Store workflow artifacts under immutable content hashes.
+- Track logical artifact references, revisions, media/type metadata, provenance, producer node, and verification status.
+- Use atomic writes and fail closed on hash mismatch or corrupt metadata.
+- Expose user-visible workspace listing/readback without arbitrary path traversal.
+- Define bounded retention/cleanup semantics that never delete artifacts still referenced by active/recoverable workflows.
+- Keep artifact content/data non-authoritative: it cannot grant capabilities, approvals, or execution rights.
+- Do not implement specialist roles, revision invalidation propagation, provider polling, or publication.
+
+### Dependencies
+
+- TASK-016 complete: durable workflow persistence model.
+- TASK-017 complete: scheduler consumes artifact readiness.
+- Existing safe filesystem/atomic-write/hash patterns should be reused.
+
+### Plan
+
+- Define artifact identity and metadata records around SHA-256 content hashes.
+- Implement scoped atomic write/read/list APIs under a dedicated workspace root.
+- Persist logical revision/provenance references in workflow-compatible metadata.
+- Add reference-aware retention guards and explicit cleanup candidates.
+- Add corruption/hash-mismatch/path-traversal and active-reference negative tests.
+- Integrate only the minimal scheduler-facing readiness seam.
+
+### Acceptance
+
+- Artifact identity is immutable and derived from verified content bytes.
+- Revisions create new identities rather than mutating prior content in place.
+- Metadata preserves producer/provenance/type/revision/verification information.
+- Hash mismatch or corrupt metadata fails explicitly.
+- Artifact paths cannot escape the configured workspace root.
+- Cleanup cannot remove artifacts still referenced by active or recoverable workflow state.
+- Artifact content cannot authorize or execute capabilities.
+
+### Verification
+
+- Focused hash/round-trip/revision/provenance tests.
+- Atomic-write and corruption/hash-mismatch tests.
+- Path-traversal/symlink-escape tests.
+- Retention tests with active/recoverable references.
+- Canonical portable verification and architecture/security review.
+
+### Expected result
+
+LAIN_OS gains an inspectable, immutable artifact substrate for scripts, narration, media, and other workflow outputs without coupling content storage to execution authority.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.3 Artifact workspace after persistence and DAG scheduling.
+- No current TaskPlanner task, open issue, or open PR represents R3.3.
+
+### Projection basis
+
+- Revision invalidation, specialist handoff, media production, and external publishing all require stable immutable artifact identities and provenance.
+
+### Risks / unknowns
+
+- Large media streaming/storage optimization should follow real workload evidence; v1 should prefer simple local bounded files.
+- Retention policy must remain conservative until storage-pressure behavior is explicitly specified.
+
+---
+
 ## TASK-017: Implement bounded DAG scheduler
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, scheduler
 **Updated:** 2026-10-03
