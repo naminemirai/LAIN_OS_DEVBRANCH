@@ -6,6 +6,7 @@ import org.junit.Test
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.io.InputStream
 import java.net.ConnectException
 import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
@@ -29,6 +30,7 @@ class NativePlannerTransportTest {
         private val response: ByteArray = "{\"choices\":[]}".toByteArray(),
         private val responseType: String? = "application/json",
         private val statusFailure: IOException? = null,
+        private val responseStream: InputStream? = null,
     ) : HttpURLConnection(url) {
         val written = ByteArrayOutputStream()
         var disconnected = false
@@ -41,7 +43,7 @@ class NativePlannerTransportTest {
             statusFailure?.let { throw it }
             return status
         }
-        override fun getInputStream() = ByteArrayInputStream(response)
+        override fun getInputStream() = responseStream ?: ByteArrayInputStream(response)
         override fun getContentType(): String? = responseType
         override fun getContentLengthLong(): Long = response.size.toLong()
     }
@@ -52,6 +54,7 @@ class NativePlannerTransportTest {
         credentialRef: String? = "cred_" + "a".repeat(32),
         allowInsecureLanHttp: Boolean = false,
         maxResponseBytes: Int = 1024,
+        timeoutSeconds: Double = 2.0,
     ) = PlannerBinding(
         profileId = "test",
         mode = mode,
@@ -59,7 +62,7 @@ class NativePlannerTransportTest {
         baseUrl = baseUrl,
         model = "model-a",
         credentialRef = credentialRef,
-        timeoutSeconds = 2.0,
+        timeoutSeconds = timeoutSeconds,
         maxResponseBytes = maxResponseBytes,
         responseMode = "json_object",
         allowInsecureLanHttp = allowInsecureLanHttp,
@@ -113,7 +116,7 @@ class NativePlannerTransportTest {
         }
     }
 
-    @Test fun rejectsOversizedAndUnsupportedResponses() {
+    @Test fun rejectsOversizedMalformedTrailingAndUnsupportedResponses() {
         val oversized = NativePlannerTransport(FakeSecretStore()) {
             FakeConnection(it, response = ByteArray(9) { 'x'.code.toByte() })
         }.newCall(binding(maxResponseBytes = 8), "{}").execute()
@@ -122,12 +125,55 @@ class NativePlannerTransportTest {
             (oversized as PlannerTransportResult.Failure).code,
         )
 
+        val invalidBodies = listOf(
+            "not-json",
+            "[]",
+            "{\"choices\":[]}garbage",
+        )
+        for (body in invalidBodies) {
+            val malformed = NativePlannerTransport(FakeSecretStore()) {
+                FakeConnection(it, response = body.toByteArray())
+            }.newCall(binding(), "{}").execute()
+            assertEquals(
+                NativePlannerTransport.ERROR_RESPONSE_MALFORMED,
+                (malformed as PlannerTransportResult.Failure).code,
+            )
+        }
+
         val unsupported = NativePlannerTransport(FakeSecretStore()) {
             FakeConnection(it, responseType = "text/html")
         }.newCall(binding(), "{}").execute()
         assertEquals(
             NativePlannerTransport.ERROR_RESPONSE_UNSUPPORTED,
             (unsupported as PlannerTransportResult.Failure).code,
+        )
+    }
+
+    @Test fun wholeRequestDeadlineBoundsTrickledResponse() {
+        val response = "{\"choices\":[]}".toByteArray()
+        val slowStream = object : InputStream() {
+            var index = 0
+            override fun read(): Int {
+                if (index >= response.size) return -1
+                Thread.sleep(20)
+                return response[index++].toInt() and 0xff
+            }
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+                val next = read()
+                if (next < 0) return -1
+                buffer[offset] = next.toByte()
+                return 1
+            }
+        }
+        val transport = NativePlannerTransport(FakeSecretStore()) {
+            FakeConnection(it, response = response, responseStream = slowStream)
+        }
+
+        val result = transport.newCall(binding(timeoutSeconds = 0.05), "{}").execute()
+
+        assertEquals(
+            NativePlannerTransport.ERROR_TIMEOUT,
+            (result as PlannerTransportResult.Failure).code,
         )
     }
 
