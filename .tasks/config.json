@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 17,
+  "nextId": 18,
   "states": [
     {
       "name": "Backlog",
@@ -109,10 +109,16 @@
         "title": "Define durable workflow persistence model",
         "priority": "P1",
         "order": 11
+      },
+      {
+        "id": "TASK-017",
+        "title": "Implement bounded DAG scheduler",
+        "priority": "P1",
+        "order": 12
       }
     ],
     "issue": 6,
-    "repo_head": "714980c5adfd349c95988e0f22adbb2497dc6baa",
-    "next_action": "TASK-006 is In Progress; continue dependency order through TASK-016."
+    "repo_head": "16ff6ae6dd8aaf3fccf25aa6a8c20332e4efa0e6",
+    "next_action": "TASK-006 is In Progress; continue dependency order through TASK-017."
   }
 }
