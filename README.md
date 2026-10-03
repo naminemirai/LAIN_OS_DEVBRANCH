@@ -50,6 +50,8 @@ LAIN_OS separates four concerns:
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+For the sequenced path from the current runtime to the 1.0 voice-agent release, see [docs/ROADMAP_1.0.md](docs/ROADMAP_1.0.md).
+
 ## First milestone
 
 Demonstrate a complete local loop on Android:
