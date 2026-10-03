@@ -1,5 +1,76 @@
 # Next
 
+## TASK-023: Implement aggregate workflow budgets
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, budgets
+**Updated:** 2026-10-03
+
+### Goal
+
+Enforce durable workflow-wide budgets for time, actions, provider calls, bytes, estimated/actual cost, and retries so long-running workflows cannot silently exceed owner-defined limits.
+
+### Scope
+
+- Persist workflow-level budget ceilings and consumed counters for time, action count, provider calls, bytes, estimated/actual cost, and retry allowance.
+- Charge budget consumption at deterministic boundaries and persist it atomically with workflow state.
+- Refuse new node execution, polling, provider work, or retry when the relevant remaining budget is insufficient.
+- Preserve existing per-session/action budgets as lower-level limits; aggregate budgets may only further restrict execution.
+- Carry budget state across restart, revision, wait/poll, and reconciliation states.
+- Surface explicit budget-exhausted outcomes without treating them as successful completion.
+- Do not implement billing APIs, dynamic price discovery, provider-specific token accounting, or automatic owner limit increases.
+
+### Dependencies
+
+- TASK-016 workflow persistence.
+- TASK-017 DAG scheduler.
+- TASK-021 durable wait/poll stages.
+- TASK-022 external-effect reconciliation.
+
+### Plan
+
+- Define the smallest aggregate budget record and deterministic charging events.
+- Persist counters/limits with workflow state and validate non-negative monotonic consumption.
+- Gate scheduler dispatch, polling, provider calls, and retry before crossing each charge boundary.
+- Preserve consumed state across crash/restart and workflow revision.
+- Add fake-clock/counter tests for each budget dimension and combined exhaustion.
+
+### Acceptance
+
+- Workflow budgets survive restart exactly and consumed counters never decrease.
+- Scheduler cannot dispatch work that would exceed a hard action/provider/retry limit.
+- Time/deadline accounting cannot be reset by process restart or wait/poll transitions.
+- Byte and cost accounting reject further bounded work once the configured ceiling is exhausted.
+- Aggregate limits only reduce authority; they cannot expand lower-level runtime/session limits.
+- Budget exhaustion produces an explicit non-success/waiting-for-owner outcome and cannot unlock downstream nodes.
+- Revision and reconciliation preserve already-consumed budget unless an explicit future owner-authorized policy says otherwise.
+
+### Verification
+
+- Focused persisted-budget and monotonic-counter tests.
+- Deterministic clock tests across wait/restart.
+- Scheduler/provider/poll/retry gate tests for each budget dimension.
+- Combined-limit and lower-level-budget-intersection negative tests.
+- Canonical portable verification plus fresh architecture/security review.
+
+### Expected result
+
+LAIN_OS can run durable multi-stage workflows under explicit owner-visible aggregate resource limits without resets, hidden overages, or privilege expansion.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.8 Aggregate budgets after external-effect reconciliation.
+- Current TaskPlanner state represents R3.1–R3.7 as TASK-016 through TASK-022; no open task, issue, or PR represents R3.8.
+
+### Projection basis
+
+- Media rendering, provider adapters, publishing, and long-running workflows require durable resource ceilings before broader 1.0 production pipelines can be considered safe and operable.
+
+### Risks / unknowns
+
+- Exact provider cost estimation may initially be caller-supplied or unavailable; unavailable estimates must not be fabricated.
+- Provider-specific token accounting belongs in adapters, not the generic budget model.
+
+---
+
 ## TASK-022: Implement external-effect reconciliation
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, reconciliation
 **Updated:** 2026-10-03
