@@ -59,62 +59,62 @@ class PlannerSettingsUiTest {
         val secondSecret = "ui-secret-two-" + suffix
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            onView(withId(R.id.planner_new_button)).perform(scrollTo(), click())
-            onView(withId(R.id.planner_name_input))
+            onView(withId(R.id.planner_new)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_name))
                 .perform(scrollTo(), replaceText(name), closeSoftKeyboard())
-            onView(withId(R.id.planner_endpoint_input))
+            onView(withId(R.id.planner_endpoint))
                 .perform(scrollTo(), replaceText("https://api.example.invalid/v1"), closeSoftKeyboard())
-            onView(withId(R.id.planner_model_input))
+            onView(withId(R.id.planner_model))
                 .perform(scrollTo(), replaceText("model-a"), closeSoftKeyboard())
-            onView(withId(R.id.planner_credential_input))
+            onView(withId(R.id.planner_credential))
                 .perform(scrollTo(), replaceText(firstSecret), closeSoftKeyboard())
-            onView(withId(R.id.planner_save_button)).perform(scrollTo(), click())
-            onView(withId(R.id.planner_select_button)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_save)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_select)).perform(scrollTo(), click())
 
             await(scenario) {
-                it.findViewById<TextView>(R.id.planner_identity).text.toString()
-                    .contains("Cloud · model-a")
+                it.findViewById<TextView>(R.id.active_planner).text.toString()
+                    .contains(name) &&\n                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
             }
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
                 assertFalse(rendered.contains(firstSecret))
             }
 
-            onView(withId(R.id.planner_credential_input))
+            onView(withId(R.id.planner_credential))
                 .perform(scrollTo(), replaceText(secondSecret), closeSoftKeyboard())
-            onView(withId(R.id.planner_save_button)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_save)).perform(scrollTo(), click())
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
                 assertFalse(rendered.contains(secondSecret))
-                assertEquals("", it.findViewById<TextView>(R.id.planner_credential_input).text.toString())
+                assertEquals("", it.findViewById<TextView>(R.id.planner_credential).text.toString())
             }
 
             scenario.recreate()
             await(scenario) {
-                it.findViewById<TextView>(R.id.planner_identity).text.toString()
-                    .contains("Cloud · model-a")
+                it.findViewById<TextView>(R.id.active_planner).text.toString()
+                    .contains(name) &&\n                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
             }
 
             var before = emptySet<String>()
             scenario.onActivity { before = sessions(it) }
-            onView(withId(R.id.planner_remove_credential_button)).perform(scrollTo(), click())
-            onView(withId(R.id.planner_test_button)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_remove_credential)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_test)).perform(scrollTo(), click())
             await(scenario) {
                 it.findViewById<TextView>(R.id.planner_status).text.toString()
-                    .contains("Missing credential")
+                    .contains("missing credential")
             }
             scenario.onActivity {
                 assertEquals(before, sessions(it))
                 assertTrue(
-                    it.findViewById<TextView>(R.id.planner_identity).text.toString()
+                    it.findViewById<TextView>(R.id.active_planner).text.toString()
                         .contains("model-a")
                 )
             }
 
-            onView(withId(R.id.planner_delete_button)).perform(scrollTo(), click())
+            onView(withId(R.id.planner_delete)).perform(scrollTo(), click())
             await(scenario) {
-                it.findViewById<TextView>(R.id.planner_identity).text.toString()
-                    .contains("Demo · offline_demo")
+                it.findViewById<TextView>(R.id.active_planner).text.toString()
+                    .contains("Offline Demo · offline_demo")
             }
         }
     }
