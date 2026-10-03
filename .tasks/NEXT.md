@@ -1,5 +1,15 @@
 # Next
 
+## CURRENT EXECUTION GATE — TASK-008 Phase-1 planner acceptance
+**State:** IN PROGRESS | **PR:** #16 | **Candidate head:** `59c58639c15227fc7216f321b3a0f8f59f2bc499`
+
+- TDD RED `712507319e082da4fe4935c9f4888f3284ca4b1f`: Android #272 failed on the deliberately missing plain connection-probe builder, explicit diagnostic mapper, and RATE_LIMITED/SERVER_ERROR statuses.
+- GREEN candidate `59c58639c15227fc7216f321b3a0f8f59f2bc499`: Verify #286 passed; Android #275 is running on API 24/35.
+- Implemented candidate fixes: zero-argument strict-schema generation; plain one-token connection probe with no structured-output requirement; explicit request/rate-limit/server/transport diagnostic states; planner-neutral Run copy; blocking in-flight Stop regression.
+- Do **not** advance to TASK-009 or close/merge TASK-008 until Android #275 is GREEN and the exact APK from that head completes the physical Galaxy suite.
+- Physical suite: Create demo file, Show battery, Show demo toast, Vibrate briefly, Copy demo text, Share demo text. Every applicable flow must reach terminal **COMPLETE**; Share must require exact approval before chooser.
+- Also retain selected-planner pinning, lifecycle/rebind/background, stale-approval, secret-isolation, no-fallback, diagnostic-status, truthful LIMITED, and in-flight Stop evidence.
+
 ## TASK-038: Implement explicit provider privacy disclosure and data-sharing state
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, privacy, disclosure
 
