@@ -57,3 +57,12 @@ Use `taskplanner_list` / `taskplanner_board`, `taskplanner_get`, `taskplanner_cr
 - A plan is required before coding and should be condensed, not deleted, on completion.
 
 <!-- TASKPLANNER:END -->
+
+## Documentation boundary
+
+Keep product and organizational concerns separate.
+
+- Product documentation: `README.md`, `docs/`, and `specs/`. Describe LAIN_OS behavior, architecture, interfaces, security, acceptance, and release goals only.
+- Internal engineering operations: `.ops/`, `.tasks/`, this file, and GitHub coordination surfaces. Put task sequencing, agent prompts, review/merge policy, scheduled automation, role instructions, and other development-process material here.
+- Never copy internal operating parameters into product documentation.
+- Preserved historical implementation sources are indexed in `.ops/README.md`.
