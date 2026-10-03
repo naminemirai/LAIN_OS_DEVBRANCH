@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 25,
+  "nextId": 26,
   "states": [
     {
       "name": "Backlog",
@@ -151,10 +151,16 @@
         "title": "Close Phase-3 durable-workflow acceptance gate",
         "priority": "P1",
         "order": 18
+      },
+      {
+        "id": "TASK-025",
+        "title": "Define media artifact schemas",
+        "priority": "P1",
+        "order": 19
       }
     ],
     "issue": 6,
-    "repo_head": "63b48346b13ce68a6286931bef7db83833508548",
-    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 3 advances through TASK-016 -> TASK-024 before Phase 4."
+    "repo_head": "c5cb213cc06bc05716f79dcc69d501c0a4b0ef0c",
+    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 4 begins only after TASK-024, with TASK-025 media artifact schemas."
   }
 }
