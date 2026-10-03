@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LAIN_OS</string>
-    <string name="eyebrow">LOCAL AUTONOMOUS INTELLIGENT NETWORKING</string>
+    <string name="eyebrow">LOYAL AUTONOMOUS INTELLIGENCE NETWORK</string>
     <string name="subtitle">Your device. Your actions. Your control.</string>
     <string name="connected">● Local runtime ready</string>
     <string name="starting">○ Starting embedded runtime</string>
