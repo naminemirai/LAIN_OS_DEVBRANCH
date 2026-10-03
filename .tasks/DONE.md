@@ -1,5 +1,22 @@
 # Done
 
+## TASK-005: Implement persistent PlannerProfile selection
+**Priority:** P1
+**Updated:** 2026-10-03
+
+### Done summary
+
+- Added strict native Demo/Cloud/Local PlannerProfile validation and atomic profile persistence with opaque credential references only.
+- Active profile selection now persists across restart and supplies the existing trusted PlannerBinding provider at session creation, preserving per-session pinning.
+- PR #10 head `1d35244b83292f309f3cb1eb0dd16e5254587abc` received fresh whole-diff review with no actionable correctness or over-engineering finding.
+- Verify workflow #150 succeeded.
+- Android workflow #139 succeeded on API 24 and API 35, including build, unit tests, lint, and instrumentation.
+- Draft state was confirmed as the mergeability gate; marking ready changed GitHub mergeability to true without history rewrite or product-code reconciliation.
+- PR #10 squash-merged as `16fd0aa363576f897282dd932b8a56609884ff86`.
+- Physical-device acceptance remains unverified and is not claimed.
+
+---
+
 ## TASK-003: Implement bounded native planner transport
 **Priority:** P1
 **Updated:** 2026-10-03
