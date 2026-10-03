@@ -1,5 +1,66 @@
 # Next
 
+## TASK-020: Implement workflow revision invalidation
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, revisions
+**Updated:** 2026-10-03
+
+### Goal
+Add explicit workflow revisions and dependency-driven downstream invalidation so changing an approved upstream artifact creates a new revision without mutating or silently reusing stale dependent outputs.
+
+### Scope
+- Create a new workflow revision for accepted upstream changes.
+- Compute the transitive set of dependent nodes/artifacts invalidated by that change.
+- Preserve prior immutable artifacts and their provenance for audit/readback.
+- Mark invalidated downstream work non-runnable until rebuilt from the current revision.
+- Bind approvals and publication payloads to an exact workflow revision and artifact hashes.
+- Reuse TASK-016 durable state, TASK-017 DAG dependencies, TASK-018 artifact identities, and TASK-019 restricted role metadata.
+- Do not implement provider polling, external-effect reconciliation, publication, or generalized merge/conflict editing.
+
+### Dependencies
+- TASK-016 workflow persistence.
+- TASK-017 DAG scheduler.
+- TASK-018 artifact workspace.
+- TASK-019 restricted specialist roles.
+
+### Plan
+- Define minimal revision and invalidation transitions over the persisted workflow graph.
+- Derive transitive invalidation from declared dependency edges and artifact references.
+- Preserve immutable prior artifacts while moving current logical references to new revision outputs.
+- Reject stale approvals, node completions, and artifact references from older revisions.
+- Add deterministic revision/invalidation/rebuild tests.
+
+### Acceptance
+- Revising one upstream artifact produces a new stable workflow revision.
+- Every transitive dependent output is invalidated; unrelated branches remain valid.
+- Invalidated nodes cannot run or report success from stale artifacts.
+- Prior artifacts remain inspectable and immutable.
+- Approval or publication records bound to an older revision/hash cannot authorize the new payload.
+- Process restart preserves revision and invalidation state exactly.
+- Revision metadata cannot grant capabilities or bypass policy, approval, execution, or verification.
+
+### Verification
+- Focused revision-transition and transitive-invalidation tests.
+- Branch-isolation tests proving unrelated nodes stay valid.
+- Restart/round-trip tests for invalidation state.
+- Negative stale-approval, stale-artifact, and stale-completion tests.
+- Canonical portable verification plus fresh architecture/security review.
+
+### Expected result
+A user revision such as “make it shorter” safely creates a new workflow revision and forces only dependent artifacts to rebuild, without mutating history or reusing stale authority.
+
+### Evidence basis
+- `docs/ROADMAP_1.0.md` defines R3.5 Revision invalidation immediately after R3.4 restricted specialist roles.
+- Current TaskPlanner state covers R3.1 through R3.4 in TASK-016 through TASK-019; no open issue, PR, or task represents R3.5.
+
+### Projection basis
+- Voice-driven revisions, narration/render regeneration, and exact publication approval require deterministic stale-output invalidation before durable waits or external side effects are added.
+
+### Risks / unknowns
+- Concurrent edits and multi-user merge semantics remain out of scope for the single-active-workflow 1.0 path.
+- Invalidation must stay graph-derived and minimal; broad “rebuild everything” behavior would hide dependency mistakes.
+
+---
+
 ## TASK-019: Implement restricted specialist roles
 **Priority:** P2 | **Tags:** overseer-assigned, developer, phase-3, workflow, roles
 **Updated:** 2026-10-03
