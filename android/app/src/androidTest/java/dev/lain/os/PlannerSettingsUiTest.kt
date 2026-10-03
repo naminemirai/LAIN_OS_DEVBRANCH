@@ -56,7 +56,7 @@ class PlannerSettingsUiTest {
             yield(root)
             return@sequence
         }
-        root.listFiles()?.forEach { child -> yieldAll(rawFilesUnder(child)) }
+        for (child in root.listFiles().orEmpty()) yieldAll(rawFilesUnder(child))
     }
 
     private fun assertSecretAbsentFromDurableFiles(activity: MainActivity, secret: String) {
