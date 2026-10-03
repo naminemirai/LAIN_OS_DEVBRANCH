@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 11,
+  "nextId": 12,
   "states": [
     {
       "name": "Backlog",
@@ -73,10 +73,16 @@
         "title": "Implement Android microphone lifecycle",
         "priority": "P2",
         "order": 5
+      },
+      {
+        "id": "TASK-011",
+        "title": "Implement bounded voice turn manager",
+        "priority": "P2",
+        "order": 6
       }
     ],
     "issue": 6,
-    "repo_head": "07f631111289b678ab9e471f1233d246b650342d",
-    "next_action": "TASK-006 is In Progress. TASK-007 follows TASK-006; TASK-008 closes Phase 1; TASK-009 and TASK-010 begin Phase 2 in order."
+    "repo_head": "a52a841a8cddfe9f5cecfe6ac56db3b7282013e5",
+    "next_action": "TASK-006 is In Progress. TASK-007 -> TASK-008 close Phase 1. TASK-009 -> TASK-010 -> TASK-011 begin Phase 2 in dependency order."
   }
 }
