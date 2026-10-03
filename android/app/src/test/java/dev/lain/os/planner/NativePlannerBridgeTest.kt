@@ -28,8 +28,9 @@ class NativePlannerBridgeTest {
 
         val result = bridge.execute(bindingJson(), """{"model":"model-a"}""")
 
-        assertTrue(result.contains("\"ok\":true"))
-        assertTrue(result.contains("\"choices\""))
+        val envelope = org.json.JSONObject(result)
+        assertTrue(envelope.getBoolean("ok"))
+        assertTrue(envelope.getString("body").contains("\"choices\""))
         assertFalse(result.contains("raw-secret-must-not-return"))
     }
 
