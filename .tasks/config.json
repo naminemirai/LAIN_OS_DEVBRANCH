@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 19,
+  "nextId": 21,
   "states": [
     {
       "name": "Backlog",
@@ -115,10 +115,22 @@
         "title": "Implement immutable artifact workspace",
         "priority": "P1",
         "order": 12
+      },
+      {
+        "id": "TASK-019",
+        "title": "Implement restricted specialist roles",
+        "priority": "P2",
+        "order": 13
+      },
+      {
+        "id": "TASK-020",
+        "title": "Implement workflow revision invalidation",
+        "priority": "P1",
+        "order": 14
       }
     ],
     "issue": 6,
-    "repo_head": "d3597638632d0a4435e7ff48644e0aaf0e4fb2b7",
-    "next_action": "TASK-007 is In Progress. TASK-008 closes Phase 1; TASK-009 through TASK-015 execute Phase 2; TASK-016 onward begin Phase 3."
+    "repo_head": "eda7ed146f551a0fba91d55690955f0e686adc0f",
+    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. TASK-009 through TASK-015 execute Phase 2. TASK-016 through TASK-020 begin Phase 3 in dependency order."
   }
 }
