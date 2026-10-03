@@ -2,6 +2,14 @@
 
 **Local Autonomous Intelligence Network Operating System**
 
+## Current 1.0 implementation focus — 2026-10-03
+
+TASK-008 Phase-1 planner acceptance is the active gate before voice work. PR #16 head `c700eed0b9de6964729a6b038eaa565daf44864d` is automated GREEN (Verify #270; Android #259), and the exact debug build has begun physical Galaxy acceptance.
+
+Current device evidence is mixed by design: Offline Demo **Show battery** reaches **COMPLETE**, while the real selected Groq planner path reaches the provider but is rejected with HTTP 400 because LAIN generates an invalid strict JSON schema for a zero-argument capability. The current one-token structured-output connection probe also produces independent validation failures. These are active TASK-008 defects; they are not credential/network failures and must not be hidden behind `unavailable`.
+
+Before TASK-008 closes, the patch must preserve the trust boundary, rerun full CI, produce a new exact-GREEN APK, prove Stop on a genuinely in-flight planner call, and require the complete applicable Workbench preset suite — Create demo file, Show battery, Show demo toast, Vibrate briefly, Copy demo text, Share demo text — to reach terminal **COMPLETE** through the real selected planner, with exact approval on sharing. See `docs/ROADMAP_1.0.md`, `docs/ANDROID_ACCEPTANCE.md`, `.tasks/NEXT.md`, and issue #6 for the canonical current gate.
+
 ## v0 — Local loop
 
 Goal: prove the architecture with a small, inspectable control path.
