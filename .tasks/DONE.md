@@ -1,5 +1,23 @@
 # Done
 
+## TASK-007: Build Planner Settings and inert connection diagnostics
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-1, android-ui
+**Updated:** 2026-10-03
+
+### Done summary
+
+- Added the native Android Planner Settings surface for Demo, Cloud, and Local profiles, including create/edit/select/delete and bounded endpoint/model/timeout/response controls.
+- Credential UI supports save, replacement, removal, and saved/missing state without rendering or returning raw secrets.
+- Added diagnostic-only Test Connection and visible active provider/model identity; instrumentation verifies diagnostics do not create an agent session.
+- Corrected the settings layout to preserve existing Workbench control visibility and made the screen-level test independent of emulator viewport scrolling.
+- Verify workflow #230 succeeded.
+- Android workflow #219 succeeded after one targeted rerun of an unrelated API-24 RuntimeFlow timing failure; API 24 and API 35 build, JVM tests, lint, and instrumentation gates are green at head `8ce8a99a720cc5f9dfc0e6310fd29bcf4ce58f3f`.
+- Final post-CI review `5401183419` found no unresolved threads or actionable correctness/security findings.
+- PR #12 squash-merged as `be4e1d273e05784beeb5783c811d19d40a8a1930`.
+- Physical-device acceptance remains unverified and is not claimed.
+
+---
+
 ## TASK-006: Wire profile-selected planner runtime bridge
 **Priority:** P1
 **Updated:** 2026-10-03
