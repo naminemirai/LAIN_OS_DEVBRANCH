@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 22,
+  "nextId": 23,
   "states": [
     {
       "name": "Backlog",
@@ -133,10 +133,16 @@
         "title": "Implement durable wait and poll stages",
         "priority": "P1",
         "order": 15
+      },
+      {
+        "id": "TASK-022",
+        "title": "Implement external-effect reconciliation",
+        "priority": "P1",
+        "order": 16
       }
     ],
     "issue": 6,
-    "repo_head": "f0d2c95aa673332a8a4c1d3f0126d613543329b7",
-    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. TASK-009 through TASK-015 execute Phase 2. TASK-016 through TASK-021 proceed through Phase 3 in dependency order."
+    "repo_head": "e8d306908406085c4db577d5b103a665c7b9f238",
+    "next_action": "Continue TASK-007 / PR #12; then TASK-008 closes Phase 1. Phase 3 advances through TASK-016 -> TASK-022 in dependency order."
   }
 }
