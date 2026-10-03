@@ -1,5 +1,21 @@
 # Done
 
+## TASK-003: Implement bounded native planner transport
+**Priority:** P1
+**Updated:** 2026-10-03
+
+### Done summary
+
+- PR #8 head `a39b69c768984fcbe0d2febca79eac99ae204b38` received fresh same-run whole-diff review PASS `5399559135` against `main@04e4a5b2b0fd947ca423415de5c469e9a7650c04`.
+- Prior P1/P2 findings were verified addressed and all three review threads were resolved.
+- Verify workflow #135 succeeded.
+- Android workflow #124 succeeded, including API 24 and API 35 instrumentation.
+- Native planner endpoints remain HTTPS-only; global cleartext denial remains intact.
+- PR #8 squash-merged as `c217ca76cc41ae24eb14357bf8ce3022f29b8534` under the review-only merge policy.
+- Tests were run and succeeded; no UNTESTED status applies to this merge.
+
+---
+
 ## TASK-001: Reconcile PR #4 with current main and restore mergeability
 **Priority:** P0
 **Updated:** 2026-10-02 17:56
