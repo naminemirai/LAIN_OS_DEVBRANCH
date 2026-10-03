@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 8,
+  "nextId": 9,
   "states": [
     {
       "name": "Backlog",
@@ -61,10 +61,16 @@
         "title": "Build Planner Settings and inert connection diagnostics",
         "priority": "P1",
         "order": 3
+      },
+      {
+        "id": "TASK-008",
+        "title": "Close Phase-1 planner acceptance and adversarial gate",
+        "priority": "P1",
+        "order": 4
       }
     ],
     "issue": 6,
-    "repo_head": "c217ca76cc41ae24eb14357bf8ce3022f29b8534",
-    "next_action": "TASK-005 is In Progress. TASK-006 is blocked only on TASK-005; TASK-007 follows TASK-006."
+    "repo_head": "560fb0c3369d5151ce645061423849fe72b02a4e",
+    "next_action": "TASK-005 is In Progress. TASK-006 follows TASK-005, TASK-007 follows TASK-006, and TASK-008 closes the Phase-1 acceptance gate before Voice Conversation."
   }
 }
