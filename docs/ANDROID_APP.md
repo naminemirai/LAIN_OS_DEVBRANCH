@@ -57,7 +57,7 @@ environment's proxy and CA trust when downloading dependencies.
 
 Expected artifact after a successful build:
 `android/app/build/outputs/apk/debug/app-debug.apk`. A debug APK is not a production
-release. No owner release-signing credentials are included. The source bundles
+release. No release-signing credentials are included. The source bundles
 only `lain/`, not repository secrets, session files, or developer configuration.
 
 ## Approvals, privacy, and recovery
