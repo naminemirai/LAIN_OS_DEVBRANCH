@@ -1,0 +1,1062 @@
+# LAIN_OS 1.0 Roadmap
+
+Version: 1.0-roadmap
+Status: Active planning baseline
+Baseline: main@5b1d5c4472fd964148a85d64be554dd7578c0e6a
+Date: 2026-10-03
+Role: Repository planning artifact
+
+## 1. North-star release outcome
+
+LAIN_OS 1.0 is a standalone Android voice-first autonomous agent suite that turns ordinary spoken or typed goals into bounded, durable, verified multi-step work while preserving owner authority over every consequential action.
+
+The release should feel like an operating layer for AI-assisted work rather than a chat front-end:
+
+    owner intent
+      -> conversation
+      -> planning
+      -> durable workflow
+      -> permissioned capabilities
+      -> deterministic execution
+      -> verification
+      -> artifacts
+      -> audit
+      -> spoken/visual result
+
+The flagship 1.0 proof is:
+
+    "Turn this idea into a YouTube video and post it."
+
+A successful demonstration means LAIN_OS creates a real script, narration, visual assets, rendered video, preview evidence, private upload, processing evidence, exact publication approval, publication, and an independently retrieved final result. A generated plan, simulated upload, mocked renderer, or planner assertion is not completion.
+
+## 2. Non-negotiable architecture
+
+The trusted runtime remains authoritative throughout 1.0.
+
+- Models plan; trusted code authorizes and executes.
+- Model output is untrusted data until validated.
+- ACTION_PROTOCOL and AGENT_PROTOCOL remain the execution/planning boundaries.
+- Capability risk, policy, approval, executor selection, verification, audit, and durable lifecycle state are never delegated to a provider.
+- Consequential actions require exact owner authority.
+- Completed external effects are never blindly replayed.
+- Uncertain external effects enter reconciliation instead of automatic retry.
+- Credentials stay outside planner context, audit, checkpoints, IPC responses, screenshots, exports, and logs.
+- Local mode never silently falls back to cloud.
+- Cancellation stops future work but never pretends an external effect was rolled back.
+- The portable Python runtime and CLI remain supported while Android becomes the primary product surface.
+- No arbitrary shell, arbitrary authenticated HTTP, or general-purpose model-controlled device driver is introduced to shortcut typed capabilities.
+
+## 3. Current baseline
+
+### Implemented foundation
+
+The repository already contains substantial pre-1.0 infrastructure:
+
+- Typed ACTION_PROTOCOL validation.
+- Capability registry, policy, confirmation, deterministic execution, verification, and audit.
+- Filesystem and bounded Android capabilities.
+- Provider-independent AGENT_PROTOCOL.
+- Durable autonomous sessions with budgets, checkpointing, resume, cancellation, and reconciliation behavior.
+- External-process planner boundary and real hosted planner precedent.
+- Standalone Android application with embedded Python runtime.
+- Android text workbench, Run/Stop, exact approvals, session history, recovery controls, and private runtime service.
+- Native Android capability adapters.
+- Physical acceptance evidence for earlier Android capability slices.
+- PlannerBinding/session pinning groundwork in the trusted agent model.
+- Android Keystore-backed planner SecretStore completed as TASK-002.
+
+### Active work
+
+TASK-003 is the current canonical task.
+
+Goal: bounded native Android HTTP transport for hosted and local OpenAI-compatible planner profiles.
+
+Active branch/PR:
+- feature/task-003-native-planner-transport
+- PR #8
+
+Known blockers at this roadmap baseline:
+- malformed-response validation is not truthful in the current local JVM test path because Android JSON stubs do not behave like the device runtime;
+- Local plaintext LAN HTTP is accepted by the intended binding contract but conflicts with Android's global cleartext deny;
+- the repository must choose a truthful Local HTTP contract without globally weakening network security.
+
+No later phase should bypass this transport boundary.
+
+## 4. Scope for 1.0
+
+### Required
+
+1. Real selectable model intelligence in the Android app.
+2. Demo, hosted cloud, and owner-provided local endpoint modes.
+3. Secure provider credentials.
+4. Voice input and spoken output.
+5. Conversational interruption and revision while work continues.
+6. Durable multi-stage workflows above the existing action-batch controller.
+7. Versioned artifact workspace with hashes and provenance.
+8. Real offline video rendering and inspection.
+9. Replaceable speech/media provider adapters with bounded cost and retry behavior.
+10. YouTube OAuth, private upload, processing verification, exact publication gate, and final lookup.
+11. Crash/restart recovery without duplicate side effects.
+12. Installed-device end-to-end acceptance.
+13. Release signing, migration, packaging, documentation, and a reproducible release-readiness report.
+
+### Explicitly deferred beyond 1.0
+
+- Embedded GGUF/on-device LLM inference.
+- Model download/management UI.
+- Arbitrary cinematic video generation.
+- Voice cloning.
+- Always-listening microphone or wake word.
+- Multiple simultaneous active workflows.
+- Unrestricted AccessibilityService automation.
+- General authenticated HTTP capability.
+- Provider-managed tool execution outside LAIN protocols.
+- RAG/vector database as a core requirement.
+- Autonomous spending without explicit owner-controlled budgets and authority.
+- Multi-device distributed execution as a release requirement.
+
+These are post-1.0 expansion targets, not hidden release blockers.
+
+## 5. Dependency graph
+
+The critical path is intentionally sequential at trust-boundary transitions:
+
+    Foundation
+      -> P1 Pluggable Planner Runtime
+      -> P2 Voice Conversation
+      -> P3 Durable Workflow Graph
+      -> P4 Offline Media Pipeline
+      -> P5 External Provider Adapters
+      -> P6 YouTube Publication
+      -> P7 End-to-End Hardening
+      -> 1.0 Release
+
+Some implementation can overlap after interfaces stabilize:
+
+    P2 Voice ----------------------+
+                                   |
+    P3 Workflow Graph -> P4 Media -+-> P5 Providers -> P6 YouTube
+                                   |
+    Android hardening -------------+-> P7 Release
+
+Do not parallelize across an unstable public interface merely to increase throughput.
+
+## 6. Phase 0 — Foundation consolidation
+
+Status: substantially complete; maintain and close remaining acceptance debt.
+
+### Goal
+
+Preserve a known-safe execution substrate before adding richer model, voice, media, and publishing surfaces.
+
+### Existing feature set
+
+- Runtime validation/policy/execution/verification/audit.
+- Durable autonomous session controller.
+- Android embedded runtime and UI.
+- Exact approval model.
+- Stop/cancel path.
+- Filesystem and Android capability set.
+- Secure planner credential store.
+
+### Remaining foundation work
+
+R0.1 — Physical Android interface acceptance
+- Re-run device acceptance on the latest runtime-affecting APK.
+- Verify Stop during confirmation transition and active work.
+- Verify rebind/rotation/background behavior.
+- Verify stale approval rejection.
+- Record device/API/build SHA and observed limits.
+
+R0.2 — Release-state hygiene
+- Ensure architecture/spec/README claims match fresh evidence.
+- Keep TaskPlanner canonical and free of duplicate or stale tasks.
+- Keep secrets and external orchestration context out of repository state.
+
+R0.3 — Regression baseline
+- Preserve canonical portable verification.
+- Preserve Android assembly/lint/instrumentation workflows.
+- Keep explicit distinction between automated, emulator, and physical-device evidence.
+
+### Exit gate
+
+Foundation can support later phases without changing planner authority, approval semantics, session recovery, or audit contracts.
+
+## 7. Phase 1 — Pluggable Planner Runtime
+
+Maps to the existing Phase 2/P2-01 through P2-07 plan.
+
+Status: IN PROGRESS.
+
+### Goal
+
+Replace the Android app's hardcoded demo-only planning path with owner-selectable Demo, Cloud, or Local model intelligence while keeping all authority local and deterministic.
+
+### Planned feature slices
+
+#### R1.1 — Provider-neutral planner contract
+
+Objectives:
+- centralize request construction;
+- centralize lifecycle decision parsing;
+- strictly validate status, actions, keys, bounds, and capability references;
+- keep provider-specific transport outside the trusted planning service.
+
+Tasks:
+- inventory existing Groq and demo logic;
+- remove duplicated provider-specific parsing where present;
+- pin strict malformed/oversized/unknown-field failure tests;
+- preserve AGENT_PROTOCOL semantics.
+
+Acceptance:
+- Demo and existing hosted planner behavior remain valid.
+- Invalid model output fails closed.
+- No provider can choose trusted IDs, policy, verification, or execution.
+
+#### R1.2 — Planner profile persistence
+
+Feature:
+- provider-neutral PlannerProfile configuration.
+
+Fields:
+- profile ID/name;
+- mode: DEMO, CLOUD, LOCAL;
+- protocol;
+- base URL;
+- model;
+- opaque credential reference;
+- timeout;
+- response-size bound;
+- response mode;
+- explicit local-network policy fields where supported.
+
+Tasks:
+- implement native profile persistence;
+- validate endpoint/model/profile inputs;
+- expose active profile;
+- capture the selected binding when a session starts;
+- ensure settings changes affect future sessions only.
+
+Acceptance:
+- restart preserves configuration;
+- active sessions remain pinned to their original planner identity;
+- raw credentials never enter profile state.
+
+#### R1.3 — Secure credential store
+
+Status: implemented in TASK-002.
+
+Maintain:
+- Android Keystore encryption;
+- credential-reference binding;
+- swap/rename failure behavior;
+- concurrent initialization safety;
+- replace/remove behavior;
+- backup/device-transfer protections.
+
+#### R1.4 — Native bounded planner transport
+
+Status: active TASK-003 / PR #8.
+
+Tasks:
+- resolve Local HTTP security/compatibility contract;
+- make malformed-response validation truthful in the tested runtime;
+- retain connect/read timeout bounds;
+- retain bounded streaming response reads;
+- retain cancellation;
+- retain redirect protections;
+- retain structured provider failure codes;
+- prove no local-to-cloud fallback.
+
+Decision rule for plaintext Local HTTP:
+- never globally enable cleartext merely for convenience;
+- support it only if Android policy can constrain it to the documented local mode safely;
+- otherwise reject it at configuration/binding time and require HTTPS for 1.0.
+
+#### R1.5 — Android/Python planner bridge
+
+Goal:
+- replace hardcoded DemoPlanner construction with profile-selected planner creation.
+
+Tasks:
+- define the smallest native transport bridge;
+- ensure Python receives only model response material and non-secret provider identity;
+- feed response into existing AgentPlanningService;
+- preserve policy/executor/verification/audit route unchanged;
+- propagate cancellation from Android Stop to transport and controller.
+
+Acceptance:
+- Demo works offline.
+- Cloud endpoint can produce a valid planner decision.
+- Local endpoint can produce a valid planner decision.
+- No bridge method grants capability authority.
+
+#### R1.6 — Planner Settings UI
+
+Features:
+- Demo / Cloud / Local selection;
+- create/edit/delete/select profile;
+- model and endpoint fields;
+- credential saved/replaced/removed state without secret reveal;
+- Test Connection;
+- active provider/model visibility in Workbench;
+- structured recovery errors.
+
+Test Connection constraints:
+- no agent session;
+- no capability execution;
+- no filesystem/device action;
+- bounded endpoint diagnostic only.
+
+#### R1.7 — Planner acceptance and adversarial suite
+
+Must cover:
+- DNS failure;
+- connection refused;
+- TLS failure;
+- 401/403;
+- 404/model missing;
+- timeout/408;
+- 429;
+- 5xx;
+- cancellation;
+- oversized response;
+- malformed JSON;
+- schema-invalid model output;
+- invalid/unknown capability;
+- provider outage during session;
+- local endpoint loss;
+- no cloud fallback;
+- credential absence from durable artifacts;
+- app restart/profile persistence.
+
+### Phase 1 exit gate
+
+From the installed Android GUI:
+
+    select real model profile
+      -> enter natural-language request
+      -> model proposes typed action
+      -> trusted validation
+      -> policy/approval
+      -> deterministic execution
+      -> verification
+      -> audit
+      -> visible result
+
+This must work without changing the trust model.
+
+## 8. Phase 2 — Voice Conversation
+
+Maps primarily to F2.
+
+Status: planned after stable planner selection/transport.
+
+### Goal
+
+Make conversation the primary interface while keeping text as a complete fallback.
+
+### Features
+
+- user-started microphone sessions;
+- visible recording state;
+- speech-to-text adapter boundary;
+- text transcript;
+- selectable speech synthesis voice;
+- streaming/progressive spoken responses where supported;
+- playback cancellation;
+- barge-in: user can interrupt synthesis;
+- distinction between Stop talking and Stop task;
+- active-task conversational reference;
+- typed fallback at all times;
+- microphone permission/revocation handling;
+- no raw audio retention by default.
+
+### Rough work packages
+
+R2.1 — Speech provider interfaces
+- TranscriptionRequest/Result.
+- SynthesisRequest/Result.
+- cancellation and timeout contracts.
+- provider identity/provenance.
+
+R2.2 — Android microphone lifecycle
+- permission flow;
+- capture start/stop;
+- visible state;
+- background/rotation behavior;
+- no hidden always-listening mode.
+
+R2.3 — Turn manager
+- monotonic turn IDs;
+- final vs partial transcript separation;
+- active task reference;
+- ambiguous referent clarification;
+- revision routing.
+
+R2.4 — Speech playback
+- audio focus;
+- start/stop/duck;
+- TTS cancellation;
+- playback state surfaced to UI.
+
+R2.5 — Barge-in and echo protection
+- speech during synthesis stops/ducks playback;
+- prevent synthesized speech becoming a user command;
+- verify partial recognition cannot authorize a consequential action.
+
+R2.6 — Voice progress narration
+- short progress events separate from durable workflow state;
+- speech failure never equals task failure;
+- task continues if TTS is unavailable.
+
+R2.7 — Voice acceptance
+- permission denied/revoked;
+- offline/provider unavailable;
+- rotation/rebind;
+- interruption;
+- Stop talking vs Stop task;
+- low-confidence consequential command;
+- latency measurement on declared reference device.
+
+Targets from the 1.0 design:
+- user interruption to playback stop: at most 500 ms on reference device;
+- trusted pause/cancel receipt: within two seconds in controlled tests.
+
+### Phase 2 exit gate
+
+The owner can start a voice session, give a normal spoken goal, hear a spoken response, interrupt it, revise the request, and stop the underlying task independently of speech playback.
+
+## 9. Phase 3 — Durable Workflow Graph and Artifact Workspace
+
+Maps to F3.
+
+### Goal
+
+Move from bounded action batches to durable, inspectable multi-stage projects without replacing the existing trusted executor.
+
+### Workflow model
+
+Each workflow/task node should track:
+
+- stable ID;
+- dependencies;
+- status;
+- assigned restricted role;
+- allowed capability families;
+- input artifact references/hashes;
+- output artifact references/hashes;
+- acceptance checks;
+- attempted operations;
+- consumed budgets;
+- retry counters;
+- provider job IDs;
+- deadlines;
+- error/recovery state;
+- workflow revision;
+- owner approvals;
+- reconciliation state.
+
+Recommended states:
+- pending;
+- ready;
+- running;
+- waiting_for_owner;
+- succeeded;
+- failed;
+- cancelled;
+- reconciliation.
+
+### Rough work packages
+
+R3.1 — Workflow persistence model
+- schema/versioning;
+- atomic state writes;
+- migration support;
+- corrupt-state failure behavior.
+
+R3.2 — DAG scheduler
+- dependency readiness;
+- one active workflow initially;
+- bounded worker leases;
+- no downstream execution until required verified outputs exist.
+
+R3.3 — Artifact workspace
+- immutable artifact identity by hash;
+- versions/revisions;
+- metadata/provenance;
+- owner-visible workspace;
+- atomic writes;
+- retention/cleanup policy.
+
+R3.4 — Restricted specialist roles
+Initial logical roles:
+- coordinator;
+- writer;
+- visual planner;
+- narrator;
+- renderer;
+- publisher.
+
+Roles are context/capability restrictions, not privileged independent executors.
+
+R3.5 — Revision invalidation
+Example:
+- "Make it shorter" creates a new script revision;
+- invalidates narration/render artifacts that depend on the old script;
+- never mutates an already approved publication payload in place.
+
+R3.6 — Durable wait/poll stages
+- long provider/render/upload jobs;
+- persisted deadlines;
+- bounded polling;
+- no silent extension of existing controller budget.
+
+R3.7 — External-effect reconciliation
+- persist operation identity before crossing side-effect gate;
+- crash after attempted write enters reconciliation;
+- completed effect cannot replay after restart;
+- uncertain effect cannot automatically retry.
+
+R3.8 — Aggregate budgets
+- time;
+- action count;
+- provider call count;
+- bytes;
+- estimated/actual cost;
+- retry allowance.
+
+### Phase 3 exit gate
+
+A multi-stage workflow survives process death, resumes without replaying completed effects, invalidates downstream artifacts correctly after revision, and exposes a truthful owner-readable state.
+
+## 10. Phase 4 — Offline Media Production Pipeline
+
+Maps to F4.
+
+### Goal
+
+Prove LAIN_OS can produce a real useful media artifact locally before depending on external media-generation services.
+
+### 1.0 media scope
+
+A short 30–60 second narrated video using:
+- owner-provided or bundled licensed images;
+- generated text/title cards;
+- narration audio;
+- captions;
+- simple transitions;
+- deterministic timeline/render settings.
+
+Not required:
+- cinematic generative video;
+- avatars;
+- voice cloning;
+- complex NLE editing.
+
+### Proposed capability families
+
+- speech.synthesize
+- media.render_video
+- media.inspect_video
+
+Capability names remain subject to repository contract review before registration.
+
+### Rough work packages
+
+R4.1 — Media artifact schemas
+- image/audio/video metadata;
+- MIME/codec expectations;
+- dimensions;
+- duration;
+- hashes;
+- provenance.
+
+R4.2 — Narration pipeline
+- script segments;
+- synthesis;
+- bounded audio file output;
+- duration validation.
+
+R4.3 — Timeline representation
+- scenes;
+- image/audio references;
+- captions;
+- transition durations;
+- output constraints.
+
+R4.4 — Renderer
+- select Android-compatible or bundled rendering toolchain;
+- no shell interpolation;
+- bounded resources;
+- cancellation;
+- deterministic output path.
+
+R4.5 — Video inspection
+Verify actual rendered file:
+- exists;
+- decodes;
+- has video stream;
+- has audio when expected;
+- dimensions;
+- duration;
+- file hash.
+
+R4.6 — Preview/export UI
+- show artifact;
+- owner can inspect;
+- render progress;
+- cancel;
+- export/share only through explicit capability policy.
+
+R4.7 — Offline golden fixture
+- bundled licensed assets;
+- real 30–60 second render;
+- no cloud account;
+- real inspection evidence.
+
+### Phase 4 exit gate
+
+A fresh installed APK can produce and inspect a real video from local assets while preserving app responsiveness, Stop behavior, durable workflow state, and artifact hashes.
+
+## 11. Phase 5 — External Speech, Media, and Planner Providers
+
+Maps to F5.
+
+### Goal
+
+Add replaceable external services without letting provider APIs become new authority surfaces.
+
+### Features
+
+- provider-neutral adapter contracts;
+- fake transports for deterministic tests;
+- bounded network requests;
+- cancellation;
+- timeout;
+- rate-limit handling;
+- retry policy;
+- provider job polling;
+- cost estimation and owner budgets;
+- provenance and provider identity;
+- no implicit provider fallback that changes privacy/cost semantics.
+
+### Rough work packages
+
+R5.1 — Provider job abstraction
+- submit;
+- poll;
+- cancel where supported;
+- terminal status;
+- result artifact retrieval.
+
+R5.2 — Speech provider adapter
+- STT/TTS through the Phase 2 interface;
+- secret handling;
+- throttling/errors.
+
+R5.3 — Image/media generation adapter
+- bounded dimensions/count;
+- content/provenance metadata;
+- download validation;
+- decoder validation;
+- hash before workflow consumption.
+
+R5.4 — Budget and spending controls
+- per-workflow spending ceiling;
+- per-provider call count;
+- owner-visible estimate;
+- actual cost recording where provider exposes it;
+- no provider estimate grants spending authority.
+
+R5.5 — Retry/backoff policy
+- retry only known-safe idempotent/read operations automatically;
+- external writes require idempotency identity or reconciliation;
+- 429/5xx bounded backoff.
+
+R5.6 — Provider privacy disclosure
+- explicitly show when text/audio/images leave the device;
+- profile-specific data-sharing state;
+- Local selection never becomes Cloud automatically.
+
+### Phase 5 exit gate
+
+The same workflow can use configured remote providers under bounded budgets and failure handling while trusted local policy/execution semantics remain unchanged.
+
+## 12. Phase 6 — YouTube Publication
+
+Maps to F6.
+
+### Goal
+
+Add a narrowly scoped, owner-authorized publishing path for the flagship workflow.
+
+### Capability family
+
+Proposed:
+- youtube.upload
+- youtube.status
+- youtube.publish
+
+Do not expose generic YouTube HTTP or arbitrary authenticated API access.
+
+### Rough work packages
+
+R6.1 — OAuth account authorization
+- current official authorization flow;
+- minimum required scopes;
+- account/channel identity display;
+- Keystore-backed token protection;
+- revocation/removal.
+
+R6.2 — Upload intent record
+Persist before upload:
+- artifact hash;
+- destination channel;
+- title;
+- description;
+- intended visibility;
+- workflow revision;
+- stable operation/idempotency identity.
+
+R6.3 — Resumable private upload
+- default first upload to private/unlisted staging as selected by policy;
+- progress;
+- cancellation semantics;
+- resumable state;
+- crash recovery.
+
+R6.4 — Processing status verification
+- independent authenticated lookup;
+- processing state;
+- video ID;
+- failure reason;
+- no "published" claim while processing is incomplete.
+
+R6.5 — Exact publication approval
+Approval binds:
+- exact video ID;
+- artifact hash;
+- destination channel;
+- title;
+- description;
+- visibility;
+- policy revision;
+- nonce;
+- expiry.
+
+A generic earlier phrase such as "post it" does not authorize a later changed payload.
+
+R6.6 — Publish operation
+- execute only after exact approval;
+- persist attempt before side effect;
+- independent lookup afterward.
+
+R6.7 — Duplicate/uncertain upload reconciliation
+- crash after upload attempt;
+- network loss after response;
+- duplicate approval;
+- already-published state;
+- never blindly create a second upload.
+
+R6.8 — Live acceptance
+- use owner-provided authorization;
+- separately authorize any real upload/publication;
+- keep live tests private until explicit publication approval;
+- record exact retrieved result.
+
+### Phase 6 exit gate
+
+LAIN_OS can upload the exact approved artifact, verify processing, require exact publication approval, publish, and independently retrieve the final metadata/visibility without leaking credentials or duplicating an uncertain external write.
+
+## 13. Phase 7 — End-to-End 1.0 Hardening
+
+Maps to F7.
+
+### Goal
+
+Turn individually working subsystems into one credible installed product and produce the evidence required for a 1.0 claim.
+
+### Golden scenario
+
+    launch installed app
+      -> start voice session
+      -> speak idea
+      -> selected planner creates workflow
+      -> script produced
+      -> owner revises script verbally
+      -> downstream artifacts invalidated/rebuilt
+      -> narration produced
+      -> visuals prepared
+      -> video rendered
+      -> video inspected
+      -> owner previews
+      -> private YouTube upload
+      -> processing verified
+      -> exact publication approval
+      -> publish
+      -> final metadata/link independently retrieved
+      -> workflow closes with audit + artifact manifest
+
+### Adversarial release matrix
+
+R7.1 — Conversation failures
+- microphone denial;
+- microphone revocation;
+- STT outage;
+- TTS outage;
+- user interruption;
+- echo/self-command;
+- ambiguous task reference.
+
+R7.2 — Planner failures
+- malformed output;
+- hostile instructions;
+- unknown capability;
+- oversized response;
+- timeout;
+- 429;
+- provider outage;
+- local endpoint loss;
+- no fallback.
+
+R7.3 — Workflow/recovery failures
+- process death between nodes;
+- process death after external effect attempt;
+- corrupt state;
+- stale revision;
+- exhausted budget;
+- duplicate resume;
+- duplicate approval;
+- workflow cancel during provider wait.
+
+R7.4 — Media failures
+- corrupt image;
+- corrupt audio;
+- renderer crash;
+- insufficient storage;
+- oversized asset;
+- invalid codec/output;
+- render cancellation.
+
+R7.5 — Publication failures
+- OAuth revoked;
+- quota exhausted;
+- resumable upload interruption;
+- processing failure;
+- uncertain upload result;
+- publication verification mismatch.
+
+R7.6 — Security/privacy
+- secret scan of durable state;
+- log/audit redaction;
+- IPC/Binder restrictions;
+- path traversal;
+- hostile filenames;
+- unauthorized provider change;
+- approval replay;
+- data export review.
+
+R7.7 — Performance and resource behavior
+- voice interruption latency;
+- Stop receipt latency;
+- memory pressure;
+- thermal pressure;
+- long render responsiveness;
+- background/foreground transitions;
+- restart timing.
+
+## 14. Release engineering
+
+### R1.0 release candidate requirements
+
+Build:
+- reproducible release build;
+- owner-controlled persistent signing key;
+- release package identity/versioning;
+- supported ABI/API declaration;
+- migration from current debug/private state where applicable.
+
+Verification:
+- canonical Python verification;
+- Android build;
+- lint;
+- JVM tests;
+- instrumentation on supported API matrix;
+- physical device acceptance;
+- end-to-end golden workflow;
+- adversarial matrix;
+- secret scan;
+- artifact manifest.
+
+Documentation:
+- install/upgrade;
+- supported Android versions/devices;
+- permissions;
+- provider configuration;
+- privacy/data flow;
+- local-vs-cloud semantics;
+- recovery/Stop behavior;
+- YouTube authorization;
+- known limitations;
+- backup/export behavior;
+- troubleshooting.
+
+Release artifacts:
+- signed APK or chosen distributable;
+- checksum;
+- version/tag;
+- source commit;
+- migration notes;
+- test/evidence report;
+- third-party notices/licenses;
+- known-issues list.
+
+### 1.0 definition of done
+
+LAIN_OS 1.0 may be claimed only when all of the following are true:
+
+1. A release-signed Android artifact is built from a recorded source commit.
+2. The installed app can use Demo plus at least one real configurable planner mode.
+3. Hosted/local selection obeys documented privacy and fallback semantics.
+4. Voice input/output works on a declared physical reference device.
+5. Barge-in and trusted Stop behavior meet recorded acceptance criteria.
+6. Durable workflows survive restart without replaying completed effects.
+7. Artifact revisions and downstream invalidation work.
+8. A real offline video fixture renders and passes media inspection.
+9. External provider failures cannot become fabricated success.
+10. YouTube upload/publish uses exact authority and independent verification.
+11. The golden spoken idea-to-video workflow succeeds through real installed artifacts.
+12. Required automated, emulator, physical, and external-service evidence is recorded separately and truthfully.
+13. Secrets are absent from durable planner/audit/log/export surfaces.
+14. Critical unresolved security/recovery/data-loss findings are zero.
+15. Documentation matches the shipped behavior.
+16. No debug APK, mocked external effect, skipped test, or planner assertion is presented as release evidence.
+
+## 15. Suggested sequential TaskPlanner queue
+
+Roadmap IDs below are work-package identifiers, not TaskPlanner IDs. Instantiate canonical TASK IDs only when a package becomes actionable; do not flood the board with the entire roadmap.
+
+Immediate sequence:
+
+1. Finish active TASK-003 / R1.4 native planner transport.
+2. R1.5 planner factory/Android-Python bridge.
+3. R1.6 Planner Settings UI and Test Connection.
+4. R1.7 real Cloud/Local planner acceptance and adversarial failures.
+5. R0.1 refresh native Android physical acceptance if runtime-affecting changes invalidate prior evidence.
+6. R2.1 speech interfaces.
+7. R2.2 microphone lifecycle.
+8. R2.3/R2.4 turn manager + playback.
+9. R2.5 barge-in/echo protection.
+10. R2.7 physical voice acceptance.
+11. R3.1 workflow persistence.
+12. R3.2 DAG scheduling.
+13. R3.3 artifact workspace.
+14. R3.5 revision invalidation.
+15. R3.6/R3.7 waits + reconciliation.
+16. R4.1 media schemas.
+17. R4.2 narration.
+18. R4.3 timeline.
+19. R4.4 renderer.
+20. R4.5 inspector.
+21. R4.7 offline golden video fixture.
+22. R5 provider job abstraction and bounded external adapters.
+23. R5 budget/privacy/retry hardening.
+24. R6 YouTube authorization.
+25. R6 upload/status/reconciliation.
+26. R6 exact publication gate and verification.
+27. R7 full golden workflow.
+28. R7 adversarial matrix.
+29. Release signing/migration/documentation.
+30. 1.0 release-candidate acceptance and evidence report.
+
+## 16. Prioritization rules
+
+When selecting the next engineering task:
+
+1. Finish an already active unblocked task before creating a duplicate.
+2. Choose critical-path trust-boundary work before cosmetic polish.
+3. Prefer work that creates an independently testable vertical slice.
+4. Resolve correctness/security contract mismatches before stacking features on them.
+5. Reuse an existing interface before creating a parallel abstraction.
+6. Keep provider-specific logic at adapter boundaries.
+7. Keep voice/media/publishing state out of RuntimeEngine unless it is truly execution authority.
+8. Do not let deferred physical acceptance block independent local implementation, but never convert deferred evidence into a pass claim.
+9. Keep external credentials/cost/publication as late-bound acceptance dependencies so local work can continue without them.
+10. Do not merge aspirational roadmap state into TaskPlanner as if it were current execution state.
+
+## 17. Key decisions to resolve during implementation
+
+These require explicit design/security/compatibility choices before affected work can be declared complete:
+
+### Local plaintext HTTP
+Choose one truthful 1.0 contract:
+- narrowly safe Android Local-LAN HTTP support; or
+- HTTPS-only Local endpoints for 1.0.
+
+Global cleartext enablement is not acceptable merely to make local endpoints convenient.
+
+### Speech engines
+Select initial STT/TTS providers after current capability, licensing, latency, Android compatibility, privacy, and cost review. The roadmap requires replaceable interfaces rather than a permanent provider commitment.
+
+### Video renderer
+Select a renderer that can be packaged/licensed for Android, supports cancellation and bounded execution, and produces inspectable real files. The offline fixture must use the actual selected renderer.
+
+### External image/media generation
+Choose a first provider only after the local media pipeline works. Provider-specific APIs must not become the workflow model.
+
+### YouTube API
+At implementation time, verify OAuth, scopes, quota, upload, processing, visibility, and policy behavior against then-current official documentation.
+
+### Release distribution
+Decide whether 1.0 ships as direct signed APK, alternative store package, or both. Do not let distribution choice weaken signing/update/state-migration requirements.
+
+## 18. Post-1.0 trajectory
+
+After the 1.0 trust/recovery/product loop is stable:
+
+### 1.1 — On-device inference
+- GGUF import/download;
+- checksum/integrity;
+- hardware compatibility;
+- native inference runtime;
+- load/unload lifecycle;
+- context/token controls;
+- thermal/memory limits;
+- same AgentPlanner contract.
+
+### 1.2 — Richer media
+- generated video clips;
+- richer transitions;
+- music/audio mixing with licensing controls;
+- optional avatar pipeline;
+- reusable project templates.
+
+### 1.3 — Advanced conversation
+- optional wake word;
+- more offline speech;
+- user-defined voices where legally/licensably supported;
+- longer-lived conversational context with explicit retention controls.
+
+### 1.4 — Multi-workflow scheduling
+- safe concurrent workflows;
+- leases/output ownership;
+- aggregate budgets;
+- priority/preemption;
+- resource arbitration.
+
+### 1.5 — Multi-device Local Autonomous Intelligent Networking
+- authenticated peer discovery;
+- capability advertisement;
+- delegated typed actions;
+- per-node policy;
+- signed/audited inter-node requests;
+- no implicit remote authority.
+
+## 19. Success metric
+
+The project has reached 1.0 when LAIN_OS is no longer merely a collection of agent primitives.
+
+It must be a coherent Android product in which the owner can speak an outcome, watch and interrupt bounded work, inspect intermediate artifacts, authorize consequential steps, survive failures/restarts without duplicate effects, and receive an independently verified real-world result.
+
+That is the release target.
