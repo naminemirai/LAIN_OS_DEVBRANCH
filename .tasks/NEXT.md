@@ -1,5 +1,75 @@
 # Next
 
+## TASK-017: Implement bounded DAG scheduler
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, scheduler
+**Updated:** 2026-10-03
+
+### Goal
+
+Schedule ready workflow nodes from the durable TASK-016 model without allowing dependency violations, unbounded concurrency, or execution before required verified outputs exist.
+
+### Scope
+
+- Compute node readiness from explicit dependencies and durable node state.
+- Support one active workflow initially.
+- Use bounded worker leases with explicit acquisition/release/expiry semantics.
+- Prevent downstream execution until required upstream outputs exist and satisfy their acceptance/verification predicates.
+- Persist scheduler transitions through the workflow store before dispatching effects.
+- Preserve trusted capability policy/approval/execution/verification/audit below the scheduler.
+- Do not implement artifact storage, specialist role internals, revision invalidation, long polling, or external-effect reconciliation beyond the interfaces required to avoid unsafe replay.
+
+### Dependencies
+
+- TASK-016 complete: durable workflow persistence model.
+- Existing trusted action runtime and verification semantics remain authoritative.
+
+### Plan
+
+- Define deterministic readiness rules over the persisted workflow graph.
+- Detect dependency cycles and invalid/missing references before scheduling.
+- Add bounded lease acquisition/renewal/release for ready nodes.
+- Persist running/terminal scheduler transitions atomically around dispatch boundaries.
+- Gate downstream readiness on verified required outputs, not planner claims.
+- Add deterministic tests for ordering, cycles, lease contention/expiry, failure propagation, and verification-gated readiness.
+
+### Acceptance
+
+- A node becomes runnable only when all required dependencies satisfy their declared verified-output conditions.
+- Cycles, missing dependencies, or invalid graph state fail closed.
+- No two workers can hold the same active node lease simultaneously.
+- Lease expiry cannot silently duplicate a known completed effect.
+- Failed/cancelled/reconciliation upstream nodes do not incorrectly unlock dependents.
+- Scheduler state cannot authorize capabilities or bypass policy/approval.
+- One-active-workflow limit is enforced explicitly.
+
+### Verification
+
+- Focused DAG/readiness/cycle tests.
+- Lease contention/expiry/recovery tests.
+- Negative tests proving unverified upstream outputs cannot unlock downstream nodes.
+- Crash-boundary tests around durable state transitions where deterministic.
+- Canonical portable verification and fresh architecture review.
+
+### Expected result
+
+LAIN_OS can advance a durable workflow graph in dependency order with bounded ownership and verified-output gating while leaving effect authority in the existing trusted runtime.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.2 DAG scheduler immediately after the workflow persistence model.
+- No current TaskPlanner task, open issue, or open PR represents R3.2.
+
+### Projection basis
+
+- Artifact, specialist, revision, wait/poll, and reconciliation layers all need deterministic dependency readiness and bounded node ownership.
+
+### Risks / unknowns
+
+- Cross-process/distributed leases are out of scope unless runtime topology actually requires them; start with the smallest local durable lease semantics.
+- Exact reconciliation behavior for uncertain external effects belongs to R3.7 and must not be pre-implemented here.
+
+---
+
 ## TASK-016: Define durable workflow persistence model
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, persistence
 **Updated:** 2026-10-03
