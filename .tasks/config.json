@@ -45,12 +45,6 @@
   "lainTaskSequencer": {
     "canonical_tasks": [
       {
-        "id": "TASK-004",
-        "title": "Complete open LAIN engineering workflow migration",
-        "priority": "P1",
-        "order": 1
-      },
-      {
         "id": "TASK-003",
         "title": "Implement bounded native planner transport",
         "priority": "P1",
@@ -58,7 +52,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "e0a2b8f41394e0a86651de601be71136de672fc2",
-    "next_action": "Implement PR #9's functional plugin migration against the now-executable red contract, preserving safety blockers and repository-derived feedback routing."
+    "repo_head": "57a39a1e951c95b2783a4cd8920069288a44b6e0",
+    "next_action": "Resolve TASK-003 planner transport blockers using repository-native engineering state."
   }
 }
