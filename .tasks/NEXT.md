@@ -1,5 +1,78 @@
 # Next
 
+## TASK-026: Implement bounded narration pipeline
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, narration
+**Updated:** 2026-10-03
+
+### Goal
+
+Turn bounded script segments into verified narration audio artifacts with explicit duration/provenance while preserving speech-provider failure as a recoverable stage failure rather than task or workflow authority.
+
+### Scope
+
+- Accept ordered bounded script segments and synthesize narration through the provider-neutral speech interface.
+- Persist each produced audio file through the immutable artifact workspace using TASK-025 media artifact schemas.
+- Record segment order, source text hash/reference, provider identity/provenance, audio MIME/codec, byte size, duration, artifact hash, and workflow revision.
+- Enforce bounded segment/input/output sizes, cancellation, timeout, and total narration duration.
+- Validate produced audio duration/metadata before declaring the narration stage successful.
+- Preserve deterministic typed/script artifacts if synthesis is unavailable or fails.
+- Do not implement timeline composition, video rendering, playback UI, voice cloning, provider-specific SDK logic, or external publication.
+
+### Dependencies
+
+- TASK-009 complete: provider-neutral speech synthesis contract.
+- TASK-018 complete: immutable artifact workspace.
+- TASK-024 complete: Phase-3 durable-workflow acceptance gate.
+- TASK-025 complete: media artifact schemas.
+
+### Plan
+
+- Define the smallest narration-segment request/result contract over existing speech synthesis and artifact APIs.
+- Synthesize segments in deterministic order under explicit byte/time/call bounds.
+- Store verified audio as immutable artifacts with source-segment and workflow provenance.
+- Validate duration/media metadata and reject corrupt, oversized, mismatched, or empty outputs.
+- Add cancellation/provider-failure/restart tests proving partial artifacts cannot masquerade as a completed narration stage.
+
+### Acceptance
+
+- Ordered script segments produce ordered immutable audio artifact references.
+- Every narration artifact is bound to exact source segment/revision/provider provenance and verified content hash.
+- Empty, malformed, oversized, wrong-media, or invalid-duration audio fails explicitly.
+- Cancellation/timeout/provider failure cannot produce a successful narration-stage result.
+- Restart cannot duplicate already-verified segment artifacts or silently skip incomplete segments.
+- Narration failure does not equal workflow success/failure outside the declared stage transition and does not grant execution authority.
+- Raw provider credentials never enter script, narration metadata, artifacts, logs, or durable workflow state.
+
+### Verification
+
+- Focused segment-order/synthesis/artifact round-trip tests.
+- Duration/media/hash validation tests.
+- Cancellation, timeout, provider-unavailable, malformed/oversized-output negatives.
+- Restart/idempotency tests for partial and verified segment sets.
+- Secret/provenance inspection.
+- Canonical portable verification plus fresh architecture review.
+
+### Expected result
+
+LAIN_OS can produce durable, bounded, verified narration audio from script segments as real workflow artifacts that later timeline/render stages can consume without provider-specific or authority coupling.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.2 Narration pipeline immediately after media artifact schemas: script segments, synthesis, bounded audio file output, and duration validation.
+- Current TaskPlanner represents R4.1 as TASK-025; no current task, issue, or open PR represents R4.2.
+
+### Projection basis
+
+- R4.3 timeline composition requires stable narration artifact references and durations; implementing narration first removes ambiguity from scene timing and renderer inputs.
+
+### Risks / unknowns
+
+- Exact audio codec/container set should stay limited to formats supported by TASK-025 and later renderer evidence.
+- Streaming synthesis and advanced prosody are out of scope until a real provider/use case requires them.
+- Hardware playback latency is unrelated to offline media narration generation and must not broaden this task.
+
+---
+
 ## TASK-025: Define media artifact schemas
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, artifacts
 **Updated:** 2026-10-03
