@@ -108,7 +108,7 @@ Android 7. The API 26 binding-death callback test runs on newer platforms.
 Identical runtime polls no longer rebuild the screen, and unchanged results
 preserve selectable text views. The API 24 suite also passed this regression.
 Exact CI heads and emulator results are recorded in
-[PR #3](https://github.com/naminemirai/LAIN_OS_DEVBRANCH/pull/3). Physical acceptance
+[PR #3](https://github.com/null0entry/LAIN_OS_DEVBRANCH/pull/3). Physical acceptance
 remains open; use [the native APK checklist](ANDROID_DEVICE_ACCEPTANCE.md).
 Earlier paused-pass evidence below describes the initial build only.
 

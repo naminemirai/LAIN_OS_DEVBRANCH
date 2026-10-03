@@ -35,10 +35,10 @@ REPOSITORY STATE AT HANDOFF
 ────────────────────────────────────────
 
 Repository:
-https://github.com/naminemirai/LAIN_OS_DEVBRANCH
+https://github.com/null0entry/LAIN_OS_DEVBRANCH
 
 Pull request:
-https://github.com/naminemirai/LAIN_OS_DEVBRANCH/pull/1
+https://github.com/null0entry/LAIN_OS_DEVBRANCH/pull/1
 
 Base:
 main
@@ -499,7 +499,7 @@ Execute now.
   "status": "ready",
   "outcome": "Carry PR #1 through a complete one-shot engineering, review, verification, publication, CI, and merge-readiness pass without merging it.",
   "relevant_context": {
-    "repository": "naminemirai/LAIN_OS_DEVBRANCH",
+    "repository": "null0entry/LAIN_OS_DEVBRANCH",
     "pr": 1,
     "base": "main",
     "branch": "feature/android-capabilities-v1",

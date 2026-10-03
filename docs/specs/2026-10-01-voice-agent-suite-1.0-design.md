@@ -16,7 +16,7 @@ Interpretation: “my voices” means the user's spoken input and selectable age
 
 Sources: attached LAIN_OS-main.zip and LAIN_OS-next-phase-handoff.zip. The main archive identifies commit 24ec1621fd63aaa6ce74f34c322d7b371b823ff6; its README describes the Python runtime, typed action validation, policy, executor, verification, audit, planner adapters, and bounded durable autonomous sessions. No native Android GUI is present in that snapshot.
 
-The handoff describes a newer inspected baseline, naminemirai/LAIN_OS_DEVBRANCH@19482fda2348e3aa0057c470b96cbc426e73bba9, with expanded Android capabilities and historical CI/hardware evidence. These snapshots differ. Inspect the actual repository at execution time; do not reset a newer branch or assume the older archive contains newer features. Historical test counts and hardware results are not fresh verification.
+The handoff describes a newer inspected baseline, null0entry/LAIN_OS_DEVBRANCH@19482fda2348e3aa0057c470b96cbc426e73bba9, with expanded Android capabilities and historical CI/hardware evidence. These snapshots differ. Inspect the actual repository at execution time; do not reset a newer branch or assume the older archive contains newer features. Historical test counts and hardware results are not fresh verification.
 
 The existing standalone-workbench design and plan remain foundational. Preserve their private runtime service, authenticated same-UID Binder control, bounded execution, exact approvals, conservative recovery, scoped filesystem, native adapters, portable CLI, and APK acceptance requirements. This brief extends their product destination; it does not certify their implementation.
 
