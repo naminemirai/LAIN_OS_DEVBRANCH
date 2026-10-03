@@ -1,5 +1,77 @@
 # Next
 
+## TASK-022: Implement external-effect reconciliation
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, reconciliation
+**Updated:** 2026-10-03
+
+### Goal
+
+Make consequential external effects crash-safe by persisting exact operation identity before the side-effect boundary and requiring explicit reconciliation when the final outcome is uncertain.
+
+### Scope
+
+- Persist stable operation identity, workflow revision, node ID, effect type, payload hash, attempt state, and provider/external reference before crossing the effect boundary.
+- Distinguish not-started, attempted/uncertain, confirmed-complete, failed-safe, and reconciliation-required states.
+- Prevent automatic retry of uncertain effects after crash/restart.
+- Prevent replay of effects already confirmed complete.
+- Allow reconciliation to inspect external/provider state and settle the durable record without granting new authority.
+- Preserve approval binding to exact workflow revision and payload hash.
+- Do not implement provider-specific reconciliation adapters, publication, aggregate budgets, or multi-user conflict handling.
+
+### Dependencies
+
+- TASK-016 workflow persistence.
+- TASK-017 DAG scheduler.
+- TASK-020 revision invalidation.
+- TASK-021 durable wait/poll stages.
+
+### Plan
+
+- Define the minimal durable external-operation record and state machine.
+- Persist operation identity before invoking any consequential external write.
+- Route crash/restart with attempted-but-unsettled state into reconciliation rather than retry.
+- Add explicit settle transitions for externally confirmed success/failure.
+- Reject stale revision/hash approvals and duplicate confirmed effects.
+- Add deterministic crash-boundary and replay-prevention tests.
+
+### Acceptance
+
+- Operation identity is durably written before any external side effect is attempted.
+- A crash after attempt but before confirmed receipt resumes in reconciliation-required state.
+- An uncertain effect is never automatically retried.
+- A confirmed completed effect cannot execute again after restart.
+- Reconciliation cannot alter the approved payload, workflow revision, or capability authority.
+- Stale approval/revision/hash combinations fail closed.
+- Downstream workflow nodes unlock only after a reconciled/verified terminal result.
+
+### Verification
+
+- Deterministic crash-before/after-effect-boundary tests.
+- Restart/replay-prevention tests.
+- Duplicate operation identity and stale-revision/hash negative tests.
+- Reconciliation settle tests with fake external state.
+- Canonical portable verification plus fresh architecture/security review.
+
+### Expected result
+
+LAIN_OS can cross consequential external side-effect boundaries without replaying completed writes or guessing whether uncertain writes should be retried after process death.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.7 External-effect reconciliation immediately after durable wait/poll stages.
+- Current TaskPlanner state represents R3.1–R3.6 as TASK-016 through TASK-021; no open task, issue, or PR represents R3.7.
+
+### Projection basis
+
+- Publishing, uploads, and external provider operations later in the 1.0 path require exact-once-oriented reconciliation semantics before those capabilities are introduced.
+
+### Risks / unknowns
+
+- Some providers lack idempotency or lookup APIs; such adapters may remain owner-reconciliation-only rather than pretending certainty.
+- Provider-specific identifiers and status schemas must remain outside the generic reconciliation state machine.
+
+---
+
 ## TASK-021: Implement durable wait and poll stages
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, waiting
 **Updated:** 2026-10-03
