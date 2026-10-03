@@ -1,76 +1,79 @@
 # Next
 
-## TASK-013: Implement voice barge-in and echo protection
-**Priority:** P2 | **Tags:** overseer-assigned, developer, phase-2, voice, safety
+## TASK-014: Implement voice progress narration
+**Priority:** P2 | **Tags:** overseer-assigned, developer, phase-2, voice, progress
 **Updated:** 2026-10-03
 
 ### Goal
 
-Add the bounded interaction layer that lets user speech interrupt synthesized playback while preventing synthesized audio or partial recognition from becoming authoritative user intent.
+Add bounded spoken progress events that narrate useful task state without turning speech delivery into durable workflow truth or making TTS availability a task dependency.
 
 ### Scope
 
-- Detect user speech onset during playback and stop/duck playback through TASK-012.
-- Keep microphone capture and playback state coordinated without introducing an always-listening mode.
-- Prevent synthesized output from being accepted as a user transcript/turn.
-- Prevent partial/interim recognition from authorizing consequential work.
-- Route only final accepted user turns through TASK-011.
-- Keep “interrupt speech playback” distinct from “cancel underlying task.”
-- Do not implement workflow progress narration or broad acoustic DSP beyond the minimum echo/loopback guards required by the voice turn boundary.
+- Define short progress-narration events derived from trusted durable task/session state.
+- Keep spoken progress separate from durable workflow/task state and planner assertions.
+- Route progress narration through the provider-neutral synthesis/playback boundaries from TASK-009/TASK-012.
+- Coalesce/rate-limit repetitive progress speech so narration cannot starve work or create unbounded provider calls.
+- Allow playback interruption through TASK-013 without cancelling the task.
+- Ensure speech/TTS failure never marks the underlying task failed or complete.
+- Preserve visual/text progress as the authoritative fallback.
+- Do not implement Phase-3 workflow DAG state, publication narration, or provider-specific TTS behavior.
 
 ### Dependencies
 
-- TASK-010 complete: Android microphone lifecycle.
-- TASK-011 complete: authoritative turn manager.
-- TASK-012 complete: cancellable speech playback.
+- TASK-009 complete: speech provider interfaces.
+- TASK-011 complete: turn semantics.
+- TASK-012 complete: cancellable playback.
+- TASK-013 complete: barge-in/echo protection.
 
 ### Plan
 
-- Define the minimal barge-in coordinator over microphone/playback/turn state.
-- Stop or duck playback on verified user-speech onset without changing task state.
-- Add explicit synthesized-audio suppression/echo guard before transcript acceptance.
-- Route only final non-echo transcripts into the turn manager.
-- Add deterministic tests for interruption, echo rejection, partial-transcript non-authority, and Stop-talking-vs-Stop-task separation.
+- Define a minimal progress-event schema sourced only from trusted runtime state.
+- Add bounded event-to-utterance formatting with coalescing/rate limits.
+- Send narration through synthesis/playback as a non-authoritative side channel.
+- Make synthesis/playback errors local to narration and preserve underlying task state.
+- Add deterministic tests for event provenance, coalescing, failure isolation, and interruption behavior.
 
 ### Acceptance
 
-- User speech during synthesis stops or ducks playback promptly.
-- Playback interruption alone does not cancel the task.
-- Synthesized speech cannot become a user command through the normal microphone/transcription path.
-- Partial/interim transcripts cannot authorize capabilities, approvals, or task revisions.
-- Final accepted user speech still reaches the turn manager after playback interruption.
-- Microphone/playback resources settle cleanly after interruption.
-- Typed fallback remains unaffected.
+- Spoken progress is generated only from trusted current task/session state.
+- Narration cannot change task status, grant approval, authorize capabilities, or fabricate completion.
+- TTS/provider/playback failure leaves the task running or settled exactly as before.
+- Repetitive progress events are bounded/coalesced.
+- User barge-in can stop progress speech without stopping the task.
+- Visual/text state remains available and authoritative when speech is unavailable.
+- No raw provider credential enters progress events or narration artifacts.
 
 ### Verification
 
-- Focused barge-in coordinator tests.
-- Negative tests for synthesized-audio loopback and partial-transcript authority.
-- Android instrumentation for playback interruption and microphone/playback lifecycle interaction.
-- Regression separating Stop talking from Stop task.
-- Canonical Android verification after implementation.
+- Focused progress-event/provenance/coalescing tests.
+- Negative tests proving narration failure does not alter task state.
+- Regression proving spoken “complete” text cannot itself mark work complete.
+- Android integration coverage for narration playback/interruption.
+- Canonical verification after implementation.
 
 ### Expected result
 
-LAIN_OS supports natural conversational interruption without allowing its own speech, partial recognition, or playback state to cross the trusted user-intent boundary.
+LAIN_OS can speak concise progress while work continues, with speech treated as a fallible presentation channel rather than a source of execution truth.
 
 ### Evidence basis
 
-- `docs/ROADMAP_1.0.md` defines R2.5 Barge-in and echo protection: stop/duck playback on speech, prevent synthesized speech from becoming a command, and ensure partial recognition cannot authorize consequential actions.
-- No current TaskPlanner task, open issue, or open PR represents R2.5.
+- `docs/ROADMAP_1.0.md` defines R2.6 Voice progress narration: progress events separate from durable workflow state, speech failure never equals task failure, and tasks continue if TTS is unavailable.
+- No current TaskPlanner task, open issue, or open PR represents R2.6.
 
 ### Projection basis
 
-- Barge-in is required for the Phase-2 conversational exit gate and must sit above established microphone, turn, and playback contracts rather than being embedded separately in each layer.
-- Explicit echo/partial guards prevent a voice feedback loop from crossing LAIN_OS authority boundaries.
+- Progress narration is the last functional voice slice before R2.7 acceptance and therefore should reuse already-stable turn/playback/barge-in contracts rather than introduce a new authority path.
+- Failure isolation is necessary before voice acceptance can truthfully test provider outages and interruption.
 
 ### Risks / unknowns
 
-- Reference-device interruption latency is measured in R2.7, not claimed by this task.
-- Device-specific acoustic echo cancellation may vary; this task should enforce semantic loopback guards even when platform DSP is limited.
-- Wake-word/always-listening behavior remains explicitly out of 1.0 scope.
+- Exact wording/verbosity policy is presentation-level and should remain adjustable without changing durable state contracts.
+- Aggregate speech-provider cost budgets may be refined later with Phase-3 workflow budgets; this task needs only local bounded/rate-limited behavior.
+- Reference-device latency and full voice-session acceptance belong to R2.7.
 
 ---
+
 
 ## TASK-013: Implement voice barge-in and echo protection
 **Priority:** P2 | **Tags:** overseer-assigned, developer, phase-2, voice, safety
