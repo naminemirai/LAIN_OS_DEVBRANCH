@@ -1,5 +1,72 @@
 # Next
 
+## TASK-016: Define durable workflow persistence model
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, persistence
+**Updated:** 2026-10-03
+
+### Goal
+
+Introduce the versioned durable workflow state model that Phase 3 can build on without weakening the existing trusted executor or replay protections.
+
+### Scope
+
+- Define a workflow schema covering stable ID, dependencies, status, restricted role, allowed capability families, artifact references/hashes, acceptance checks, attempted operations, budgets, retries, provider job IDs, deadlines, error/recovery state, revision, approvals, and reconciliation state.
+- Implement atomic local persistence with strict validation, schema versioning, and fail-closed corrupt-state handling.
+- Define migration boundaries for compatible future schema revisions.
+- Preserve existing agent sessions and trusted action execution as lower-level primitives; do not replace policy/executor/verification/audit.
+- Do not implement DAG scheduling, artifact storage, specialist execution, or external-effect retry in this task.
+
+### Dependencies
+
+- TASK-015 complete: Phase-2 voice acceptance gate.
+- Existing atomic file/session-store patterns and audit/error models should be reused where appropriate.
+
+### Plan
+
+- Inventory current durable session/checkpoint patterns for reuse.
+- Define the smallest versioned workflow record/state schema needed by R3.2-R3.8.
+- Add strict serialization/deserialization and atomic write/read behavior.
+- Fail closed on unknown versions, malformed fields, invalid transitions, duplicate IDs, or corrupt persisted state.
+- Add migration hook structure without speculative migrations.
+- Add focused persistence/corruption/version tests.
+
+### Acceptance
+
+- A valid workflow round-trips through durable storage without losing authoritative state.
+- Unknown schema versions and corrupt state fail explicitly without silent reset or replay.
+- Atomic writes cannot expose a partially written valid-looking workflow.
+- Stable IDs/revisions/dependencies/status and reconciliation state are preserved exactly.
+- No workflow record can grant capabilities or bypass policy/approval merely by persisted content.
+- Existing agent/session persistence remains compatible and independently authoritative for its current scope.
+
+### Verification
+
+- Focused schema/round-trip/corruption/version tests.
+- Atomic-write interruption/recovery tests where deterministic.
+- Negative tests for duplicate IDs, invalid dependency references, invalid transitions, malformed budgets/approvals/reconciliation fields.
+- Canonical portable verification after implementation.
+- Fresh architecture review before integrating scheduler work.
+
+### Expected result
+
+LAIN_OS gains a strict durable workflow-state foundation that can support dependency scheduling, artifacts, revisions, long waits, and reconciliation without inventing those higher layers prematurely.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R3.1 Workflow persistence model as the first Phase-3 work package.
+- No current TaskPlanner task, open issue, or open PR represents R3.1.
+
+### Projection basis
+
+- Every later Phase-3 work package depends on a stable persisted workflow identity/state contract; defining it first prevents scheduler/artifact/revision layers from inventing incompatible durable state.
+
+### Risks / unknowns
+
+- Migration semantics beyond the initial version are intentionally deferred until a real second schema exists.
+- Cross-process locking needs should follow actual runtime topology rather than speculative multi-writer support.
+
+---
+
 ## TASK-015: Close Phase-2 voice acceptance gate
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-2, voice, acceptance
 **Updated:** 2026-10-03
