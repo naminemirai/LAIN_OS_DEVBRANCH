@@ -1,5 +1,81 @@
 # Next
 
+## TASK-030: Build verified video preview and explicit export UI
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, preview, export
+**Updated:** 2026-10-03
+
+### Goal
+
+Let the user review a current-revision video that passed TASK-029 inspection, observe render/inspection progress, cancel safely, and explicitly export or share the exact verified artifact through narrow Android capability policy.
+
+### Scope
+
+- Display only immutable video artifacts with successful current-revision TASK-029 inspection evidence.
+- Present trusted artifact identity, duration, dimensions, inspection status, provenance summary, and current/stale state without trusting planner-provided labels as verification.
+- Expose render and inspection progress from durable workflow state and preserve the existing trusted Stop/cancellation path.
+- Preview through a bounded Android media surface without copying the artifact into planner-visible or world-readable storage.
+- Implement explicit user export/share initiation through a narrow content URI/capability boundary with exact artifact hash and destination intent.
+- Treat missing/stale/failed inspection, unavailable decoder, revoked URI permission, cancelled export, or mismatched artifact identity as explicit non-success.
+- Do not implement YouTube OAuth/upload/publication, generic file browsing, arbitrary URI grants, editor/NLE controls, or automatic sharing.
+
+### Dependencies
+
+- TASK-029 complete: independently verified video artifact and inspection evidence.
+- TASK-028 complete: bounded renderer and durable render progress/cancellation.
+- TASK-018 and TASK-020 complete: immutable artifact workspace and revision invalidation.
+- TASK-024 complete: durable workflow acceptance semantics.
+
+### Plan
+
+- Define the smallest trusted preview-state model over current workflow, render, artifact, and inspection records.
+- Bind UI state and playback source to exact artifact identity/hash/revision and expose stale/failed states distinctly.
+- Integrate a lifecycle-safe Android playback surface with bounded error handling and no arbitrary path input.
+- Route Stop through the existing trusted cancellation control path.
+- Add a narrow explicit export/share capability using scoped content URIs and time-bounded least-privilege grants.
+- Add state, lifecycle, stale-revision, cancellation, hostile-intent/path, URI-permission, and process-restart tests.
+
+### Acceptance
+
+- The UI previews only a verified, current-revision artifact and visibly identifies the exact hash, dimensions, duration, and inspection result.
+- Rendering/inspection progress remains truthful across lifecycle changes and process restart; unavailable progress is not fabricated.
+- Stop cancels the active render/inspection path through trusted control semantics and cannot silently report success.
+- Stale, missing, corrupt, uninspected, hash-mismatched, or failed artifacts cannot be previewed as approved/current or exported.
+- Export/share requires a fresh explicit user action bound to the exact artifact and uses a scoped content URI rather than a raw filesystem path.
+- URI access is limited to the chosen operation/recipient and does not expose sibling artifacts, credentials, checkpoints, or private app storage.
+- Cancellation, target-app failure, revoked permission, or process interruption produces an explicit non-success/recoverable state without duplicate export.
+- Preview or export never grants upload, publication, provider, planner, or generic filesystem authority.
+
+### Verification
+
+- Android UI/state tests for verified/current, stale, failed, missing, and inspection-pending artifacts.
+- Playback lifecycle, decoder failure, background/foreground, rotation/recreation, restart, and cancellation tests.
+- Content-URI scope/permission, hostile filename/path, wrong-hash/revision, target failure, duplicate intent, and revoked-grant negatives.
+- Assertions that raw private paths, credentials, planner payloads, and unrelated artifacts never enter exported intents or public UI state.
+- Canonical portable verification plus Android build/lint/unit/instrumentation on the supported API matrix.
+- Physical-device playback/share evidence remains separately labeled unless actually exercised.
+
+### Expected result
+
+Phase 4 gains a truthful user review surface for the exact verified local video and a narrow user-authorized export path without collapsing preview, sharing, and later publication into one authority boundary.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R4.6 Preview/export UI immediately after R4.5 inspection, requiring artifact display, render progress, cancellation, and export/share only through explicit capability policy.
+- Current TaskPlanner, issue #6, and open PR set end at TASK-029/R4.5; no repository-native work item represents R4.6.
+
+### Projection basis
+
+- The Phase-4 exit gate requires the user to inspect a real produced video, while the later YouTube path needs a reviewed exact artifact identity before any upload or publication approval can be meaningful.
+- Separating local preview/export from publication prevents media UI from becoming an implicit external-effect authority surface.
+
+### Risks / unknowns
+
+- Android playback and sharing behavior varies by API level and recipient app; emulator evidence must not be promoted to physical-device interoperability.
+- Large videos may pressure memory or lifecycle handling; playback must stream from bounded scoped storage rather than load entire files.
+- Content URI grant lifetime and duplicate chooser launches require explicit reconciliation so interruption cannot be reported as confirmed delivery.
+
+---
+
 ## TASK-029: Implement real video inspection
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, inspection
 **Updated:** 2026-10-03
