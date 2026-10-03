@@ -190,7 +190,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "3f3ae3af9cc627dd1cd6b4adde56b5b1ca71ff67",
-    "next_action": "Continue TASK-008 after PR #13: re-inventory remaining Phase-1 acceptance gaps and add only the next missing integrated adversarial slice; physical-device evidence remains unverified."
+    "repo_head": "d52a7c5459d01a96419db9a1525fca47bacd0622",
+    "next_action": "Continue TASK-008 after PR #14: re-inventory remaining Phase-1 acceptance gaps, especially installed GUI/runtime happy-path evidence and secret-surface inspection; physical-device evidence remains unverified."
   }
 }
