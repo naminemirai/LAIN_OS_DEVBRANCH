@@ -40,4 +40,4 @@ verification states. Include any startup, disconnect, or crash symptoms. Never
 paste private clipboard contents, credentials, or sensitive logs into the report.
 
 The debug build and portable tests are separate evidence. Physical acceptance
-remains open until the owner supplies observations for the final APK.
+remains open until physical observations are recorded for the final APK.
