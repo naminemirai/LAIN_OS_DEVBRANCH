@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -118,13 +119,13 @@ class LainEngineeringPluginContractTest(unittest.TestCase):
                 (Path(second), "git@github.com:another/two.git", "another/two"),
             ]
             for repo, remote, expected in repos:
-                git_dir = repo / ".git"
-                git_dir.mkdir()
-                (git_dir / "config").write_text(
-                    "[remote \"origin\"]\n"
-                    f"\turl = {remote}\n"
-                    "\tfetch = +refs/heads/*:refs/remotes/origin/*\n",
-                    encoding="utf-8",
+                subprocess.run(
+                    ["git", "init", "--quiet", str(repo)],
+                    check=True,
+                )
+                subprocess.run(
+                    ["git", "-C", str(repo), "remote", "add", "origin", remote],
+                    check=True,
                 )
                 self.assertEqual(expected, feedback.feedback_target(repo))
 
