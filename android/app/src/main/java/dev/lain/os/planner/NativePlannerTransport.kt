@@ -2,6 +2,7 @@ package dev.lain.os.planner
 
 import org.json.JSONException
 import org.json.JSONObject
+import org.json.JSONTokener
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.ConnectException
@@ -12,7 +13,13 @@ import java.net.URL
 import java.net.UnknownHostException
 import java.nio.ByteBuffer
 import java.nio.charset.CodingErrorAction
+import java.util.concurrent.CancellationException
+import java.util.concurrent.ExecutionException
+import java.util.concurrent.FutureTask
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 import javax.net.ssl.SSLException
 import kotlin.math.ceil
 
@@ -92,6 +99,13 @@ internal class NativePlannerTransport(
     }
 }
 
+private enum class PlannerCallTerminalState {
+    ACTIVE,
+    CANCELLED,
+    TIMED_OUT,
+    FINISHED,
+}
+
 internal class PlannerTransportCall(
     private val binding: PlannerBinding,
     private val requestBody: String,
@@ -99,84 +113,134 @@ internal class PlannerTransportCall(
     private val connectionFactory: (URL) -> HttpURLConnection,
 ) {
     private val started = AtomicBoolean(false)
-    private val cancelled = AtomicBoolean(false)
+    private val terminalState = AtomicReference(PlannerCallTerminalState.ACTIVE)
     @Volatile private var activeConnection: HttpURLConnection? = null
+    @Volatile private var activeTask: FutureTask<PlannerTransportResult>? = null
 
     fun cancel() {
-        cancelled.set(true)
-        activeConnection?.disconnect()
+        if (terminalState.compareAndSet(
+                PlannerCallTerminalState.ACTIVE,
+                PlannerCallTerminalState.CANCELLED,
+            )
+        ) {
+            activeConnection?.disconnect()
+            activeTask?.cancel(true)
+        }
     }
 
     fun execute(): PlannerTransportResult {
         if (!started.compareAndSet(false, true)) {
             return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_TRANSPORT_FAILED)
         }
-        if (cancelled.get()) return cancelled()
+        terminalFailureOrNull()?.let { return it }
+
+        val task = FutureTask { executeBlocking() }
+        activeTask = task
+        terminalFailureOrNull()?.let {
+            task.cancel(true)
+            activeTask = null
+            return it
+        }
+
+        Thread(task, "lain-planner-transport").apply {
+            isDaemon = true
+            start()
+        }
+
+        return try {
+            task.get(timeoutMillis().toLong(), TimeUnit.MILLISECONDS)
+        } catch (_: TimeoutException) {
+            if (terminalState.compareAndSet(
+                    PlannerCallTerminalState.ACTIVE,
+                    PlannerCallTerminalState.TIMED_OUT,
+                )
+            ) {
+                activeConnection?.disconnect()
+                task.cancel(true)
+                timeout()
+            } else if (terminalState.get() == PlannerCallTerminalState.FINISHED) {
+                try {
+                    task.get()
+                } catch (_: Exception) {
+                    terminalResult(NativePlannerTransport.ERROR_TIMEOUT)
+                }
+            } else {
+                terminalResult(NativePlannerTransport.ERROR_TIMEOUT)
+            }
+        } catch (_: CancellationException) {
+            terminalResult(NativePlannerTransport.ERROR_TRANSPORT_FAILED)
+        } catch (_: InterruptedException) {
+            Thread.currentThread().interrupt()
+            if (terminalState.compareAndSet(
+                    PlannerCallTerminalState.ACTIVE,
+                    PlannerCallTerminalState.CANCELLED,
+                )
+            ) {
+                activeConnection?.disconnect()
+                task.cancel(true)
+            }
+            cancelled()
+        } catch (_: ExecutionException) {
+            finishFailure(NativePlannerTransport.ERROR_TRANSPORT_FAILED)
+        } finally {
+            activeTask = null
+        }
+    }
+
+    private fun executeBlocking(): PlannerTransportResult {
+        terminalFailureOrNull()?.let { return it }
 
         var connection: HttpURLConnection? = null
         return try {
             val endpoint = URL(chatCompletionsUrl(binding.baseUrl))
             connection = connectionFactory(endpoint)
             activeConnection = connection
-            if (cancelled.get()) return cancelled()
+            terminalFailureOrNull()?.let { return it }
 
             configure(connection)
             connection.outputStream.use { it.write(requestBody.toByteArray(Charsets.UTF_8)) }
-            if (cancelled.get()) return cancelled()
+            terminalFailureOrNull()?.let { return it }
 
             val status = connection.responseCode
-            if (cancelled.get()) return cancelled()
-            statusFailure(status)?.let { return PlannerTransportResult.Failure(it) }
+            terminalFailureOrNull()?.let { return it }
+            statusFailure(status)?.let { return finishFailure(it) }
 
             val declared = connection.contentLengthLong
             if (declared > binding.maxResponseBytes) {
-                return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE)
+                return finishFailure(NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE)
             }
             if (!isSupportedJsonType(connection.contentType)) {
-                return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_RESPONSE_UNSUPPORTED)
+                return finishFailure(NativePlannerTransport.ERROR_RESPONSE_UNSUPPORTED)
             }
 
             val bytes = readBounded(connection)
-            if (cancelled.get()) return cancelled()
+            terminalFailureOrNull()?.let { return it }
             val body = decodeUtf8(bytes)
-                ?: return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_RESPONSE_MALFORMED)
-            try {
-                JSONObject(body)
-            } catch (_: JSONException) {
-                return PlannerTransportResult.Failure(NativePlannerTransport.ERROR_RESPONSE_MALFORMED)
+                ?: return finishFailure(NativePlannerTransport.ERROR_RESPONSE_MALFORMED)
+            if (!isCompleteJsonObject(body)) {
+                return finishFailure(NativePlannerTransport.ERROR_RESPONSE_MALFORMED)
             }
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Success(body)
+            finishSuccess(body)
         } catch (_: ResponseTooLarge) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE
-            )
+            finishFailure(NativePlannerTransport.ERROR_RESPONSE_TOO_LARGE)
         } catch (exc: SecretStoreException) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(exc.code)
+            finishFailure(exc.code)
         } catch (_: UnknownHostException) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_DNS_UNREACHABLE
-            )
+            finishFailure(NativePlannerTransport.ERROR_DNS_UNREACHABLE)
         } catch (_: ConnectException) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_CONNECTION_REFUSED
-            )
+            finishFailure(NativePlannerTransport.ERROR_CONNECTION_REFUSED)
         } catch (_: SSLException) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_TLS
-            )
+            finishFailure(NativePlannerTransport.ERROR_TLS)
         } catch (_: SocketTimeoutException) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_TIMEOUT
-            )
+            finishFailure(NativePlannerTransport.ERROR_TIMEOUT)
         } catch (exc: IOException) {
-            if (cancelled.get()) cancelled()
-            else if (exc.message.orEmpty().contains("cleartext", ignoreCase = true)) {
-                PlannerTransportResult.Failure(NativePlannerTransport.ERROR_CLEARTEXT_BLOCKED)
-            } else PlannerTransportResult.Failure(NativePlannerTransport.ERROR_ENDPOINT_UNREACHABLE)
+            if (exc.message.orEmpty().contains("cleartext", ignoreCase = true)) {
+                finishFailure(NativePlannerTransport.ERROR_CLEARTEXT_BLOCKED)
+            } else {
+                finishFailure(NativePlannerTransport.ERROR_ENDPOINT_UNREACHABLE)
+            }
         } catch (_: Exception) {
-            if (cancelled.get()) cancelled() else PlannerTransportResult.Failure(
-                NativePlannerTransport.ERROR_TRANSPORT_FAILED
-            )
+            finishFailure(NativePlannerTransport.ERROR_TRANSPORT_FAILED)
         } finally {
             activeConnection = null
             connection?.disconnect()
@@ -184,10 +248,7 @@ internal class PlannerTransportCall(
     }
 
     private fun configure(connection: HttpURLConnection) {
-        val timeoutMillis = ceil(binding.timeoutSeconds * 1000.0)
-            .coerceAtMost(Int.MAX_VALUE.toDouble())
-            .toInt()
-            .coerceAtLeast(1)
+        val timeoutMillis = timeoutMillis()
         connection.requestMethod = "POST"
         connection.instanceFollowRedirects = false
         connection.doOutput = true
@@ -199,6 +260,12 @@ internal class PlannerTransportCall(
             connection.setRequestProperty("Authorization", "Bearer ${secretStore.resolve(ref)}")
         }
     }
+
+    private fun timeoutMillis(): Int =
+        ceil(binding.timeoutSeconds * 1000.0)
+            .coerceAtMost(Int.MAX_VALUE.toDouble())
+            .toInt()
+            .coerceAtLeast(1)
 
     private fun statusFailure(status: Int): String? = when {
         status in 200..299 -> null
@@ -216,7 +283,7 @@ internal class PlannerTransportCall(
         val buffer = ByteArray(8192)
         connection.inputStream.use { input ->
             while (true) {
-                if (cancelled.get()) throw IOException("cancelled")
+                terminalFailureOrNull()?.let { throw IOException(it.code) }
                 val read = input.read(buffer)
                 if (read < 0) break
                 if (output.size() + read > binding.maxResponseBytes) {
@@ -238,13 +305,67 @@ internal class PlannerTransportCall(
         null
     }
 
+    private fun isCompleteJsonObject(body: String): Boolean = try {
+        val tokener = JSONTokener(body)
+        val value = tokener.nextValue()
+        value is JSONObject && tokener.nextClean() == '\u0000'
+    } catch (_: JSONException) {
+        false
+    }
+
     private fun isSupportedJsonType(contentType: String?): Boolean {
         if (contentType == null) return true
         val mediaType = contentType.substringBefore(';').trim().lowercase()
         return mediaType == "application/json" || mediaType.endsWith("+json")
     }
 
-    private fun cancelled() = PlannerTransportResult.Failure(NativePlannerTransport.ERROR_CANCELLED)
+    private fun finishSuccess(body: String): PlannerTransportResult {
+        return if (terminalState.compareAndSet(
+                PlannerCallTerminalState.ACTIVE,
+                PlannerCallTerminalState.FINISHED,
+            )
+        ) {
+            PlannerTransportResult.Success(body)
+        } else {
+            terminalResult(NativePlannerTransport.ERROR_TRANSPORT_FAILED)
+        }
+    }
+
+    private fun finishFailure(code: String): PlannerTransportResult {
+        return if (terminalState.compareAndSet(
+                PlannerCallTerminalState.ACTIVE,
+                PlannerCallTerminalState.FINISHED,
+            )
+        ) {
+            PlannerTransportResult.Failure(code)
+        } else {
+            terminalResult(code)
+        }
+    }
+
+    private fun terminalFailureOrNull(): PlannerTransportResult.Failure? = when (terminalState.get()) {
+        PlannerCallTerminalState.CANCELLED -> cancelled()
+        PlannerCallTerminalState.TIMED_OUT -> timeout()
+        PlannerCallTerminalState.ACTIVE,
+        PlannerCallTerminalState.FINISHED,
+        -> null
+    }
+
+    private fun terminalResult(fallbackCode: String): PlannerTransportResult.Failure = when (
+        terminalState.get()
+    ) {
+        PlannerCallTerminalState.CANCELLED -> cancelled()
+        PlannerCallTerminalState.TIMED_OUT -> timeout()
+        PlannerCallTerminalState.ACTIVE,
+        PlannerCallTerminalState.FINISHED,
+        -> PlannerTransportResult.Failure(fallbackCode)
+    }
+
+    private fun cancelled() =
+        PlannerTransportResult.Failure(NativePlannerTransport.ERROR_CANCELLED)
+
+    private fun timeout() =
+        PlannerTransportResult.Failure(NativePlannerTransport.ERROR_TIMEOUT)
 
     private class ResponseTooLarge : IOException()
 
