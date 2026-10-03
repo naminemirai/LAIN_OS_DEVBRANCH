@@ -1,5 +1,8 @@
 # Work Log
 
+## 2026-10-03 — TASK-007
+PR #12 head `8ce8a99a720cc5f9dfc0e6310fd29bcf4ce58f3f` passed Verify #230 and Android #219 after a targeted rerun of one unrelated API-24 RuntimeFlow timing failure. API 24/API 35 build, JVM tests, lint, and instrumentation were green; final review `5401183419` found no actionable blocker. PR #12 squash-merged as `be4e1d273e05784beeb5783c811d19d40a8a1930`. Physical-device acceptance remains unverified.
+
 ## 2026-10-03 — TASK-006
 PR #11 head `9aec3158c8ab98d7ffabf3f6ec7582ebfeac5125` passed Verify #173 and Android #162. API 35 initially hit unrelated Espresso window-focus failures after emulator/ADB startup trouble; a targeted retry passed without product-code changes. Fresh post-CI review found no actionable review threads, and PR #11 squash-merged as `f8cff695f4dfdac5cdf5bffa33b2d5dc70776bb2`. Physical-device acceptance remains unverified.
 
