@@ -1,5 +1,73 @@
 # Next
 
+## TASK-031: Close Phase-4 with a real offline golden video fixture
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, acceptance, golden-fixture
+**Updated:** 2026-10-03
+
+### Goal
+
+Prove the complete local media path with bundled/licensed assets by producing, independently inspecting, and previewing a real 30–60 second video on the supported Android path without any cloud account.
+
+### Scope
+
+- Add a deterministic offline fixture using bundled or clearly licensed local image/audio/text inputs.
+- Drive the existing media schema, narration, timeline, renderer, inspection, and preview contracts end to end; do not introduce a parallel fixture-only pipeline.
+- Record exact input identities, workflow revision, renderer/toolchain identity, output hash, dimensions, duration, stream evidence, and inspection result.
+- Exercise cancellation/Stop and durable workflow state without weakening existing authority, revision, artifact, or budget semantics.
+- Keep cloud providers, YouTube, publication, generic shell execution, and new media-generation providers out of scope.
+
+### Dependencies
+
+- TASK-024 complete: durable workflow acceptance semantics.
+- TASK-025 through TASK-030 complete: media schema, narration, timeline, renderer, inspection, and preview/export path.
+
+### Plan
+
+- Define one small reproducible licensed fixture and expected bounded output constraints.
+- Execute it through the production media workflow interfaces.
+- Persist immutable artifact/provenance evidence and independently inspect the rendered file.
+- Exercise preview plus cancellation/Stop and restart-sensitive workflow state.
+- Add deterministic fixture automation where portable and Android installed-artifact evidence where platform-specific.
+- Document exact commands, hashes, environment, evidence strength, and any physical-device gaps.
+
+### Acceptance
+
+- A fresh supported build can produce a real 30–60 second video from only local fixture assets.
+- The output is independently decodable and matches declared stream, dimensions, duration, revision, and hash constraints.
+- Preview uses the exact verified artifact; stale/mismatched/corrupt outputs are rejected.
+- Stop/cancellation leaves truthful durable state and cannot promote partial output to verified success.
+- No cloud account, external media provider, publication authority, or generic shell capability is required.
+- Automated/emulator/device evidence is labeled separately; physical-device acceptance is never inferred.
+
+### Verification
+
+- Run canonical Python verification plus relevant media workflow tests.
+- Run Android build/lint/JVM/instrumentation checks on the supported API matrix.
+- Execute the real fixture through renderer -> inspection -> preview and capture output hash/metadata/provenance.
+- Negative-test corrupt/stale/mismatched artifacts, cancellation, restart, and insufficient/invalid fixture inputs.
+- Perform architecture/security/license review of the whole fixture path.
+- Record physical-device evidence separately when available.
+
+### Expected result
+
+Phase 4 has reproducible evidence that the production local workflow can create, inspect, and preview a genuine video artifact without cloud dependencies or fabricated success.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` explicitly defines R4.7 Offline golden fixture and the Phase-4 exit gate after R4.6.
+- Current TaskPlanner state represents R4.1–R4.6 as TASK-025 through TASK-030; no existing task, open issue, or open PR represents R4.7.
+
+### Projection basis
+
+- Phase 5 provider work should build on a proven local media pipeline so provider failures cannot hide renderer/inspection/workflow defects.
+- The 1.0 definition of done requires a real offline video fixture and installed-artifact evidence.
+
+### Risks / unknowns
+
+- Renderer packaging/licensing and device codec behavior remain dependent on TASK-028 selection.
+- Emulator evidence may not represent physical-device codec/resource behavior.
+- Fixture assets must have repository-compatible licensing and deterministic provenance.
+
 ## TASK-030: Build verified video preview and explicit export UI
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-4, media, preview, export
 **Updated:** 2026-10-03
