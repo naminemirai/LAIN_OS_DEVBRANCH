@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 38,
+  "nextId": 39,
   "states": [
     {
       "name": "Backlog",
@@ -229,10 +229,16 @@
         "title": "Implement bounded provider retry and backoff policy",
         "priority": "P1",
         "order": 31
+      },
+      {
+        "id": "TASK-038",
+        "title": "Implement explicit provider privacy disclosure and data-sharing state",
+        "priority": "P1",
+        "order": 32
       }
     ],
     "issue": 6,
-    "repo_head": "6702f746762dc9c3ac19e481d9a86a8eca2b8cad",
-    "next_action": "Continue TASK-008 on PR #16 head 334efd0: Verify #280 passed; Android #269 is running. If green, build/install that exact APK and rerun the full physical Galaxy Phase-1 suite before TASK-008 can close."
+    "repo_head": "9168b184e1170c7adf1cee9906b24bc92b811903",
+    "next_action": "Continue TASK-008 on PR #16 head eeeff4bd: Verify #282 passed; Android #271 is running. If green, build/install that exact APK and rerun the full physical Galaxy Phase-1 suite before TASK-008 can close."
   }
 }
