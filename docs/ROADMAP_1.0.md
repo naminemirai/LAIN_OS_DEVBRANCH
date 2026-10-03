@@ -4,7 +4,7 @@
 
 LAIN_OS is the concrete open-source platform described by this roadmap. It implements the broader **LAIN — Loyal Autonomous Intelligence Network** philosophy through a local-first operating layer for autonomous intelligence.
 
-Version: 1.0-roadmap-r4
+Version: 1.0-roadmap-r5
 Status: Active product roadmap
 Date: 2026-10-03
 
@@ -46,6 +46,7 @@ Required exit path:
 
 Preview acceptance requires:
 - installed Android GUI using a real selected planner profile;
+- before voice work begins, the complete applicable typed Workbench preset suite reaches terminal **COMPLETE** on the reference Galaxy, including the exact-approval share path rather than relying on a single battery smoke test;
 - spoken and typed goals entering the same trusted planning path;
 - policy, exact approval, deterministic execution, verification, audit, and durable sessions remaining authoritative;
 - cancellable speech playback and user barge-in;
@@ -103,14 +104,29 @@ The repository already contains substantial pre-1.0 infrastructure:
 
 ### Active product work
 
-The current implementation focus is bounded native Android HTTP transport for hosted and local OpenAI-compatible planner profiles.
+The current implementation focus is **TASK-008 Phase-1 planner acceptance on the physical Galaxy**, after automated installed-workbench acceptance reached GREEN on PR #16 head `c700eed0b9de6964729a6b038eaa565daf44864d` (Verify #270; Android #259).
 
-Known blockers at this roadmap baseline:
-- malformed-response validation is not truthful in the current local JVM test path because Android JSON stubs do not behave like the device runtime;
-- Local plaintext LAN HTTP is accepted by the intended binding contract but conflicts with Android's global cleartext deny;
-- the repository must choose a truthful Local HTTP contract without globally weakening network security.
+Current physical evidence from the exact GREEN debug build:
+- the standalone APK installs and launches on the Galaxy reference device;
+- Offline Demo **Show battery** reaches terminal **COMPLETE**, proving the embedded runtime/native battery path on-device;
+- a real Groq Cloud profile using `openai/gpt-oss-120b` is stored and selected, and Groq receives the app's requests;
+- real-planner tasks currently fail before model execution because Groq rejects LAIN's generated JSON Schema for a zero-argument capability such as `android.battery_status`;
+- the current connection diagnostic also produces separate JSON-validation 400s because it requests structured JSON with only one completion token;
+- provider request errors are currently flattened into the unhelpful `unavailable` status;
+- the `Run locally` UI label is misleading when Cloud planning is selected;
+- Stop/cancellation requires a deliberately blocking planner acceptance test before any production cancellation change is justified.
 
-No later phase should bypass this transport boundary.
+Immediate TASK-008 patch sequence:
+1. correct zero-argument capability schema generation while preserving strict validation for normal arguments;
+2. make the connection diagnostic a truthful bounded endpoint/auth/model probe;
+3. surface safe request/rate-limit/server/transport failure classes instead of collapsing them into `unavailable`;
+4. use planner-neutral Run-button copy;
+5. prove Stop against a genuinely in-flight planner call;
+6. cut a new debug APK only from the exact post-patch GREEN head and rerun the complete Galaxy matrix.
+
+**Phase-1 device acceptance is suite-level, not a battery smoke test.** The current Workbench presets — **Create demo file, Show battery, Show demo toast, Vibrate briefly, Copy demo text, and Share demo text** — must each reach terminal **COMPLETE** through the intended real selected planner where applicable. Share must require exact approval and then complete without automatic sending. Each run must preserve truthful execution/verification status, including LIMITED where the capability contract cannot independently prove the physical/UI effect.
+
+No later phase should bypass this planner/trusted-runtime boundary. Phase 2 voice work starts only after TASK-008 is reconciled against this gate.
 
 ## 4. Scope for 1.0
 
@@ -175,7 +191,7 @@ Do not parallelize across an unstable public interface merely to increase throug
 
 The immediate ordered product path is:
 
-1. Close **TASK-008 / Phase 1 planner acceptance**.
+1. Close **TASK-008 / Phase 1 planner acceptance** by fixing the observed Groq schema/diagnostic defects, preserving Cloud/Local automated acceptance, proving in-flight Stop, and requiring the full applicable installed Workbench preset suite to reach terminal **COMPLETE** on the Galaxy through the real selected planner.
 2. Complete **TASK-009 through TASK-015 / Phase 2 voice conversation**.
 3. Run current-build **physical Galaxy acceptance**, including planner happy paths, approval transitions, rotation/rebind/background behavior, interruption, and measured Stop behavior.
 4. Cut the **Voice-First LAIN Preview** only from evidence that passes those gates.
