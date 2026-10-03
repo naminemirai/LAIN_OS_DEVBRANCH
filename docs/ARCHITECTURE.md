@@ -1,5 +1,12 @@
 # Architecture
 
+## Naming
+
+- **LAIN** means **Loyal Autonomous Intelligence Network**: the broader autonomous-intelligence philosophy and network identity.
+- **LAIN_OS** means **Local Autonomous Intelligence Network Operating System**: the open-source local-first software platform implementing that philosophy.
+
+The distinction is intentional: LAIN describes the network and alignment model; LAIN_OS is the operating-system layer that runs, coordinates, constrains, verifies, and connects autonomous intelligence on user-controlled hardware.
+
 ## Principle
 
 LAIN_OS treats the language model as a planner, not as the device driver.
@@ -232,7 +239,7 @@ Nodes should expose the same capability vocabulary where practical.
 
 ## Networking model
 
-"LAIN_OS" includes local networking between trusted nodes.
+LAIN_OS includes local networking between trusted nodes as part of the broader LAIN network model.
 
 Future transport may use:
 - localhost IPC;
