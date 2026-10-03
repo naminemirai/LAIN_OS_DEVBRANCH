@@ -5,6 +5,7 @@ from pathlib import Path
 
 from lain.agent import AgentBudget, AgentController, AgentPlanningService, AgentSessionStatus, AgentSessionStore
 from lain.agent.models import OFFLINE_DEMO_BINDING, PlannerBinding
+from lain.app.control import AppController
 from lain.app.demo import DemoPlanner
 from lain.app.planner_bridge import AndroidPlannerFactory
 from lain.errors import ErrorCode, LainError
@@ -98,6 +99,62 @@ class AndroidPlannerFactoryTests(unittest.TestCase):
             planner.decide("finish", {"iteration_count": 0}, ())
 
         self.assertEqual(raised.exception.code, ErrorCode.PLANNER_CANCELLED)
+
+
+
+class FakePlannerProfiles:
+    def __init__(self, binding):
+        self.binding = binding
+
+    def activeBindingJson(self):
+        return json.dumps(self.binding.to_dict(), separators=(",", ":"))
+
+
+class AppControllerPlannerBridgeTests(unittest.TestCase):
+    def test_cloud_session_uses_pinned_bridge_and_completes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            binding = cloud_binding()
+            bridge = FakeNativePlannerBridge()
+            app = AppController(
+                Path(directory),
+                planner_profiles=FakePlannerProfiles(binding),
+                planner_bridge=bridge,
+            )
+            reply = json.loads(app.dispatch(json.dumps({
+                "version": 1,
+                "command": "start",
+                "arguments": {"goal": "finish"},
+            })))
+            self.assertTrue(reply["ok"])
+
+            self.assertFalse(app.advance())
+
+            stored = app.store.load(reply["session"]["session_id"])
+            self.assertEqual(stored.status, AgentSessionStatus.COMPLETE)
+            self.assertEqual(stored.planner_binding.profile_id, "cloud-primary")
+            self.assertEqual(len(bridge.calls), 1)
+
+    def test_local_transport_failure_never_falls_back(self):
+        with tempfile.TemporaryDirectory() as directory:
+            binding = cloud_binding("local")
+            bridge = FakeNativePlannerBridge({"ok": False, "error": "PLANNER_CONNECTION_REFUSED"})
+            app = AppController(
+                Path(directory),
+                planner_profiles=FakePlannerProfiles(binding),
+                planner_bridge=bridge,
+            )
+            reply = json.loads(app.dispatch(json.dumps({
+                "version": 1,
+                "command": "start",
+                "arguments": {"goal": "finish"},
+            })))
+
+            self.assertFalse(app.advance())
+
+            stored = app.store.load(reply["session"]["session_id"])
+            self.assertEqual(stored.status, AgentSessionStatus.FAILED)
+            self.assertEqual(stored.planner_binding.mode, "local")
+            self.assertEqual(len(bridge.calls), 1)
 
 
 class PlannerCancellationControllerTests(unittest.TestCase):
