@@ -1,5 +1,78 @@
 # Next
 
+## TASK-035: Implement aggregate provider spending controls
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, budget, spending
+**Updated:** 2026-10-03
+
+### Goal
+
+Extend persisted workflow budgets into explicit provider-spending controls so remote provider calls remain bounded, user-visible, restart-safe, and incapable of granting themselves additional spending authority.
+
+### Scope
+
+- Add per-workflow provider spending ceilings and provider-call ceilings that intersect with existing TASK-023 aggregate budgets.
+- Track user-visible estimated cost before provider submission and actual cost when a provider exposes trustworthy usage metadata.
+- Persist consumed provider-call and cost counters monotonically across restart/reconciliation.
+- Bind spending authority to trusted local workflow configuration/approval; provider estimates, retry hints, model output, job status, or metadata never increase ceilings.
+- Ensure TASK-032/033/034 provider jobs consult the same budget authority before submit/retry/poll paths that incur billable work.
+- Represent unknown pricing, missing actual usage, currency/unit mismatch, stale revision, exhausted budget, and reconciliation uncertainty explicitly.
+- Do not implement autonomous purchasing, generic payment methods, provider billing-account mutation, or implicit budget expansion.
+
+### Dependencies
+
+- TASK-023 complete: aggregate workflow budgets.
+- TASK-032 complete: provider job abstraction.
+- TASK-033 and TASK-034 interfaces available for speech/media provider cost integration.
+
+### Plan
+
+- Define the smallest persisted provider-budget ledger layered on existing workflow budget state.
+- Add trusted cost-estimate inputs and provider-call charging gates before billable submission.
+- Record actual usage/cost only from adapter-validated provider metadata without treating it as authority.
+- Make retries/reconciliation preserve operation identity and avoid double charging known-completed operations while never assuming uncertain writes are free.
+- Surface remaining budget, estimate, actual usage when known, and explicit exhausted/unknown states.
+- Add deterministic pricing/counter tests across restart, retry, reconciliation, stale revision, and concurrent provider-job attempts.
+
+### Acceptance
+
+- No provider submission or billable retry occurs when the trusted remaining workflow/provider ceiling is insufficient.
+- Restart cannot reset provider call counts, estimated/actual consumed cost, or spending ceilings.
+- Provider-supplied estimates/status/model output cannot expand authority or alter trusted ceilings.
+- Unknown/missing pricing cannot be silently interpreted as zero cost where a configured cost ceiling requires accounting.
+- Duplicate/reconciled operations do not double-charge known single effects, while uncertain external effects remain conservatively represented.
+- User-visible budget state distinguishes estimate from actual usage and identifies provider/currency/unit provenance.
+- Provider budget enforcement composes with time/action/bytes/retry budgets rather than replacing them.
+
+### Verification
+
+- Persisted monotonic provider-call/cost counter tests.
+- Deterministic estimate-vs-actual and unknown-pricing tests.
+- Budget exhaustion before submit/retry tests.
+- Restart/reconciliation/duplicate-operation/stale-revision tests.
+- Concurrent-job atomicity tests.
+- Malicious provider estimate/status/model-output authority-bypass negatives.
+- TASK-032/033/034 integration contract tests plus canonical verification and architecture/security review.
+
+### Expected result
+
+External providers operate under durable user-controlled call and spending ceilings with truthful estimates/actuals, without provider-controlled metadata creating new financial authority.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines R5.4 with per-workflow spending ceilings, provider call counts, user-visible estimates, actual cost recording, and an explicit rule that provider estimates grant no spending authority.
+- Current TaskPlanner represents R5.1–R5.3 as TASK-032 through TASK-034; no task/open issue/open PR represents R5.4.
+
+### Projection basis
+
+- Phase-5 acceptance requires bounded remote providers under explicit budgets before retry/backoff and privacy-disclosure work can be trusted end to end.
+- Centralized budget authority prevents each provider adapter from inventing incompatible cost semantics.
+
+### Risks / unknowns
+
+- Providers expose pricing/usage with differing currencies, token/media units, timing, and accuracy; unsupported conversions must remain explicit rather than guessed.
+- Some providers report actual cost only after completion; preflight estimates must remain conservative and clearly labeled.
+- Live billing evidence may require user credentials and must remain separate from deterministic pricing fixtures.
+
 ## TASK-034: Implement bounded external image/media generation adapter
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, media, provenance
 **Updated:** 2026-10-03
