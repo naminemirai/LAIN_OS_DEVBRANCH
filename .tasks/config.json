@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 34,
+  "nextId": 35,
   "states": [
     {
       "name": "Backlog",
@@ -205,10 +205,16 @@
         "title": "Implement bounded external speech provider adapter",
         "priority": "P1",
         "order": 27
+      },
+      {
+        "id": "TASK-034",
+        "title": "Implement bounded external image/media generation adapter",
+        "priority": "P1",
+        "order": 28
       }
     ],
     "issue": 6,
-    "repo_head": "718d488b6cf9629fb9f7b48fc2b59b9968ced601",
-    "next_action": "Continue TASK-008 through PR #15; after TASK-032, TASK-033 integrates external STT/TTS through Phase-2 speech contracts."
+    "repo_head": "dde44b46b92d5224298ff65b8ff86a936d7dcd5d",
+    "next_action": "Continue TASK-008 through PR #15; Phase 5 proceeds TASK-032 provider jobs → TASK-033 speech → TASK-034 external media."
   }
 }
