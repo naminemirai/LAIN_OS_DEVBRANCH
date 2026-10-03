@@ -1,5 +1,63 @@
 # Next
 
+## TASK-019: Implement restricted specialist roles
+**Priority:** P2 | **Tags:** overseer-assigned, developer, phase-3, workflow, roles
+**Updated:** 2026-10-03
+
+### Goal
+Add bounded logical specialist roles for durable workflows while keeping all execution authority in the existing trusted runtime.
+
+### Scope
+- Define coordinator, writer, visual planner, narrator, renderer, and publisher roles.
+- Restrict each role's visible context and capability families.
+- Bind roles to durable workflow nodes and scheduler dispatch.
+- Role restrictions may narrow existing authority only; they never grant policy, approval, execution, or verification authority.
+- Reuse artifact references/provenance rather than exposing unrestricted workspace state.
+- Do not add privileged independent executors or background daemons.
+
+### Dependencies
+- TASK-016 workflow persistence.
+- TASK-017 DAG scheduler.
+- TASK-018 artifact workspace.
+
+### Plan
+- Define a closed role catalog.
+- Filter context and capability families at workflow-node dispatch.
+- Intersect role allowances with existing registry/policy authority.
+- Persist selected role and allowed families with workflow state.
+- Add isolation and privilege-escalation tests.
+
+### Acceptance
+- Every specialist node uses one known restricted role.
+- Role selection can only reduce available capabilities.
+- Unrelated context, secrets, and artifacts remain unavailable.
+- Unknown roles fail closed.
+- Roles cannot approve work, alter policy, bypass verification, or select privileged executors.
+- No parallel permission system is introduced.
+
+### Verification
+- Role catalog and context-filter tests.
+- Capability-intersection tests.
+- Cross-role isolation tests.
+- Negative privilege-escalation tests.
+- Canonical verification and architecture/security review.
+
+### Expected result
+LAIN_OS can dispatch bounded specialist perspectives inside a durable workflow while preserving one trusted authority layer.
+
+### Evidence basis
+- `docs/ROADMAP_1.0.md` defines R3.4 Restricted specialist roles after R3.1-R3.3.
+- No current TaskPlanner task, open issue, or open PR represents R3.4.
+
+### Projection basis
+- Later revision, waiting, and media-production stages need explicit bounded stage roles without privileged autonomous sub-agents.
+
+### Risks / unknowns
+- Role-specific model/prompt choices remain deferred until actual stages require them.
+- Capability-family granularity must reuse existing registry semantics.
+
+---
+
 ## TASK-018: Implement immutable artifact workspace
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, artifacts
 **Updated:** 2026-10-03
