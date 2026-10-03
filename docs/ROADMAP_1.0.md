@@ -11,11 +11,11 @@ Role: Repository planning artifact
 
 ## 1. North-star release outcome
 
-LAIN_OS 1.0 is a standalone Android voice-first autonomous agent suite that turns ordinary spoken or typed goals into bounded, durable, verified multi-step work while preserving owner authority over every consequential action.
+LAIN_OS 1.0 is a standalone Android voice-first autonomous agent suite that turns ordinary spoken or typed goals into bounded, durable, verified multi-step work while preserving human authority over every consequential action.
 
 The release should feel like an operating layer for AI-assisted work rather than a chat front-end:
 
-    owner intent
+    user intent
       -> conversation
       -> planning
       -> durable workflow
@@ -40,7 +40,7 @@ The trusted runtime remains authoritative throughout 1.0.
 - Model output is untrusted data until validated.
 - ACTION_PROTOCOL and AGENT_PROTOCOL remain the execution/planning boundaries.
 - Capability risk, policy, approval, executor selection, verification, audit, and durable lifecycle state are never delegated to a provider.
-- Consequential actions require exact owner authority.
+- Consequential actions require exact user confirmation.
 - Completed external effects are never blindly replayed.
 - Uncertain external effects enter reconciliation instead of automatic retry.
 - Credentials stay outside planner context, audit, checkpoints, IPC responses, screenshots, exports, and logs.
@@ -84,7 +84,7 @@ No later phase should bypass this transport boundary.
 ### Required
 
 1. Real selectable model intelligence in the Android app.
-2. Demo, hosted cloud, and owner-provided local endpoint modes.
+2. Demo, hosted cloud, and user-provided local endpoint modes.
 3. Secure provider credentials.
 4. Voice input and spoken output.
 5. Conversational interruption and revision while work continues.
@@ -109,7 +109,7 @@ No later phase should bypass this transport boundary.
 - General authenticated HTTP capability.
 - Provider-managed tool execution outside LAIN protocols.
 - RAG/vector database as a core requirement.
-- Autonomous spending without explicit owner-controlled budgets and authority.
+- Autonomous spending without explicit user-controlled budgets and authorization.
 - Multi-device distributed execution as a release requirement.
 
 These are post-1.0 expansion targets, not hidden release blockers.
@@ -187,7 +187,7 @@ Status: IN PROGRESS.
 
 ### Goal
 
-Replace the Android app's hardcoded demo-only planning path with owner-selectable Demo, Cloud, or Local model intelligence while keeping all authority local and deterministic.
+Replace the Android app's hardcoded demo-only planning path with user-selectable Demo, Cloud, or Local model intelligence while keeping all authority local and deterministic.
 
 ### Planned feature slices
 
@@ -422,7 +422,7 @@ Targets from the 1.0 design:
 
 ### Phase 2 exit gate
 
-The owner can start a voice session, give a normal spoken goal, hear a spoken response, interrupt it, revise the request, and stop the underlying task independently of speech playback.
+The user can start a voice session, give a normal spoken goal, hear a spoken response, interrupt it, revise the request, and stop the underlying task independently of speech playback.
 
 ## 9. Phase 3 — Durable Workflow Graph and Artifact Workspace
 
@@ -451,7 +451,7 @@ Each workflow/task node should track:
 - deadlines;
 - error/recovery state;
 - workflow revision;
-- owner approvals;
+- user approvals;
 - reconciliation state.
 
 Recommended states:
@@ -482,7 +482,7 @@ R3.3 — Artifact workspace
 - immutable artifact identity by hash;
 - versions/revisions;
 - metadata/provenance;
-- owner-visible workspace;
+- user-visible workspace;
 - atomic writes;
 - retention/cleanup policy.
 
@@ -525,7 +525,7 @@ R3.8 — Aggregate budgets
 
 ### Phase 3 exit gate
 
-A multi-stage workflow survives process death, resumes without replaying completed effects, invalidates downstream artifacts correctly after revision, and exposes a truthful owner-readable state.
+A multi-stage workflow survives process death, resumes without replaying completed effects, invalidates downstream artifacts correctly after revision, and exposes a truthful user-readable state.
 
 ## 10. Phase 4 — Offline Media Production Pipeline
 
@@ -538,7 +538,7 @@ Prove LAIN_OS can produce a real useful media artifact locally before depending 
 ### 1.0 media scope
 
 A short 30–60 second narrated video using:
-- owner-provided or bundled licensed images;
+- user-provided or bundled licensed images;
 - generated text/title cards;
 - narration audio;
 - captions;
@@ -601,7 +601,7 @@ Verify actual rendered file:
 
 R4.6 — Preview/export UI
 - show artifact;
-- owner can inspect;
+- user can inspect;
 - render progress;
 - cancel;
 - export/share only through explicit capability policy.
@@ -634,7 +634,7 @@ Add replaceable external services without letting provider APIs become new autho
 - rate-limit handling;
 - retry policy;
 - provider job polling;
-- cost estimation and owner budgets;
+- cost estimation and user budgets;
 - provenance and provider identity;
 - no implicit provider fallback that changes privacy/cost semantics.
 
@@ -662,7 +662,7 @@ R5.3 — Image/media generation adapter
 R5.4 — Budget and spending controls
 - per-workflow spending ceiling;
 - per-provider call count;
-- owner-visible estimate;
+- user-visible estimate;
 - actual cost recording where provider exposes it;
 - no provider estimate grants spending authority.
 
@@ -686,7 +686,7 @@ Maps to F6.
 
 ### Goal
 
-Add a narrowly scoped, owner-authorized publishing path for the flagship workflow.
+Add a narrowly scoped, user-authorized publishing path for the flagship workflow.
 
 ### Capability family
 
@@ -757,7 +757,7 @@ R6.7 — Duplicate/uncertain upload reconciliation
 - never blindly create a second upload.
 
 R6.8 — Live acceptance
-- use owner-provided authorization;
+- use user-provided authorization;
 - separately authorize any real upload/publication;
 - keep live tests private until explicit publication approval;
 - record exact retrieved result.
@@ -781,13 +781,13 @@ Turn individually working subsystems into one credible installed product and pro
       -> speak idea
       -> selected planner creates workflow
       -> script produced
-      -> owner revises script verbally
+      -> user revises script verbally
       -> downstream artifacts invalidated/rebuilt
       -> narration produced
       -> visuals prepared
       -> video rendered
       -> video inspected
-      -> owner previews
+      -> user previews
       -> private YouTube upload
       -> processing verified
       -> exact publication approval
@@ -869,7 +869,7 @@ R7.7 — Performance and resource behavior
 
 Build:
 - reproducible release build;
-- owner-controlled persistent signing key;
+- maintainer-controlled persistent signing key;
 - release package identity/versioning;
 - supported ABI/API declaration;
 - migration from current debug/private state where applicable.
@@ -1072,6 +1072,6 @@ After the 1.0 trust/recovery/product loop is stable:
 
 The project has reached 1.0 when LAIN_OS is no longer merely a collection of agent primitives.
 
-It must be a coherent Android product in which the owner can speak an outcome, watch and interrupt bounded work, inspect intermediate artifacts, authorize consequential steps, survive failures/restarts without duplicate effects, and receive an independently verified real-world result.
+It must be a coherent Android product in which the user can speak an outcome, watch and interrupt bounded work, inspect intermediate artifacts, authorize consequential steps, survive failures/restarts without duplicate effects, and receive an independently verified real-world result.
 
 That is the release target.
