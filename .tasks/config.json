@@ -178,7 +178,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "ea34a0d9453dd06a69f3aac9148b2ea0f5684d2d",
-    "next_action": "Start TASK-008: close the Phase-1 planner acceptance and adversarial gate after TASK-007 merged in PR #12."
+    "repo_head": "a06fd35df912f517605433b57f23b6669129e687",
+    "next_action": "Execute TASK-008: close the Phase-1 planner acceptance and adversarial gate; do not start Phase 2 until it passes."
   }
 }
