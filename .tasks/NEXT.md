@@ -1,5 +1,79 @@
 # Next
 
+## TASK-036: Close Voice-First LAIN Preview physical Galaxy acceptance
+**Priority:** P1 | **Tags:** overseer-assigned, developer, preview, physical-device, galaxy, acceptance
+**Updated:** 2026-10-03
+
+### Goal
+
+After Phase 1 and Phase 2 are complete, prove the near-term Voice-First LAIN Preview on the declared Galaxy reference device with current-build physical evidence distinct from CI/emulator evidence.
+
+### Scope
+
+- Install the current candidate APK on the reference Galaxy device and record build/source SHA, Android/API/device identity, and environment.
+- Exercise a real selected planner profile through both typed and spoken goals into the same trusted planning path.
+- Verify exact approval, deterministic execution, verification, audit, durable sessions, planner/provider secret isolation, and no silent fallback.
+- Verify microphone permission/revocation, speech playback, barge-in, Stop talking vs Stop task separation, rotation/rebind/background behavior, stale approval rejection, and interruption behavior.
+- Measure user interruption to playback-stop latency and trusted Stop receipt latency against roadmap acceptance targets.
+- Preserve truthful evidence strength: physical observations are recorded separately from CI/emulator automation.
+- Do not claim the complete 1.0 media/publishing roadmap, publish externally, or weaken security/authority semantics to make acceptance pass.
+
+### Dependencies
+
+- TASK-008 complete: Phase-1 planner acceptance.
+- TASK-009 through TASK-015 complete: Phase-2 voice interfaces, lifecycle, interruption, playback, narration, and acceptance.
+- A current installable debug/release-candidate APK produced from the recorded source SHA.
+
+### Plan
+
+- Define one reproducible physical-device acceptance matrix from the roadmap preview gate and existing Android acceptance conventions.
+- Install the exact current build and record device/build metadata before testing.
+- Run typed and spoken planner happy paths plus approval/execution/verification/audit evidence.
+- Exercise lifecycle, permission, interruption, barge-in, stale-approval, Stop-talking, and Stop-task cases.
+- Measure required latencies using device-observed timestamps/automation where reliable.
+- Record failures/limits explicitly and rerun only after bounded fixes with fresh build identity.
+- Produce a concise preview-readiness evidence record without conflating it with full 1.0 release readiness.
+
+### Acceptance
+
+- Real selected planner works from the installed GUI for typed and spoken goals on the reference Galaxy.
+- Speech can be interrupted; Stop talking and Stop task remain distinct and truthful.
+- Exact approval/policy/execution/verification/audit remain authoritative through voice interaction.
+- Restart/rotation/background/rebind behavior preserves or fails closed according to documented contracts.
+- Raw planner/provider credentials are absent from user-visible/durable returned surfaces.
+- Measured interruption/Stop behavior meets recorded Phase-2 targets or the task remains explicitly blocked.
+- All physical evidence names device/API/build SHA; emulator/CI results are not substituted.
+- Passing this task authorizes only the Voice-First LAIN Preview milestone, not the full 1.0 claim.
+
+### Verification
+
+- Current-build install and launch on declared Galaxy reference device.
+- Typed real-profile happy path and spoken real-profile happy path.
+- Permission denied/revoked, provider unavailable, rotation/rebind/background, interruption, barge-in, Stop-talking vs Stop-task, stale approval, and secret-surface checks.
+- Recorded latency measurements and exact observed outcomes.
+- Fresh canonical/Android CI evidence for the same source state where applicable.
+- Final evidence reconciliation against the roadmap preview acceptance checklist.
+
+### Expected result
+
+A reproducible device-native evidence package establishes whether the Voice-First LAIN Preview is ready without overstating CI, emulator, or full-1.0 status.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` roadmap-r4 adds the Voice-First LAIN Preview milestone and explicitly orders Phase 1 → Phase 2 → current physical-device Galaxy acceptance → preview.
+- The new milestone requires real selected planner, spoken+typed goals, trusted execution semantics, barge-in, independent Stop task, secret isolation, and physical Galaxy evidence.
+
+### Projection basis
+
+- This gate converts Phase-1/2 subsystem completion into a usable device milestone while allowing Phases 3–7 to continue independently toward full 1.0.
+- A dedicated physical gate prevents emulator/CI success from being misreported as device readiness.
+
+### Risks / unknowns
+
+- Physical-device execution requires owner access to the Galaxy and may expose hardware/vendor-specific behavior not reproducible in CI.
+- Live planner/speech-provider paths may require user credentials/network access.
+- Device performance/thermal state can affect latency measurements and must be recorded with evidence.
+
 ## TASK-035: Implement aggregate provider spending controls
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, budget, spending
 **Updated:** 2026-10-03
