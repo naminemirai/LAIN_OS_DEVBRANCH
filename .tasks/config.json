@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 33,
+  "nextId": 34,
   "states": [
     {
       "name": "Backlog",
@@ -199,10 +199,16 @@
         "title": "Define bounded external provider job abstraction",
         "priority": "P1",
         "order": 26
+      },
+      {
+        "id": "TASK-033",
+        "title": "Implement bounded external speech provider adapter",
+        "priority": "P1",
+        "order": 27
       }
     ],
     "issue": 6,
-    "repo_head": "67ad592a5e4fd9aab4dc5296a74bad43ee490de5",
-    "next_action": "Continue TASK-008 through PR #15 acceptance evidence; after Phase 4, TASK-032 establishes the shared bounded external-provider job lifecycle before concrete provider adapters."
+    "repo_head": "718d488b6cf9629fb9f7b48fc2b59b9968ced601",
+    "next_action": "Continue TASK-008 through PR #15; after TASK-032, TASK-033 integrates external STT/TTS through Phase-2 speech contracts."
   }
 }
