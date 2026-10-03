@@ -43,6 +43,8 @@ internal enum class PlannerConnectionStatus {
     TLS_FAILURE,
     TIMED_OUT,
     RESPONSE_UNSUPPORTED,
+    REQUEST_REJECTED,
+    TRANSPORT_FAILURE,
     MISSING_CREDENTIAL,
     UNAVAILABLE,
 }
@@ -197,7 +199,7 @@ private class PlannerConnectionDiagnostic(context: Context) {
         )
         val request = JSONObject()
             .put("model", profile.model)
-            .put("max_completion_tokens", 1)
+            .put("max_completion_tokens", 32)
             .put(
                 "messages",
                 JSONArray().put(
@@ -233,6 +235,10 @@ private class PlannerConnectionDiagnostic(context: Context) {
         NativePlannerTransport.ERROR_RESPONSE_MALFORMED,
         NativePlannerTransport.ERROR_RESPONSE_UNSUPPORTED ->
             PlannerConnectionStatus.RESPONSE_UNSUPPORTED
+        NativePlannerTransport.ERROR_HTTP_REJECTED ->
+            PlannerConnectionStatus.REQUEST_REJECTED
+        NativePlannerTransport.ERROR_TRANSPORT_FAILED ->
+            PlannerConnectionStatus.TRANSPORT_FAILURE
         AndroidKeystoreSecretStore.ERROR_CREDENTIAL_MISSING ->
             PlannerConnectionStatus.MISSING_CREDENTIAL
         else -> PlannerConnectionStatus.UNAVAILABLE
