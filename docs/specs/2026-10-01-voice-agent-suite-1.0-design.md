@@ -1,8 +1,8 @@
-# LAIN_OS — Voice Agent Suite: 1.0 Design and GodPrompt Brief
+# LAIN_OS — Voice Agent Suite: 1.0 Design
 
-Version: 1.0-draft · 2026-10-01 · ROLE=PLANNER
+Version: 1.0-draft · 2026-10-01
 
-Status: product direction selected by the user; proposed architecture and implementation stages below are reviewable planning artifacts. No product code, build, hardware test, publication, or deployment was performed for this brief.
+Status: product design specification. This document defines intended application behavior and acceptance targets; implementation and verification status are tracked separately.
 
 ## Product intent
 
@@ -12,13 +12,17 @@ Flagship scenario: “Turn this idea into a YouTube video and post it.” Succes
 
 Interpretation: “my voices” means the user's spoken input and selectable agent speech voices. Voice cloning, multiple simultaneous speakers, and multiple independently speaking agent personas are not assumed requirements. They can be added after clarification. Use licensed stock speech voices initially.
 
-## Inspected baseline and limits
+## Product baseline
 
-Sources: attached LAIN_OS-main.zip and LAIN_OS-next-phase-handoff.zip. The main archive identifies commit 24ec1621fd63aaa6ce74f34c322d7b371b823ff6; its README describes the Python runtime, typed action validation, policy, executor, verification, audit, planner adapters, and bounded durable autonomous sessions. No native Android GUI is present in that snapshot.
+LAIN_OS already provides the trusted execution foundation this design builds on:
+typed action validation, capability policy, deterministic execution, verification,
+audit, bounded autonomous sessions, Android integration, exact approvals, Stop
+controls, and durable recovery semantics.
 
-The handoff describes a newer inspected baseline, null0entry/LAIN_OS_DEVBRANCH@19482fda2348e3aa0057c470b96cbc426e73bba9, with expanded Android capabilities and historical CI/hardware evidence. These snapshots differ. Inspect the actual repository at execution time; do not reset a newer branch or assume the older archive contains newer features. Historical test counts and hardware results are not fresh verification.
-
-The existing standalone-workbench design and plan remain foundational. Preserve their private runtime service, authenticated same-UID Binder control, bounded execution, exact approvals, conservative recovery, scoped filesystem, native adapters, portable CLI, and APK acceptance requirements. This brief extends their product destination; it does not certify their implementation.
+The 1.0 design extends that foundation with real selectable planners, voice
+conversation, durable multi-stage workflows, media production, and narrowly scoped
+publishing. Those additions must preserve the existing authority boundary rather
+than replacing it with direct model-driven execution.
 
 ## Recommended architecture
 
@@ -84,7 +88,7 @@ Use owner-selected OAuth account authorization and minimum required scopes. Stor
 
 ## Delivery graph and acceptance
 
-All tasks are pending. Implement by dependency after the written design and plan reviews required by the applicable workflow.
+The product dependency graph is ordered by the interfaces and trust boundaries each stage requires.
 
 | ID | Dependencies | Deliverable and acceptance |
 |---|---|---|
@@ -99,24 +103,7 @@ All tasks are pending. Implement by dependency after the written design and plan
 
 A 1.0 claim requires the documented core scope to work through real installed artifacts, not just adapters mocked in tests. Missing device, build/signing infrastructure, live credentials, or required acceptance evidence remains explicit. Preserve CLI compatibility and existing tests. No public release claim for a debug APK. Keep persistent owner-controlled release signing and reviewed update/state migration behavior.
 
-## GodPrompt execution brief
+## Design summary
 
-You are the LAIN_OS principal engineering agent. Begin in ROLE=PLANNER for the new voice/workflow/media design, then hand off to ROLE=DEVELOPER only after the applicable written spec and implementation-plan gates are complete. Use this document and the existing standalone Android handoff as inputs; conversation memory is not repository state.
+This design selects a hybrid architecture, one active workflow, user-started voice sessions, stock voices, and a deliberately narrow first video format for 1.0. The product remains local-authority-first even when remote reasoning, speech, media, or publishing services are configured.
 
-Mission: deliver a standalone Android voice agent suite that can understand normal spoken goals, converse while working, execute bounded complex workflows through the existing trusted runtime, and demonstrate a real idea-to-video workflow with separately authorized publication.
-
-1. Inspect actual source, instructions, branch/commit, dirty state, approvals, existing durable goals/plans, and available build/device/network tools. Reconcile the two supplied baseline snapshots. Preserve unrelated work and record facts separately from assumptions.
-2. Produce the repository-native written design and task plan for F0–F7. Resolve provider/rendering/toolchain feasibility with current official documentation and bounded probes. Prefer one native conversational interface over specialist workers; retain typed policy-controlled actions. Do not silently replace the standalone app with a Termux/server client.
-3. Implement authorized tasks in dependency order after required reviews. Establish meaningful behavior failures before fixes, run focused verification, then required broader checks. Preserve the portable CLI, safe recovery, exact approvals, budgets, and capability boundaries.
-4. Implement real voice/media paths. Test doubles are appropriate for failure contracts but cannot certify hardware speech, actual rendering, uploads, or publication. Clearly label demo planners and offline fixtures.
-5. Do not spend, create paid infrastructure, publish content, merge, deploy, or send messages without corresponding authority. Continue independent local implementation when credentials or infrastructure block a later stage. Do not invent a successful external operation or weaken verification to finish.
-6. Verify interruption during synthesis and planning, revision during production, crash after an external effect, duplicate approval/upload, provider timeout/429, exhausted budget, microphone denial/revocation, corrupt state, hostile tool output, path escape, and secret leakage. Measure the stated control targets on declared environments.
-7. Deliver source changes, exact commands/exit codes, test results, artifacts/hashes/signers, installed-device evidence, known limits, pending task IDs, and next action. Distinguish implemented, tested, built, installed, observed, release-signed, published, reviewed, and merged. Update durable task state after each completed unit.
-
-Do not end with architecture alone once implementation is authorized. Do not claim 1.0 until its required acceptance evidence exists. If blocked, finish independent authorized work and leave a concrete recovery handoff rather than a vague promise.
-
-## Review and next action
-
-This brief selects a hybrid architecture, one active workflow, user-started voice sessions, stock voices, and a deliberately narrow first video format as proposed defaults. No implementation approval is inferred from those choices. Next: review this written design, then expand F0–F7 into repository-specific implementation steps and verify the current execution environment.
-
-Planning check: baseline conflicts documented; voice and workflow semantics separated; external authority distinct; capability names labeled proposed; all tasks have dependencies and observable acceptance; no code/build/publication completion claims.
