@@ -214,7 +214,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "dde44b46b92d5224298ff65b8ff86a936d7dcd5d",
-    "next_action": "Continue TASK-008 through PR #15; Phase 5 proceeds TASK-032 provider jobs → TASK-033 speech → TASK-034 external media."
+    "repo_head": "e0412c1cefaa61c8b6a0289f13a56bdda4570d14",
+    "next_action": "Continue TASK-008: PR #15 merged green; close remaining installed GUI/runtime Cloud+Local happy-path acceptance before advancing TASK-009."
   }
 }
