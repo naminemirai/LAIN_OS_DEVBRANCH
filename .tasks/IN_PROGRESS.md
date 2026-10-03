@@ -2,14 +2,14 @@
 
 ## TASK-004: Complete open LAIN engineering workflow migration
 **Priority:** P1
-**Updated:** 2026-10-02 20:03
+**Updated:** 2026-10-02 20:56
 
 Complete PR #9's migration from person-specific ZzzOps engineering skills to
 functional LAIN workflow names without weakening safety boundaries.
 
 ### Sequence
 
-1. **Make the migration contract executable (started).**
+1. **Make the migration contract executable (completed).**
    - Observable outcome: every contract assertion is discovered by the canonical
      `unittest` runner and compares parsed skill metadata and resolved feedback
      targets, not substrings.
@@ -17,7 +17,7 @@ functional LAIN workflow names without weakening safety boundaries.
    - Verification: run the focused contract test through `python -m unittest`.
    - Expected result: the test is discovered and fails because the
      `plugins/lain-engineering` implementation is not yet present.
-2. **Implement the bounded migration.**
+2. **Implement the bounded migration (next).**
    - Observable outcome: the functional skill tree and neutral plugin manifests
      exist, feedback targets are repository/configuration-derived, and policy
      approval is iterative while unresolved safety decisions remain blocking.
@@ -36,12 +36,14 @@ functional LAIN workflow names without weakening safety boundaries.
 
 ### Evidence / progress
 
-- PR #9 head `323cdc28461a52530ba02c42a75633afb683fb63` adds only
-  `tests/test_lain_engineering_plugin.py`; the referenced plugin tree is absent.
-- Verify #65 and Android #54 succeeded, but the five module-level pytest-style
-  functions are not discovered by the canonical `unittest` runner and remain
-  untested by those green workflows.
-- Fresh review does not pass (review ID `5398033512`). No merge was performed.
+- PR #9 head `2dde8da3ac4aedf52cdb76ef65ddd320325ff039` now uses
+  discoverable `unittest.TestCase` coverage, exact parsed frontmatter names,
+  and repository-derived feedback-target cases for HTTPS and SSH origins.
+- Focused canonical execution discovers 5 tests and fails all 5 for the intended
+  red-state reason: `plugins/lain-engineering` is absent.
+- Fresh review still does not pass (review ID `5398246491`). Verify #67 is in
+  progress and Android #56 is queued; neither is claimed passed. No merge was
+  performed.
 
 ---
 

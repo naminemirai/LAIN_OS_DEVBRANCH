@@ -58,7 +58,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "f8dec08464c78dcbb47e0e4d0a57a4d84fad619a",
-    "next_action": "Convert PR #9's migration contract to discoverable unittest coverage, verify the intended red failures, then implement the plugin migration."
+    "repo_head": "e0a2b8f41394e0a86651de601be71136de672fc2",
+    "next_action": "Implement PR #9's functional plugin migration against the now-executable red contract, preserving safety blockers and repository-derived feedback routing."
   }
 }
