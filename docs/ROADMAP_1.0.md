@@ -1,13 +1,12 @@
 # LAIN_OS 1.0 Roadmap
 
-**LAIN — Loyal Autonomous Intelligence Network**
+**LAIN_OS — Local Autonomous Intelligence Network Operating System**
 
-LAIN is an open-source autonomous intelligence platform. "Loyal" describes alignment to the human using the system; local-first operation remains a core technical principle rather than the expansion of the acronym.
+LAIN_OS is the concrete open-source platform described by this roadmap. It implements the broader **LAIN — Loyal Autonomous Intelligence Network** philosophy through a local-first operating layer for autonomous intelligence.
 
-Version: 1.0-roadmap-r2
-Status: Active planning baseline
+Version: 1.0-roadmap-r3
+Status: Active product roadmap
 Date: 2026-10-03
-Role: Repository planning artifact
 
 ## 1. North-star release outcome
 
