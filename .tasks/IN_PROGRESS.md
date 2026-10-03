@@ -1,68 +1,58 @@
 # In Progress
 
-## TASK-003: Implement bounded native planner transport
-**Priority:** P1
-**Updated:** 2026-10-02 18:59
+## TASK-005: Implement persistent PlannerProfile selection
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-1, planner-runtime
+**Updated:** 2026-10-03
 
-Implement Phase 2 P2-04 after TASK-002: cancellable Android-native HTTP transport shared by Cloud and Local OpenAI-compatible planner profiles.
+### Goal
 
-Acceptance:
-- timeout and response-size bounds are enforced;
-- structured failures cover DNS/unreachable, refused connection, TLS, 401/403, missing model/404, timeout, 429, 5xx, cancellation, oversized response, and malformed/unsupported responses;
-- Local mode never silently falls back to Cloud;
-- plaintext LAN HTTP is allowed only under the documented explicit local/private-address policy;
-- cancellation cannot lead to subsequent action execution.
+Create the provider-neutral Android planner profile store required to select Demo, Cloud, or Local intelligence without placing credentials in profile state.
+
+### Scope
+
+- Define native `PlannerProfile` persistence for profile ID/name, mode, protocol, base URL, model, opaque credential reference, timeout, response-size bound, response mode, and supported local-network policy fields.
+- Keep raw credentials exclusively in the existing Keystore-backed `SecretStore`.
+- Persist the active profile across process/app restart.
+- Convert the selected profile into the existing trusted `PlannerBinding` captured when a new agent session starts.
+- Settings changes affect future sessions only; existing sessions remain pinned to their original binding.
+
+### Dependencies
+
+- Existing `PlannerBinding` validation/session-pinning groundwork on main.
+- Existing TASK-002 Keystore-backed `SecretStore`.
+- No hard dependency on TASK-003 transport integration; do not duplicate or modify native transport work owned by PR #8.
 
 ### Plan
 
-- Define a narrow native planner transport contract consuming PlannerBinding plus SecretStore.
-- Implement cancellable bounded OpenAI-compatible HTTP POST for cloud/local profiles.
-- Map DNS/refused/TLS/auth/not-found/timeout/rate-limit/5xx/cancel/oversize/malformed failures to structured native codes.
-- Enforce no cloud fallback and explicit private-address cleartext policy from the existing binding.
-- Author focused Android tests but defer running verification per owner directive.
-- Open a PR, hand it to review, record deferred checks, then advance.
+- Add the smallest native profile model/store and validation boundary.
+- Make Demo the safe default when no user profile is selected.
+- Store only opaque credential references.
+- Add active-profile CRUD/selection operations needed by the later bridge/UI.
+- Prove restart persistence and session pinning with focused tests.
 
+### Acceptance
 
-### Progress
+- Demo, Cloud, and Local profiles validate under one provider-neutral schema.
+- Invalid endpoint/model/profile input fails closed.
+- Restart preserves profiles and active selection.
+- Raw credentials never enter profile files, Binder/IPC responses, Python checkpoints, audit, logs, or exported settings.
+- A session created under profile A remains bound to A after the active setting changes to B.
 
-- Branch `feature/task-003-native-planner-transport` fast-forwarded to `main@4f6f6bc` without history rewrite.
-- Draft PR #8 opened at head `7316494`.
-- Authored JVM transport tests and Android manifest-policy instrumentation tests.
-- Implemented bounded/cancellable OpenAI-compatible native HTTP transport using existing `SecretStore`; no provider SDK dependency added.
-- Added Android `INTERNET` permission while preserving global cleartext deny.
-- Structured failure mapping covers required DNS/unreachable, refused, TLS, 401/403, 404, timeout/408, 429, 5xx, cancellation, oversized, malformed, and unsupported response cases.
-- Verify workflow #62 completed successfully on PR head `7316494`.
-- Android workflow #51 failed on both API jobs in
-  `NativePlannerTransportTest.rejectsOversizedMalformedAndUnsupportedResponses`;
-  the malformed-response case returned a non-failure and the forced cast failed at
-  test line 130. Instrumentation was skipped.
-- Fresh GitHub review on head `7316494` does not pass (review ID
-  `5397679657`); PR #8 remains draft and non-mergeable.
+### Verification
 
-### Blockers / deferred verification
+- Focused profile-store/validation tests.
+- Restart/persistence and profile-selection tests.
+- Session-pinning regression against existing `PlannerBinding`.
+- Canonical portable verification and Android test/build gates when implementation is integrated.
 
-- The JVM test exercises Android `org.json.JSONObject` through local Android
-  stubs, so its malformed-JSON assertion is not truthful in that environment.
-  Validation must become platform-neutral for JVM coverage or move to Android
-  instrumentation before the workflow can pass.
-- Arbitrary user-entered private-LAN HTTP remains blocked by Android's global cleartext deny. The transport validates explicit Local/private-address opt-in, but enabling dynamic RFC1918 cleartext would require a material security/compatibility decision; this branch does not globally weaken cleartext policy or bypass it with raw sockets.
-- The accepted-binding/runtime-policy mismatch must be resolved: reject Local
-  cleartext at the binding boundary for this release, or implement a narrowly safe
-  Android policy. Global cleartext enablement and raw-socket bypass remain rejected.
-- Verify workflow #62 passed. Android workflow #51 failed; Android
-  instrumentation and any later skipped steps remain untested.
+### Expected result
 
-### Sequenced continuation
+LAIN_OS has a durable, non-secret source of planner identity/configuration that the runtime bridge and settings UI can consume without weakening authority boundaries.
 
-- Observable outcome: Local HTTP validation and Android runtime policy describe
-  one truthful supported contract, and malformed JSON is validated on a
-  platform-neutral boundary or truthful instrumentation path.
-- Dependencies: explicit cleartext compatibility/security decision.
-- Verification: focused malformed-response test, Android workflow, manifest
-  policy test, and fresh whole-diff review.
-- Expected result: accepted planner bindings are executable under Android policy,
-  the failing JVM assertion is truthful, and the review passes without weakening
-  global cleartext protections.
-- Fresh unchanged-head review remains blocked (review ID `5398751852`).
+### Evidence / projection basis
+
+- Code search on `main@06ead233185f3e90e2f979bd798aa6d407e22f1c` finds `PlannerBinding` and session pinning but no `PlannerProfile`/profile-store implementation.
+- `docs/PLUGGABLE_MODEL_RUNTIME.md` defines P2-02/R1.2 as a prerequisite for the runtime bridge.
+- This task unlocks TASK-006 while PR #8 completes transport integration.
 
 ---
