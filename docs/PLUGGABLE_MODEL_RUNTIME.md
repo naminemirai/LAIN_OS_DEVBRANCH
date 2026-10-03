@@ -7,7 +7,7 @@
 
 ## Goal
 
-Turn the existing Android GUI + embedded runtime from a deterministic demo into a real natural-language LAIN client where the owner can choose the source of model intelligence while keeping authorization, execution, verification, budgets, and audit local and authoritative.
+Turn the existing Android GUI + embedded runtime from a deterministic demo into a real natural-language LAIN client where the user can choose the source of model intelligence while keeping authorization, execution, verification, budgets, and audit local and authoritative.
 
 Initial provider modes:
 
@@ -20,7 +20,7 @@ True on-device inference is intentionally deferred to the following phase.
 ## Architecture
 
 ```text
-                    OWNER SETTINGS
+                    USER SETTINGS
                          │
               ┌──────────┴──────────┐
               │                     │
@@ -139,7 +139,7 @@ Show the selected source directly in the main workbench, e.g.:
 Planner: Local · qwen3.5-9b
 ```
 
-The source of intelligence should never be invisible to the owner.
+The source of intelligence should never be invisible to the user.
 
 ## Secret handling
 
