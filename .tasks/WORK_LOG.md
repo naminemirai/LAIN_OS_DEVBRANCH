@@ -1,5 +1,8 @@
 # Work Log
 
+## 2026-10-03 — TASK-006
+PR #11 head `9aec3158c8ab98d7ffabf3f6ec7582ebfeac5125` passed Verify #173 and Android #162. API 35 initially hit unrelated Espresso window-focus failures after emulator/ADB startup trouble; a targeted retry passed without product-code changes. Fresh post-CI review found no actionable review threads, and PR #11 squash-merged as `f8cff695f4dfdac5cdf5bffa33b2d5dc70776bb2`. Physical-device acceptance remains unverified.
+
 ## 2026-10-03 — TASK-005
 PR #10 passed fresh whole-diff review on head `1d35244b83292f309f3cb1eb0dd16e5254587abc`; Verify #150 and Android #139 succeeded, with Android API 24/API 35 build, unit, lint, and instrumentation jobs green. Draft state was the mergeability gate; after marking ready, GitHub reported mergeable=true and the PR squash-merged as `16fd0aa363576f897282dd932b8a56609884ff86`. Physical-device acceptance remains unverified.
 
