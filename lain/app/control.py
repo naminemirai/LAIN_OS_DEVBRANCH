@@ -308,7 +308,11 @@ class AppController:
                                 "details": result["details"] if result else {}})
         snapshot = {**self._summary(session), "revision": _revision(session),
                     "actions": actions[-32:], "attempted_actions": session.total_attempted_actions,
-                    "iterations": session.iteration_count, "planner": "offline_demo"}
+                    "iterations": session.iteration_count, "planner": {
+                        "profile_id": session.planner_binding.profile_id,
+                        "mode": session.planner_binding.mode,
+                        "model": session.planner_binding.model,
+                    }}
         with self._lock:
             snapshot["active"] = self._active == session.session_id
             snapshot["stop_requested"] = snapshot["active"] and self._stopped.is_set()
