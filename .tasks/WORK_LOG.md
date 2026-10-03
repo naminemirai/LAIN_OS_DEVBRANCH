@@ -3,13 +3,13 @@
 ## 2026-10-02 — PR #8 review reconciliation
 Fresh review on head `7316494` does not pass (review `5397679657`): Android #51 fails the malformed-response JVM test on both API jobs, instrumentation was skipped, and Local cleartext remains an unresolved contract/security mismatch. TASK-003 stays In Progress; no new task was created.
 
-## 2026-10-02 — PR review and Suggest Work reconciliation
-PR #7 passed fresh review on c26925e and merged as 2946e1a; Verify #56 succeeded, Android #45 was cancelled, and Android instrumentation remains untested. TASK-001 and TASK-002 are now Done, TASK-003 remains In Progress, and no new suggestion or task ID was warranted from current repository evidence.
+## 2026-10-02 — PR review and queue reconciliation
+PR #7 passed fresh review on c26925e and merged as 2946e1a; Verify #56 succeeded, Android #45 was cancelled, and Android instrumentation remains untested. TASK-001 and TASK-002 are now Done, TASK-003 remains In Progress, and no new task ID was warranted from current repository evidence.
 
 ## 2026-10-02 — TASK-002 review fixes
 PR #7 review corrections implemented in commits c67d1a5 and c26925e: AES-GCM AAD now binds records to exact credential refs, swapped-record/concurrent-init regressions were authored, and the mkdir race was fixed. Tests remain explicitly unrun; fresh automated review is blocked by Codex review quota. No merge performed.
 
-## 2026-10-02 — Suggest Work reconciliation
+## 2026-10-02 — Queue reconciliation
 Fresh GitHub PR review evidence reopened existing tasks instead of creating duplicates: TASK-001 moved back to Next because PR #4 is now non-mergeable against current main despite a passing code review; TASK-002 moved back to Next because PR #7 review found missing AES-GCM AAD binding and a first-use directory creation race. No new task ID was created.
 
 ## 2026-10-02 — TASK-002
