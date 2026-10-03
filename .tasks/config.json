@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 10,
+  "nextId": 11,
   "states": [
     {
       "name": "Backlog",
@@ -73,10 +73,16 @@
         "title": "Define bounded speech provider interfaces",
         "priority": "P2",
         "order": 5
+      },
+      {
+        "id": "TASK-010",
+        "title": "Implement Android microphone lifecycle",
+        "priority": "P2",
+        "order": 6
       }
     ],
     "issue": 6,
-    "repo_head": "6afef3e08566098e99d2b6b972983c52ec7abdd2",
-    "next_action": "TASK-005 remains In Progress on PR #10. After TASK-005, execute TASK-006 -> TASK-007 -> TASK-008; once the Phase-1 gate passes, TASK-009 begins Phase 2 with bounded speech provider interfaces."
+    "repo_head": "95087f0406bc69a8f09f6cd0c430bd3a5df6d6e4",
+    "next_action": "Continue TASK-005 / PR #10. Then TASK-006 -> TASK-007 -> TASK-008. TASK-009 begins Phase 2 speech contracts; TASK-010 follows with Android microphone lifecycle."
   }
 }
