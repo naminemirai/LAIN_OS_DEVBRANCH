@@ -8,6 +8,7 @@ import android.os.Parcel
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import dev.lain.os.planner.PlannerProfileStore
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.ScheduledThreadPoolExecutor
@@ -31,7 +32,11 @@ class RuntimeService : Service() {
             try {
                 if (!Python.isStarted()) Python.start(AndroidPlatform(this))
                 controller = Python.getInstance().getModule("lain.app.control").callAttr(
-                    "create_controller", File(filesDir, "lain").absolutePath, NativeCapabilities(this))
+                    "create_controller",
+                    File(filesDir, "lain").absolutePath,
+                    NativeCapabilities(this),
+                    PlannerProfileStore(this),
+                )
             } catch (_: Exception) {
                 // Fail closed without Python tracebacks or raw private output in logcat.
                 controller = null

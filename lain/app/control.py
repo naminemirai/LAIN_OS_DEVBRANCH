@@ -9,6 +9,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import secrets
 import threading
 from pathlib import Path
@@ -16,7 +17,13 @@ from time import monotonic
 from uuid import UUID
 
 from lain.agent.controller import AgentController
-from lain.agent.models import AgentBudget, AgentSessionStatus, TERMINAL_AGENT_STATUSES
+from lain.agent.models import (
+    AgentBudget,
+    AgentSessionStatus,
+    OFFLINE_DEMO_BINDING,
+    PlannerBinding,
+    TERMINAL_AGENT_STATUSES,
+)
 from lain.agent.planning import AgentPlanningService
 from lain.agent.store import AgentSessionStore
 from lain.app.demo import COMMANDS, DemoPlanner
@@ -29,6 +36,7 @@ from lain.runtime.engine import RuntimeEngine
 
 MAX_MESSAGE_BYTES = 65536
 APPROVAL_TTL_SECONDS = 120
+_OPAQUE_CREDENTIAL_REF = re.compile(r"^cred_[0-9a-f]{32}$")
 _FIELDS = {
     "start": {"goal"}, "inspect": {"session_id"}, "sessions": set(),
     "approve": {"session_id", "token"}, "stop": {"session_id"}, "resume": {"session_id"},
@@ -56,8 +64,34 @@ def _revision(session):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _planner_binding_provider(native_profiles):
+    if native_profiles is None:
+        return lambda: OFFLINE_DEMO_BINDING
+
+    def current_binding():
+        payload = str(native_profiles.activeBindingJson())
+        if len(payload.encode("utf-8")) > 8192:
+            raise ValueError("planner binding response too large")
+        raw = json.loads(
+            payload,
+            object_pairs_hook=_unique_object,
+            parse_constant=lambda _: (_ for _ in ()).throw(ValueError("nonfinite JSON")),
+        )
+        if not isinstance(raw, dict):
+            raise ValueError("planner binding must be an object")
+        credential_ref = raw.get("credential_ref")
+        if credential_ref is not None and (
+            not isinstance(credential_ref, str)
+            or _OPAQUE_CREDENTIAL_REF.fullmatch(credential_ref) is None
+        ):
+            raise ValueError("planner credential reference must be opaque")
+        return PlannerBinding.from_dict(raw)
+
+    return current_binding
+
+
 class AppController:
-    def __init__(self, root: Path, native=None):
+    def __init__(self, root: Path, native=None, planner_profiles=None):
         root = Path(root).resolve()
         root.mkdir(parents=True, mode=0o700, exist_ok=True)
         os.chmod(root, 0o700)
@@ -69,6 +103,7 @@ class AppController:
         self.controller = AgentController(
             AgentPlanningService(DemoPlanner(workspace), max_actions=1), self.runtime,
             self.store, AgentBudget(12, 1, 32, 900.0),
+            planner_binding_provider=_planner_binding_provider(planner_profiles),
         )
         self._lock = threading.RLock()
         self._active = None
@@ -281,5 +316,5 @@ class AppController:
         return snapshot
 
 
-def create_controller(root: str, native) -> AppController:
-    return AppController(Path(root), native)
+def create_controller(root: str, native, planner_profiles=None) -> AppController:
+    return AppController(Path(root), native, planner_profiles)

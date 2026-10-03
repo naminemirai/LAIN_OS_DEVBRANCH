@@ -8,6 +8,14 @@ from pathlib import Path
 from lain.app.control import AppController
 
 
+class FakePlannerProfiles:
+    def __init__(self, binding):
+        self.binding = binding
+
+    def activeBindingJson(self):
+        return json.dumps(self.binding, separators=(",", ":"))
+
+
 class AppControlTests(unittest.TestCase):
     def setUp(self):
         self.directory = tempfile.TemporaryDirectory()
@@ -24,6 +32,57 @@ class AppControlTests(unittest.TestCase):
             if not self.app.advance():
                 return
         self.fail("demo did not settle within bounded steps")
+
+
+    def test_native_profile_binding_is_pinned_when_session_starts(self):
+        binding_a = {
+            "profile_id": "cloud-a",
+            "mode": "cloud",
+            "protocol": "openai_compatible_v1",
+            "base_url": "https://a.example.invalid/v1",
+            "model": "model-a",
+            "credential_ref": "cred_0123456789abcdef0123456789abcdef",
+            "timeout_seconds": 30.0,
+            "max_response_bytes": 1048576,
+            "response_mode": "json_schema",
+            "allow_insecure_lan_http": False,
+        }
+        binding_b = {
+            **binding_a,
+            "profile_id": "cloud-b",
+            "base_url": "https://b.example.invalid/v1",
+            "model": "model-b",
+            "credential_ref": "cred_fedcba9876543210fedcba9876543210",
+        }
+        profiles = FakePlannerProfiles(binding_a)
+        self.app = AppController(Path(self.directory.name), planner_profiles=profiles)
+
+        reply = self.send("start", goal="Create demo file")
+        self.assertTrue(reply["ok"])
+        profiles.binding = binding_b
+
+        stored = self.app.store.load(reply["session"]["session_id"])
+        self.assertEqual(stored.planner_binding.profile_id, "cloud-a")
+        self.assertEqual(stored.planner_binding.model, "model-a")
+
+    def test_native_profile_source_rejects_non_opaque_credential_reference(self):
+        profiles = FakePlannerProfiles({
+            "profile_id": "cloud-a",
+            "mode": "cloud",
+            "protocol": "openai_compatible_v1",
+            "base_url": "https://a.example.invalid/v1",
+            "model": "model-a",
+            "credential_ref": "sk-raw-secret",
+            "timeout_seconds": 30.0,
+            "max_response_bytes": 1048576,
+            "response_mode": "json_schema",
+            "allow_insecure_lan_http": False,
+        })
+        self.app = AppController(Path(self.directory.name), planner_profiles=profiles)
+
+        reply = self.send("start", goal="Create demo file")
+        self.assertFalse(reply["ok"])
+        self.assertEqual(self.app.store.list_sessions(), ())
 
     def test_unknown_control_command_rejected(self):
         self.assertFalse(self.send("shell", command_line="id")["ok"])
