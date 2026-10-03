@@ -361,7 +361,201 @@ class GitHubGoalTransitionAdapter:
             input_text=json.dumps({"body": body}, ensure_ascii=False, sort_keys=True, separators=(",", ":")),
         )
         if result.returncode:
-    #~8òÚ$z{-®éÜj×]) - evidence_ids)
+            raise self._provider_error(result)
+        try:
+            comment = json.loads(result.stdout)
+        except json.JSONDecodeError as exc:
+            raise GoalTransitionProviderError(
+                "GitHub returned an invalid history response; body replacement was not attempted."
+            ) from exc
+        if not isinstance(comment, dict):
+            raise GoalTransitionProviderError(
+                "GitHub returned an incomplete history response; body replacement was not attempted."
+            )
+        return comment
+
+
+_validate_reservation_goal = _reservation._validate_reservation_goal
+acquire_reservation = _reservation.acquire_reservation
+renew_reservation = _reservation.renew_reservation
+release_reservation = _reservation.release_reservation
+acquire_reservation_bundle = _reservation.acquire_reservation_bundle
+renew_reservation_bundle = _reservation.renew_reservation_bundle
+release_reservation_bundle = _reservation.release_reservation_bundle
+reservation_cli_message = _reservation.reservation_cli_message
+
+
+def project_claim_ttl_seconds(project: dict[str, Any]) -> int:
+    sections = ((project.get("policy") or {}).get("sections") if isinstance(project.get("policy"), dict) else None)
+    section = next((item for item in sections or [] if isinstance(item, dict) and item.get("id") == "autonomy_approval_parallelism"), None)
+    hours = ((section.get("settings") or {}).get("claim_ttl_hours") if isinstance(section, dict) else None)
+    if not isinstance(hours, int) or isinstance(hours, bool) or not 1 <= hours <= 24:
+        raise ValueError("Reviewed project policy must set claim_ttl_hours from 1 to 24")
+    return hours * 3600
+
+
+def project_resource_policy(project: dict[str, Any]) -> dict[str, Any]:
+    sections = ((project.get("policy") or {}).get("sections") if isinstance(project.get("policy"), dict) else None)
+    section = next((item for item in sections or [] if isinstance(item, dict) and item.get("id") == "autonomy_approval_parallelism"), None)
+    settings = section.get("settings") if isinstance(section, dict) else None
+    configured = settings.get("resource_reservations") if isinstance(settings, dict) else None
+    return normalize_resource_policy(configured)
+
+reviewed_project_state = _policy.reviewed_project_state
+
+
+def read_cli_text(value: str) -> str:
+    if value == "-":
+        text = sys.stdin.read()
+        return text[1:] if text.startswith("\ufeff") else text
+    try:
+        return Path(value).resolve().read_text(encoding="utf-8-sig")
+    except (OSError, UnicodeError) as exc:
+        raise ValueError(f"Could not read feedback prompt: {type(exc).__name__}") from exc
+
+
+def configure_cli_stdout() -> None:
+    """Use readable, byte-stable UTF-8 whenever stdout owns an encoding layer."""
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if reconfigure is not None:
+        reconfigure(encoding="utf-8", errors="strict")
+
+
+project_digest = _policy.project_digest
+project_path = _policy.project_path
+project_audit_path = _policy.project_audit_path
+project_policy_path = _policy.project_policy_path
+read_project = _policy.read_project
+parse_policy_state = _policy.parse_policy_state
+read_policy_text = _policy.read_policy_text
+read_project_state = _policy.read_project_state
+initialization_base_digest = _policy.initialization_base_digest
+policy_review_digest = _policy.policy_review_digest
+
+
+def validate_project_state(state: Any) -> list[str]:
+    if not isinstance(state, dict):
+        return ["project state must be an object"]
+    allowed = {
+        "schema_version", "initialized", "backend", "repository", "revision",
+        "charter", "policy", "history", "bindings", "approval",
+    }
+    errors = []
+    unknown = sorted(set(state) - allowed)
+    if unknown:
+        errors.append("unknown fields: " + ", ".join(unknown))
+    if state.get("schema_version") != PROJECT_SCHEMA_VERSION:
+        errors.append(f"schema_version must be {PROJECT_SCHEMA_VERSION}")
+    if not isinstance(state.get("initialized"), bool):
+        errors.append("initialized must be boolean")
+    if not isinstance(state.get("revision"), int) or isinstance(state.get("revision"), bool) or state.get("revision", -1) < 0:
+        errors.append("revision must be a non-negative integer")
+    initialized = state.get("initialized") is True
+    policy_errors = validate_policy(state.get("policy"), require_pending=False) if state.get("policy") is not None else []
+    errors.extend(f"policy.{error}" for error in policy_errors)
+    pending_policy = policy_blockers(state.get("policy")) if not policy_errors else []
+    if state.get("initialized") is True:
+        if state.get("backend") not in BACKENDS:
+            errors.append("initialized backend must be github_issues")
+        repository = state.get("repository")
+        if not isinstance(repository, dict) or not nonempty(repository.get("identity")):
+            errors.append("initialized repository.identity is required")
+        if pending_policy:
+            errors.append("initialized state cannot have unreviewed required policy: " + ", ".join(pending_policy))
+        approval = state.get("approval")
+        if not isinstance(approval, dict) or not text_present(approval.get("reviewer")) or not text_present(approval.get("date")):
+            errors.append("initialized state requires explicit approval metadata")
+        elif approval.get("digest") != policy_review_digest(state):
+            errors.append("policy approval digest changed")
+    elif state.get("backend") is not None or state.get("repository") is not None or state.get("policy") is not None:
+        if state.get("backend") not in BACKENDS or not isinstance(state.get("repository"), dict) or not state.get("policy"):
+            errors.append("uninitialized state may select a backend only as a complete pending policy draft")
+    bindings = state.get("bindings")
+    if not isinstance(bindings, dict):
+        errors.append("bindings must be an object")
+    else:
+        for name, expected_path in (("project", ".zzzops/PROJECT.md"), ("audit", PROJECT_AUDIT_RELATIVE)):
+            binding = bindings.get(name)
+            if not isinstance(binding, dict) or binding.get("path") != expected_path or not text_present(binding.get("digest")):
+                errors.append(f"bindings.{name} must contain the canonical path and digest")
+    history = state.get("history")
+    if not isinstance(history, list) or not history:
+        errors.append("history must be a non-empty list")
+    else:
+        for index, entry in enumerate(history):
+            if not isinstance(entry, dict) or any(not text_present(entry.get(key)) for key in ("date", "actor", "change", "reason")):
+                errors.append(f"history[{index}] requires date, actor, change, and reason")
+    return errors
+
+
+def validate_project_artifacts(repo: Path, state: dict[str, Any] | None) -> list[str]:
+    if not isinstance(state, dict):
+        return []
+    bindings = state.get("bindings")
+    if not isinstance(bindings, dict):
+        return []
+    errors = []
+    for name, path in (("project", project_path(repo)), ("audit", project_audit_path(repo))):
+        binding = bindings.get(name)
+        if not isinstance(binding, dict) or not text_present(binding.get("digest")):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError):
+            errors.append(f"{name} policy artifact is unavailable")
+            continue
+        if project_digest(text) != binding["digest"]:
+            errors.append(f"{name} policy artifact digest changed")
+    return errors
+
+
+def validate_policy(policy: Any, require_pending: bool) -> list[str]:
+    if not isinstance(policy, dict):
+        return ["must be an object"]
+    errors = []
+    if policy.get("schema_version") != POLICY_SCHEMA_VERSION:
+        errors.append(f"schema_version must be {POLICY_SCHEMA_VERSION}")
+    sections = policy.get("sections")
+    if not isinstance(sections, list):
+        return errors + ["sections must be a list"]
+    evidence_ids = set()
+    if not require_pending:
+        evidence = policy.get("evidence")
+        if not isinstance(evidence, list) or not evidence:
+            errors.append("evidence must be a non-empty list")
+        else:
+            for index, item in enumerate(evidence):
+                if not isinstance(item, dict) or not text_present(item.get("id")) or not text_present(item.get("source")) or not text_present(item.get("finding")):
+                    errors.append(f"evidence[{index}] requires id, source, and finding")
+                elif item["id"] in evidence_ids:
+                    errors.append(f"evidence[{index}].id must be unique")
+                else:
+                    evidence_ids.add(item["id"])
+    seen = set()
+    for index, section in enumerate(sections):
+        prefix = f"sections[{index}]"
+        if not isinstance(section, dict):
+            errors.append(f"{prefix} must be an object")
+            continue
+        section_id = section.get("id")
+        if section_id not in POLICY_SECTION_IDS or section_id in seen:
+            errors.append(f"{prefix}.id must be unique and from the current taxonomy")
+        else:
+            seen.add(section_id)
+        for field in ("title", "decision", "rationale", "confidence", "default_origin", "default_disposition"):
+            if not text_present(section.get(field)):
+                errors.append(f"{prefix}.{field} is required")
+        if section.get("confidence") not in {"low", "medium", "high"}:
+            errors.append(f"{prefix}.confidence must be low, medium, or high")
+        if section.get("default_disposition") not in {"accepted", "changed", "rejected", "unknown"}:
+            errors.append(f"{prefix}.default_disposition must be accepted, changed, rejected, or unknown")
+        if not isinstance(section.get("required"), bool) or not isinstance(section.get("applicable"), bool):
+            errors.append(f"{prefix}.required and applicable must be booleans")
+        for field in ("source_ids", "exceptions", "unresolved"):
+            if not isinstance(section.get(field), list):
+                errors.append(f"{prefix}.{field} must be a list")
+        if not require_pending and isinstance(section.get("source_ids"), list):
+            missing_sources = sorted(set(section["source_ids"]) - evidence_ids)
             if missing_sources:
                 errors.append(f"{prefix}.source_ids missing citations: {', '.join(missing_sources)}")
         if not isinstance(section.get("settings"), dict):
