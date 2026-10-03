@@ -4,7 +4,7 @@
 
 LAIN_OS is the concrete open-source platform described by this roadmap. It implements the broader **LAIN — Loyal Autonomous Intelligence Network** philosophy through a local-first operating layer for autonomous intelligence.
 
-Version: 1.0-roadmap-r3
+Version: 1.0-roadmap-r4
 Status: Active product roadmap
 Date: 2026-10-03
 
@@ -30,6 +30,40 @@ The flagship 1.0 proof is:
     "Turn this idea into a YouTube video and post it."
 
 A successful demonstration means LAIN_OS creates a real script, narration, visual assets, rendered video, preview evidence, private upload, processing evidence, exact publication approval, publication, and an independently retrieved final result. A generated plan, simulated upload, mocked renderer, or planner assertion is not completion.
+
+### Near-term product milestone — Voice-First LAIN Preview
+
+The roadmap distinguishes the **usable agent milestone** from the complete 1.0 flagship scope.
+
+The next product milestone is a standalone, voice-first LAIN running on the reference Galaxy device with real selectable planner intelligence and the existing trusted execution substrate. This milestone does **not** require the later media-production or YouTube-publication phases.
+
+Required exit path:
+
+    finish Phase 1 planner acceptance
+      -> Phase 2 voice conversation
+      -> current physical-device acceptance
+      -> Voice-First LAIN Preview
+
+Preview acceptance requires:
+- installed Android GUI using a real selected planner profile;
+- spoken and typed goals entering the same trusted planning path;
+- policy, exact approval, deterministic execution, verification, audit, and durable sessions remaining authoritative;
+- cancellable speech playback and user barge-in;
+- Stop task remaining independent from Stop talking;
+- no planner/provider credential leakage;
+- physical-device evidence on the current Galaxy build, explicitly distinguished from CI/emulator evidence.
+
+This preview is a meaningful usable release checkpoint, not a claim that the complete 1.0 roadmap is finished. Phases 3–7 remain required for the roadmap-defined 1.0 flagship release.
+
+### Progress interpretation
+
+Progress should be reported by subsystem rather than as a single misleading percentage:
+
+- **Trusted execution foundation:** mature pre-1.0 substrate; maintain acceptance and regression evidence.
+- **Usable voice-first Galaxy agent:** near-term critical path is Phase 1 completion, Phase 2, then current-device acceptance.
+- **Complete roadmap-defined 1.0:** still includes durable workflow graphs, artifact/media production, external providers and budgets, YouTube publication, and release hardening.
+
+Repository task state and fresh verification evidence remain authoritative over prose estimates.
 
 ## 2. Non-negotiable architecture
 
@@ -136,6 +170,18 @@ Some implementation can overlap after interfaces stabilize:
     Android hardening -------------+-> P7 Release
 
 Do not parallelize across an unstable public interface merely to increase throughput.
+
+## Critical path to the next usable release
+
+The immediate ordered product path is:
+
+1. Close **TASK-008 / Phase 1 planner acceptance**.
+2. Complete **TASK-009 through TASK-015 / Phase 2 voice conversation**.
+3. Run current-build **physical Galaxy acceptance**, including planner happy paths, approval transitions, rotation/rebind/background behavior, interruption, and measured Stop behavior.
+4. Cut the **Voice-First LAIN Preview** only from evidence that passes those gates.
+5. Continue Phases 3–7 toward the complete 1.0 flagship release.
+
+Media production and YouTube publication must not block the Voice-First LAIN Preview, but the preview must not be relabeled as the complete 1.0 release.
 
 ## 6. Phase 0 — Foundation consolidation
 
