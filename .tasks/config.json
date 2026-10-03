@@ -178,7 +178,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "589cdf7440e24ce2fcd0288d79e773c9f129bd27",
-    "next_action": "Continue TASK-007 / PR #12. Phase 4 remains ordered TASK-025 -> TASK-026 -> TASK-027 -> TASK-028."
+    "repo_head": "ea34a0d9453dd06a69f3aac9148b2ea0f5684d2d",
+    "next_action": "Start TASK-008: close the Phase-1 planner acceptance and adversarial gate after TASK-007 merged in PR #12."
   }
 }
