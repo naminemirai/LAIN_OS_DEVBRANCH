@@ -1,5 +1,68 @@
 # Next
 
+## TASK-037: Implement bounded provider retry and backoff policy
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-5, provider, retry, backoff, reconciliation
+**Updated:** 2026-10-03
+
+### Goal
+Implement one durable retry/backoff policy for provider operations that automatically retries only known-safe idempotent/read work, routes uncertain writes through reconciliation, and bounds 429/5xx recovery without resetting workflow authority or budgets.
+
+### Scope
+- Classify provider operations as safe-idempotent/read, idempotency-keyed write, or uncertain external write.
+- Allow automatic retry only where operation semantics and durable identity make replay safe.
+- Route ambiguous writes to existing TASK-022/TASK-032 reconciliation instead of blind replay.
+- Add bounded exponential/jitter-capable backoff state persisted with durable provider jobs.
+- Count retries, provider calls, elapsed time, and applicable cost against TASK-023/TASK-035 budgets.
+- Respect Retry-After only as a bounded scheduling hint, never as authority to exceed deadlines/budgets.
+- Surface exhausted, non-retryable, reconciliation-required, and cancelled states explicitly.
+
+### Dependencies
+- TASK-022 external-effect reconciliation.
+- TASK-023 aggregate workflow budgets.
+- TASK-032 provider-job abstraction.
+- TASK-035 provider spending controls.
+
+### Plan
+- Define typed retry eligibility and durable attempt/backoff state.
+- Implement deterministic clock-driven policy with bounded caps.
+- Integrate 429/5xx/transport failures without retrying auth/schema/validation failures.
+- Bind retries to stable operation identity and persisted deadlines.
+- Add crash/restart and uncertain-write reconciliation tests.
+- Add budget/cost/call-count intersection tests.
+
+### Acceptance
+- Only explicitly safe/idempotent operations auto-retry.
+- Uncertain external writes never replay automatically.
+- Restart preserves attempt count, backoff deadline, operation identity, and consumed budgets.
+- Retry-After/provider hints cannot extend trusted ceilings.
+- Cancellation stops future retries truthfully.
+- 429/5xx recovery is bounded and deterministic under test clocks.
+
+### Verification
+- Retry eligibility matrix.
+- Deterministic backoff progression/cap tests.
+- 429/5xx/timeout/network/auth/schema failure classification tests.
+- Restart/reconciliation/duplicate-operation tests.
+- Budget/deadline/cost/call-count exhaustion tests.
+- Cancellation and stale-revision negatives.
+- Canonical verification plus architecture/security review.
+
+### Expected result
+Provider recovery becomes durable and bounded without replaying uncertain writes or allowing retries to bypass time, action, call, byte, or spending authority.
+
+### Evidence basis
+- `docs/ROADMAP_1.0.md` R5.5 requires retry only for known-safe idempotent/read operations, reconciliation/idempotency for external writes, and bounded 429/5xx backoff.
+- Current TaskPlanner represents R5.1–R5.4 as TASK-032 through TASK-035 and has no R5.5 task/open PR.
+
+### Projection basis
+- Phase-5 exit requires reliable remote-provider failure handling after provider jobs and budgets exist.
+- Central retry semantics prevent each adapter from inventing incompatible replay rules.
+
+### Risks / unknowns
+- Provider idempotency guarantees differ and must be explicit per adapter.
+- Some providers expose ambiguous transient failures after accepting work; those must reconcile rather than retry.
+- Jitter must remain testable and bounded.
+
 ## TASK-008: Close Phase-1 planner acceptance and Galaxy real-planner gate — CURRENT
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-1, planner, android, galaxy, acceptance, groq
 **Updated:** 2026-10-03
