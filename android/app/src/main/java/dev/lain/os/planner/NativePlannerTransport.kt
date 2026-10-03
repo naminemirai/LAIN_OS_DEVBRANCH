@@ -347,8 +347,7 @@ internal class PlannerTransportCall(
         PlannerCallTerminalState.CANCELLED -> cancelled()
         PlannerCallTerminalState.TIMED_OUT -> timeout()
         PlannerCallTerminalState.ACTIVE,
-        PlannerCallTerminalState.FINISHED,
-        -> null
+        PlannerCallTerminalState.FINISHED -> null
     }
 
     private fun terminalResult(fallbackCode: String): PlannerTransportResult.Failure = when (
@@ -357,8 +356,7 @@ internal class PlannerTransportCall(
         PlannerCallTerminalState.CANCELLED -> cancelled()
         PlannerCallTerminalState.TIMED_OUT -> timeout()
         PlannerCallTerminalState.ACTIVE,
-        PlannerCallTerminalState.FINISHED,
-        -> PlannerTransportResult.Failure(fallbackCode)
+        PlannerCallTerminalState.FINISHED -> PlannerTransportResult.Failure(fallbackCode)
     }
 
     private fun cancelled() =
