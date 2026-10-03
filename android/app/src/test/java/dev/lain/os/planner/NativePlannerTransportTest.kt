@@ -12,6 +12,9 @@ import java.net.HttpURLConnection
 import java.net.SocketTimeoutException
 import java.net.URL
 import java.net.UnknownHostException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicReference
 import javax.net.ssl.SSLException
 
 class NativePlannerTransportTest {
@@ -185,6 +188,47 @@ class NativePlannerTransportTest {
         assertEquals(
             NativePlannerTransport.ERROR_CANCELLED,
             (result as PlannerTransportResult.Failure).code,
+        )
+    }
+
+    @Test fun cancellationDuringResponseWinsOverSuccessPublication() {
+        val readStarted = CountDownLatch(1)
+        val releaseRead = CountDownLatch(1)
+        val blockingStream = object : InputStream() {
+            override fun read(): Int {
+                readStarted.countDown()
+                try {
+                    releaseRead.await(2, TimeUnit.SECONDS)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return -1
+                }
+                return -1
+            }
+
+            override fun read(buffer: ByteArray, offset: Int, length: Int): Int = read()
+        }
+        val transport = NativePlannerTransport(FakeSecretStore()) {
+            FakeConnection(
+                it,
+                response = "{\"choices\":[]}".toByteArray(),
+                responseStream = blockingStream,
+            )
+        }
+        val call = transport.newCall(binding(), "{}")
+        val result = AtomicReference<PlannerTransportResult?>()
+        val caller = Thread { result.set(call.execute()) }
+
+        caller.start()
+        assertTrue(readStarted.await(1, TimeUnit.SECONDS))
+        call.cancel()
+        releaseRead.countDown()
+        caller.join(1_000)
+
+        assertTrue(!caller.isAlive)
+        assertEquals(
+            NativePlannerTransport.ERROR_CANCELLED,
+            (result.get() as PlannerTransportResult.Failure).code,
         )
     }
 
