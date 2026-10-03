@@ -8,6 +8,7 @@ import android.os.Parcel
 import com.chaquo.python.PyObject
 import com.chaquo.python.Python
 import com.chaquo.python.android.AndroidPlatform
+import dev.lain.os.planner.NativePlannerBridge
 import dev.lain.os.planner.PlannerProfileStore
 import org.json.JSONObject
 import java.io.File
@@ -22,6 +23,7 @@ class RuntimeService : Service() {
         controller?.callAttr("advance")?.toBoolean() ?: false
     }
     @Volatile private var controller: PyObject? = null
+    @Volatile private var plannerBridge: NativePlannerBridge? = null
     @Volatile private var startupFailed = false
     @Volatile private var bound = false
 
@@ -31,15 +33,19 @@ class RuntimeService : Service() {
         worker.execute {
             try {
                 if (!Python.isStarted()) Python.start(AndroidPlatform(this))
+                val bridge = NativePlannerBridge(this)
+                plannerBridge = bridge
                 controller = Python.getInstance().getModule("lain.app.control").callAttr(
                     "create_controller",
                     File(filesDir, "lain").absolutePath,
                     NativeCapabilities(this),
                     PlannerProfileStore(this),
+                    bridge,
                 )
             } catch (_: Exception) {
                 // Fail closed without Python tracebacks or raw private output in logcat.
                 controller = null
+                plannerBridge = null
                 startupFailed = true
             }
         }
@@ -72,6 +78,7 @@ class RuntimeService : Service() {
             if (startupFailed) "APP_START_FAILED" else "APP_STARTING")
         val command = JSONObject(payload).optString("command")
         if (command in RuntimeProtocol.readCommands) {
+            if (command == "stop") plannerBridge?.cancel()
             val result = python.callAttr("dispatch", payload).toString()
             if (command == "stop") kick()
             return bounded(result)
@@ -124,6 +131,7 @@ class RuntimeService : Service() {
     }
 
     private fun requestStop() {
+        plannerBridge?.cancel()
         try { controller?.callAttr("stop_active") } catch (_: Exception) { }
         kick()
     }

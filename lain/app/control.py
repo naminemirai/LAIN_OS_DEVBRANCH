@@ -27,6 +27,7 @@ from lain.agent.models import (
 from lain.agent.planning import AgentPlanningService
 from lain.agent.store import AgentSessionStore
 from lain.app.demo import COMMANDS, DemoPlanner
+from lain.app.planner_bridge import AndroidPlannerFactory
 from lain.app.native import NativeAndroidAdapter
 from lain.audit.logger import redact, redact_android_narratives
 from lain.config import RuntimeConfig
@@ -91,7 +92,7 @@ def _planner_binding_provider(native_profiles):
 
 
 class AppController:
-    def __init__(self, root: Path, native=None, planner_profiles=None):
+    def __init__(self, root: Path, native=None, planner_profiles=None, planner_bridge=None):
         root = Path(root).resolve()
         root.mkdir(parents=True, mode=0o700, exist_ok=True)
         os.chmod(root, 0o700)
@@ -100,10 +101,12 @@ class AppController:
         config = RuntimeConfig.for_workspace(workspace)
         self.store = AgentSessionStore(root / "sessions")
         self.runtime = RuntimeEngine(config, native_android=NativeAndroidAdapter(native) if native else None)
+        self._planner_bridge = planner_bridge
         self.controller = AgentController(
             AgentPlanningService(DemoPlanner(workspace), max_actions=1), self.runtime,
             self.store, AgentBudget(12, 1, 32, 900.0),
             planner_binding_provider=_planner_binding_provider(planner_profiles),
+            planner_factory=AndroidPlannerFactory(workspace, planner_bridge),
         )
         self._lock = threading.RLock()
         self._active = None
@@ -201,6 +204,7 @@ class AppController:
             self._stopped.set()
             self._grants.clear()
             self._confirmed = frozenset()
+        self._cancel_planner()
         return {"stop_requested": True, "session_id": sid,
                 "message": "Stop requested. An in-flight action may still settle."}
 
@@ -269,6 +273,13 @@ class AppController:
                 self._confirmed = frozenset()
                 self._stopped.clear()
 
+    def _cancel_planner(self):
+        if self._planner_bridge is not None:
+            try:
+                self._planner_bridge.cancel()
+            except Exception:
+                pass
+
     def stop_active(self):
         """Private lifecycle hook; not a Binder-dispatchable planner command."""
         with self._lock:
@@ -276,6 +287,7 @@ class AppController:
                 self._stopped.set()
                 self._grants.clear()
                 self._confirmed = frozenset()
+        self._cancel_planner()
 
     def _summary(self, session):
         # Do not persist/display arbitrary goal text in the app's history surface.
@@ -316,5 +328,5 @@ class AppController:
         return snapshot
 
 
-def create_controller(root: str, native, planner_profiles=None) -> AppController:
-    return AppController(Path(root), native, planner_profiles)
+def create_controller(root: str, native, planner_profiles=None, planner_bridge=None) -> AppController:
+    return AppController(Path(root), native, planner_profiles, planner_bridge)
