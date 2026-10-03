@@ -1,5 +1,76 @@
 # Next
 
+## TASK-024: Close Phase-3 durable-workflow acceptance gate
+**Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, acceptance, adversarial
+**Updated:** 2026-10-03
+
+### Goal
+
+Prove the integrated durable-workflow subsystem survives process death, resumes truthfully, prevents replay of completed or uncertain effects, invalidates stale downstream artifacts after revision, and exposes an accurate user-readable workflow state before Phase 4 media work begins.
+
+### Scope
+
+- Exercise the integrated TASK-016 through TASK-023 workflow stack end to end.
+- Verify crash/restart at scheduler, wait/poll, artifact, revision, and external-effect boundaries.
+- Verify completed external effects cannot replay and uncertain effects cannot auto-retry.
+- Verify upstream revision invalidates only transitive dependents while preserving immutable prior artifacts/provenance.
+- Verify aggregate budgets persist and continue constraining resumed workflows.
+- Verify restricted roles cannot expand capability authority.
+- Verify user-readable workflow state distinguishes ready/running/waiting/reconciliation/succeeded/failed/cancelled truthfully.
+- Do not add new workflow features, media rendering, provider-specific adapters, or publication behavior.
+
+### Dependencies
+
+- TASK-016 through TASK-023 complete.
+
+### Plan
+
+- Build the smallest deterministic acceptance harness over the integrated durable workflow APIs.
+- Add process-restart fixtures around each critical durable transition.
+- Exercise stale revision/hash, duplicate completion, uncertain effect, lease/wait, and budget exhaustion paths.
+- Add user-readable state assertions derived from durable state rather than planner narration.
+- Run canonical verification plus focused architecture/security review of the integrated Phase-3 boundary.
+
+### Acceptance
+
+- A multi-stage workflow resumes after simulated process death with exact durable state.
+- Known completed effects cannot replay after restart.
+- Attempted-but-uncertain effects enter reconciliation and never auto-retry.
+- Revision invalidation rebuilds only dependent branches and preserves prior immutable artifacts.
+- Wait/poll deadlines, scheduler leases, retries, and aggregate budgets survive restart truthfully.
+- Restricted roles and workflow metadata cannot grant capability/policy/approval authority.
+- Downstream nodes unlock only from verified/reconciled current-revision outputs.
+- User-readable state matches durable workflow state without fabricated progress or completion.
+
+### Verification
+
+- End-to-end deterministic durable-workflow acceptance suite.
+- Crash-boundary/restart matrix.
+- Replay/uncertainty/reconciliation negatives.
+- Revision/artifact invalidation and provenance checks.
+- Budget/lease/wait/retry persistence checks.
+- Canonical portable verification and fresh whole-diff architecture/security review.
+
+### Expected result
+
+Phase 3 has a reproducible gate proving durable workflows can survive interruption and revision without replay, stale authority, hidden budget reset, or false state before Phase 4 begins.
+
+### Evidence basis
+
+- `docs/ROADMAP_1.0.md` defines an explicit Phase-3 exit gate after R3.1–R3.8.
+- Current TaskPlanner represents R3.1–R3.8 as TASK-016 through TASK-023, but no existing task/issue/PR represents the exit-gate acceptance proof.
+
+### Projection basis
+
+- Phase 4 media pipelines create longer-running artifact-heavy workflows; carrying unresolved durability/replay defects into that layer would multiply integration cost and safety risk.
+
+### Risks / unknowns
+
+- Some external-provider reconciliation cases may require adapter-specific fixtures later; the core acceptance gate should use deterministic fakes and label anything not exercised against a live provider.
+- Physical-device/UI acceptance remains separate unless explicitly exercised.
+
+---
+
 ## TASK-023: Implement aggregate workflow budgets
 **Priority:** P1 | **Tags:** overseer-assigned, developer, phase-3, workflow, budgets
 **Updated:** 2026-10-03
