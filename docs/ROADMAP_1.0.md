@@ -1,8 +1,8 @@
 # LAIN_OS 1.0 Roadmap
 
-Version: 1.0-roadmap
+Version: 1.0-roadmap-r2
 Status: Active planning baseline
-Baseline: main@5b1d5c4472fd964148a85d64be554dd7578c0e6a
+Revision baseline: main@1b805338b26cd9f089559ddf1bd1244ff0a0ee79
 Date: 2026-10-03
 Role: Repository planning artifact
 
@@ -65,15 +65,9 @@ The repository already contains substantial pre-1.0 infrastructure:
 - PlannerBinding/session pinning groundwork in the trusted agent model.
 - Android Keystore-backed planner SecretStore completed as TASK-002.
 
-### Active work
+### Active product work
 
-TASK-003 is the current canonical task.
-
-Goal: bounded native Android HTTP transport for hosted and local OpenAI-compatible planner profiles.
-
-Active branch/PR:
-- feature/task-003-native-planner-transport
-- PR #8
+The current implementation focus is bounded native Android HTTP transport for hosted and local OpenAI-compatible planner profiles.
 
 Known blockers at this roadmap baseline:
 - malformed-response validation is not truthful in the current local JVM test path because Android JSON stubs do not behave like the device runtime;
@@ -256,7 +250,7 @@ Maintain:
 
 #### R1.4 — Native bounded planner transport
 
-Status: active TASK-003 / PR #8.
+Status: active implementation focus.
 
 Tasks:
 - resolve Local HTTP security/compatibility contract;
@@ -933,42 +927,60 @@ LAIN_OS 1.0 may be claimed only when all of the following are true:
 15. Documentation matches the shipped behavior.
 16. No debug APK, mocked external effect, skipped test, or planner assertion is presented as release evidence.
 
-## 15. Suggested sequential TaskPlanner queue
+## 15. Sequential product development sequence
 
-Roadmap IDs below are work-package identifiers, not TaskPlanner IDs. Instantiate canonical TASK IDs only when a package becomes actionable; do not flood the board with the entire roadmap.
+The following 50 product-development items are the concrete forward path from the current app to the intended 1.0 experience. They describe application work, not organizational process.
 
-Immediate sequence:
-
-1. Finish active TASK-003 / R1.4 native planner transport.
-2. R1.5 planner factory/Android-Python bridge.
-3. R1.6 Planner Settings UI and Test Connection.
-4. R1.7 real Cloud/Local planner acceptance and adversarial failures.
-5. R0.1 refresh native Android physical acceptance if runtime-affecting changes invalidate prior evidence.
-6. R2.1 speech interfaces.
-7. R2.2 microphone lifecycle.
-8. R2.3/R2.4 turn manager + playback.
-9. R2.5 barge-in/echo protection.
-10. R2.7 physical voice acceptance.
-11. R3.1 workflow persistence.
-12. R3.2 DAG scheduling.
-13. R3.3 artifact workspace.
-14. R3.5 revision invalidation.
-15. R3.6/R3.7 waits + reconciliation.
-16. R4.1 media schemas.
-17. R4.2 narration.
-18. R4.3 timeline.
-19. R4.4 renderer.
-20. R4.5 inspector.
-21. R4.7 offline golden video fixture.
-22. R5 provider job abstraction and bounded external adapters.
-23. R5 budget/privacy/retry hardening.
-24. R6 YouTube authorization.
-25. R6 upload/status/reconciliation.
-26. R6 exact publication gate and verification.
-27. R7 full golden workflow.
-28. R7 adversarial matrix.
-29. Release signing/migration/documentation.
-30. 1.0 release-candidate acceptance and evidence report.
+1. Finish the native planner transport.
+2. Resolve Local HTTP versus Android cleartext-security policy.
+3. Make malformed planner-response validation platform-neutral.
+4. Finish hosted OpenAI-compatible model transport.
+5. Finish local OpenAI-compatible endpoint transport.
+6. Build the Android-to-Python planner bridge.
+7. Replace hardcoded DemoPlanner construction with runtime planner selection.
+8. Add persistent PlannerProfile storage.
+9. Add active-profile selection.
+10. Add session-pinned model/provider identity.
+11. Build Planner Settings UI.
+12. Add Cloud / Local / Demo mode selection.
+13. Add model-name and endpoint configuration UI.
+14. Add secure credential create/replace/remove UI.
+15. Add inert Test Connection diagnostics.
+16. Display the active provider/model in the workbench.
+17. Complete the first real natural-language action through the Android GUI.
+18. Add microphone permission and capture lifecycle.
+19. Add a speech-to-text provider interface.
+20. Add the first working speech-to-text implementation.
+21. Add a text-to-speech provider interface.
+22. Add the first working text-to-speech implementation.
+23. Add selectable agent voices.
+24. Add conversational transcript UI.
+25. Add streaming/progressive assistant speech.
+26. Add barge-in so user speech interrupts synthesis.
+27. Separate Stop talking from Stop task.
+28. Add echo/self-command prevention.
+29. Add voice-driven task revisions such as "make it shorter".
+30. Build durable multi-step workflow DAG storage.
+31. Add workflow dependency scheduling.
+32. Add durable workflow revision numbers.
+33. Build the versioned artifact workspace.
+34. Hash every workflow artifact.
+35. Add provenance metadata for generated and downloaded artifacts.
+36. Add downstream invalidation when upstream artifacts change.
+37. Add durable provider-job polling.
+38. Add crash recovery for long-running workflows.
+39. Add uncertain-external-effect reconciliation.
+40. Add aggregate workflow budgets for time, actions, cost, bytes, and retries.
+41. Add restricted specialist roles: writer, visual planner, narrator, renderer, and publisher.
+42. Build the script-generation workflow stage.
+43. Build the narration-generation stage.
+44. Build the image/visual-asset stage.
+45. Build the deterministic video timeline format.
+46. Integrate a real Android-capable video renderer.
+47. Build real video inspection: decode, streams, dimensions, duration, audio, and hash.
+48. Build preview/review UI for generated videos.
+49. Add YouTube OAuth, resumable upload, exact publication approval, and independent verification.
+50. Ship the complete installed-phone flow: speak idea -> plan -> create assets -> render video -> preview -> approve -> publish -> verify -> report result.
 
 ## 16. Prioritization rules
 
@@ -983,7 +995,7 @@ When selecting the next engineering task:
 7. Keep voice/media/publishing state out of RuntimeEngine unless it is truly execution authority.
 8. Do not let deferred physical acceptance block independent local implementation, but never convert deferred evidence into a pass claim.
 9. Keep external credentials/cost/publication as late-bound acceptance dependencies so local work can continue without them.
-10. Do not merge aspirational roadmap state into TaskPlanner as if it were current execution state.
+10. Do not describe roadmap aspirations as implemented product state.
 
 ## 17. Key decisions to resolve during implementation
 
