@@ -1,4 +1,6 @@
-# Roadmap
+# LAIN_OS Roadmap
+
+**Local Autonomous Intelligence Network Operating System**
 
 ## v0 — Local loop
 
