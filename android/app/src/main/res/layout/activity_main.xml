@@ -18,6 +18,73 @@
             android:textColor="@color/accent" android:textSize="12sp" android:layout_marginTop="20dp" />
         <Button android:id="@+id/reconnect_button" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:text="@string/reconnect" android:textAllCaps="false" android:visibility="gone" />
+        <TextView android:id="@+id/planner_identity" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="@color/text_primary" android:textSize="13sp" android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+        <LinearLayout android:id="@+id/planner_settings_card"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:background="@drawable/card" android:orientation="vertical" android:padding="20dp"
+            android:layout_marginTop="16dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/planner_settings_heading" android:textColor="@color/text_primary"
+                android:textSize="18sp" android:textStyle="bold" />
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/planner_settings_notice" android:textColor="@color/text_secondary"
+                android:textSize="12sp" android:layout_marginTop="6dp" />
+            <Spinner android:id="@+id/planner_profile_selector"
+                android:layout_width="match_parent" android:layout_height="48dp"
+                android:layout_marginTop="10dp" />
+            <Button android:id="@+id/planner_new_button"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/planner_new" android:textAllCaps="false" />
+            <Spinner android:id="@+id/planner_mode_selector"
+                android:layout_width="match_parent" android:layout_height="48dp" />
+            <EditText android:id="@+id/planner_name_input"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/planner_name_hint" android:maxLength="128"
+                android:importantForAutofill="no" android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+            <EditText android:id="@+id/planner_endpoint_input"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/planner_endpoint_hint" android:inputType="textUri"
+                android:maxLength="4096" android:importantForAutofill="no"
+                android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" />
+            <EditText android:id="@+id/planner_model_input"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/planner_model_hint" android:maxLength="512"
+                android:importantForAutofill="no" android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+            <EditText android:id="@+id/planner_credential_input"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:hint="@string/planner_credential_hint" android:inputType="textPassword"
+                android:maxLength="16384" android:importantForAutofill="no"
+                android:textColor="@color/text_primary" android:textColorHint="@color/text_secondary" />
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="8dp">
+                <Button android:id="@+id/planner_save_button"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:text="@string/planner_save" android:textAllCaps="false" />
+                <Button android:id="@+id/planner_select_button"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp" android:text="@string/planner_select" android:textAllCaps="false" />
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <Button android:id="@+id/planner_remove_credential_button"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:text="@string/planner_remove_credential" android:textAllCaps="false" />
+                <Button android:id="@+id/planner_delete_button"
+                    android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp" android:text="@string/planner_delete" android:textAllCaps="false" />
+            </LinearLayout>
+            <Button android:id="@+id/planner_test_button"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="@string/planner_test_connection" android:textAllCaps="false" />
+            <TextView android:id="@+id/planner_status"
+                android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:textColor="@color/text_secondary" android:textSize="12sp"
+                android:layout_marginTop="6dp" android:accessibilityLiveRegion="polite" />
+        </LinearLayout>
         <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
             android:background="@drawable/card" android:orientation="vertical" android:padding="20dp"
             android:layout_marginTop="20dp">
