@@ -184,7 +184,7 @@
       }
     ],
     "issue": 6,
-    "repo_head": "6798ce816e737d339e1388ec8faec13dd6d0fab8",
-    "next_action": "Execute TASK-008: close the Phase-1 planner acceptance and adversarial gate; do not start Phase 2 until it passes."
+    "repo_head": "6bdf0de11957253e510fb0ef8f0a11ee1634657f",
+    "next_action": "Continue TASK-008 after PR #13: re-inventory remaining Phase-1 acceptance gaps and add only the next missing integrated adversarial slice; physical-device evidence remains unverified."
   }
 }
