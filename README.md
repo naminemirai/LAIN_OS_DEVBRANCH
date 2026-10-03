@@ -145,7 +145,7 @@ payload is known. The initial user goal remains available to its planner.
 Clipboard/share arguments are also redacted in `plan`/`do`
 display output; do not reuse that display as an executable request. Session
 checkpoints retain supplied action content, including completed actions, in the
-existing private mode-0600 files for exact-action resume; those files remain under the device owner's
+existing private mode-0600 files for exact-action resume; those files remain under the device user's
 control. Keep credentials out of goals/payloads; free-form goal/reason text is not
 a secret vault.
 
@@ -279,4 +279,4 @@ live interruption/resume validation. Live Reddit posting remains unvalidated.
 
 Secrets, authentication tokens, private messages, precise personal location history, recovery codes, and other sensitive user data must not be embedded in source, build artifacts, planner context, logs, audit output, or exported settings.
 
-LAIN_OS should make the device more capable without making its owner less in control.
+LAIN_OS should make the device more capable without making the human using it less in control.
