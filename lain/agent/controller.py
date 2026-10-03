@@ -20,7 +20,7 @@ from lain.agent.models import (
 from lain.agent.planning import AgentPlanningService
 from lain.agent.store import AgentSessionStore
 from lain.errors import ErrorCode, LainError
-from lain.planning.models import AgentPlannerStatus
+from lain.planning.models import AgentPlanner, AgentPlannerStatus
 from lain.protocol.models import ActionEnvelope, ActionStatus
 
 
@@ -39,6 +39,7 @@ class AgentController:
         monotonic_clock: Callable[[], float] = monotonic,
         now: Callable[[], str] = utc_now,
         planner_binding_provider: Callable[[], PlannerBinding] | None = None,
+        planner_factory: Callable[[PlannerBinding], AgentPlanner] | None = None,
     ):
         self.planning = planning
         self.runtime = runtime
@@ -47,6 +48,7 @@ class AgentController:
         self.monotonic_clock = monotonic_clock
         self.now = now
         self.planner_binding_provider = planner_binding_provider or (lambda: OFFLINE_DEMO_BINDING)
+        self.planner_factory = planner_factory
 
     def create(self, goal: str) -> AgentSession:
         if not isinstance(goal, str) or not goal.strip():
@@ -156,17 +158,33 @@ class AgentController:
         started = self.monotonic_clock()
         try:
             context = build_agent_context(session)
-            iteration = self.planning.decide(
+            planning = self.planning
+            if self.planner_factory is not None:
+                planning = AgentPlanningService(
+                    self.planner_factory(session.planner_binding),
+                    registry=self.planning.registry,
+                    max_actions=self.planning.max_actions,
+                )
+            iteration = planning.decide(
                 context["goal"],
                 context,
                 session.iteration_count + 1,
             )
         except LainError as exc:
             elapsed = max(0.0, self.monotonic_clock() - started)
-            failed = replace(
+            current = replace(
                 session,
                 cumulative_runtime_seconds=session.cumulative_runtime_seconds + elapsed,
-            ).transition(
+            )
+            if exc.code is ErrorCode.PLANNER_CANCELLED:
+                cancelled = current.transition(
+                    AgentSessionStatus.CANCELLED,
+                    updated_at=self.now(),
+                    terminal_reason="planner call cancelled",
+                )
+                self.store.save(cancelled)
+                return cancelled
+            failed = current.transition(
                 AgentSessionStatus.FAILED,
                 updated_at=self.now(),
                 terminal_reason=f"planner failed: {exc.code.value}",
