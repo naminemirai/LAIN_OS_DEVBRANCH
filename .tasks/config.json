@@ -3,7 +3,7 @@
   "taskplannerVersion": "2.4.7",
   "readmeAttribution": true,
   "idPrefix": "TASK",
-  "nextId": 37,
+  "nextId": 38,
   "states": [
     {
       "name": "Backlog",
@@ -223,10 +223,16 @@
         "title": "Close Voice-First LAIN Preview physical Galaxy acceptance",
         "priority": "P1",
         "order": 30
+      },
+      {
+        "id": "TASK-037",
+        "title": "Implement bounded provider retry and backoff policy",
+        "priority": "P1",
+        "order": 31
       }
     ],
     "issue": 6,
-    "repo_head": "cff0afbfcae302859f54103f5e6b5bc9747da3d7",
-    "next_action": "Continue TASK-008; then TASK-009→TASK-015; TASK-036 is the physical Galaxy gate for the Voice-First LAIN Preview."
+    "repo_head": "a9f0f008990161e3d506d5fda69073ba1c6233dd",
+    "next_action": "Continue TASK-008 Galaxy planner blocker bundle; Phase 5 proceeds TASK-032→033→034→035→037."
   }
 }
