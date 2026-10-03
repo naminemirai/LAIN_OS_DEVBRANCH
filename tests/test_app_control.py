@@ -34,7 +34,7 @@ class AppControlTests(unittest.TestCase):
         self.fail("demo did not settle within bounded steps")
 
 
-    def test_native_profile_binding_is_pinned_when_session_starts(self):
+    def test_native_profile_binding_is_pinned_and_reported_when_session_starts(self):
         binding_a = {
             "profile_id": "cloud-a",
             "mode": "cloud",
@@ -64,6 +64,12 @@ class AppControlTests(unittest.TestCase):
         stored = self.app.store.load(reply["session"]["session_id"])
         self.assertEqual(stored.planner_binding.profile_id, "cloud-a")
         self.assertEqual(stored.planner_binding.model, "model-a")
+
+        snapshot = self.send("inspect", session_id=reply["session"]["session_id"])
+        self.assertEqual(
+            snapshot["session"]["planner"],
+            {"profile_id": "cloud-a", "mode": "cloud", "model": "model-a"},
+        )
 
     def test_native_profile_source_rejects_non_opaque_credential_reference(self):
         profiles = FakePlannerProfiles({
