@@ -73,7 +73,8 @@ class PlannerSettingsUiTest {
 
             await(scenario) {
                 it.findViewById<TextView>(R.id.active_planner).text.toString()
-                    .contains(name) &&\n                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
+                    .contains(name) &&
+                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
             }
             scenario.onActivity {
                 val rendered = visibleText(it.findViewById(R.id.workbench_root))
@@ -92,7 +93,8 @@ class PlannerSettingsUiTest {
             scenario.recreate()
             await(scenario) {
                 it.findViewById<TextView>(R.id.active_planner).text.toString()
-                    .contains(name) &&\n                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
+                    .contains(name) &&
+                    it.findViewById<TextView>(R.id.active_planner).text.toString().contains("model-a")
             }
 
             var before = emptySet<String>()
